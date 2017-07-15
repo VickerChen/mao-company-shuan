@@ -71,24 +71,25 @@ public class XinlvFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_xinlv, container, false);
 
-        initDatas(view);
+        initView(view);
 
+        initDatas();
 
         return view;
     }
 
-    private void initDatas(View view) {
+    private void initView(View view) {
         i = 0;
-
-
         SQLiteDatabase db = Connector.getDatabase();
-
-
         mC = Calendar.getInstance();
-
         mHeartbeatView = (HeartbeatView) view.findViewById(R.id.heartbeat);
         mDigiResult = (DigitalGroupView) view.findViewById(R.id.digi_heartbeat_result);
         mTextUnit = (TextView) view.findViewById(R.id.text_unit);
+        mHeartbeatRecycler = (RecyclerView) view.findViewById(R.id.recycler_heartbeat);
+    }
+
+    private void initDatas() {
+
 
         mHeartbeatView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,7 +151,7 @@ public class XinlvFragment extends Fragment {
             e.setTimes(heartTime.getTimes());
             mHeartTimesList.add(e);
         }
-        mHeartbeatRecycler = (RecyclerView) view.findViewById(R.id.recycler_heartbeat);
+
         mHeartbeatRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         mHeartbeatRecycler.addItemDecoration(new DividerItemDecoration(mContext, LinearLayoutManager.VERTICAL));
         mHeartbeatRecycler.setItemAnimator(new DefaultItemAnimator());

@@ -75,6 +75,8 @@ public class MainActivity extends FragmentActivity {
             public boolean onTabSelected(int position, boolean wasSelected) {
                 mFragmentTransaction = mFragmentManager.beginTransaction();
                 if (position == 0){
+                    mXinlvFragment = null;
+                    mZhibiaoFragment = null;
                     mFrameLayout.setVisibility(View.GONE);
                     mViewPager.setVisibility(View.VISIBLE);
                     mIndicator.setVisibility(View.VISIBLE);
