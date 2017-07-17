@@ -32,13 +32,14 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile files('libs/nineoldandroids-2.4.0.jar')
     compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:recyclerview-v7:25.2.0'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'org.litepal.android:core:1.5.1'
     compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.22'
     compile 'com.github.bestTao:CoordinatorMenu:v1.0.2'
     compile 'com.aurelhubert:ahbottomnavigation:2.0.6'
     compile 'me.relex:circleindicator:1.2.2@aar'
+    compile 'com.android.support:support-v4:25.3.1'
     testCompile 'junit:junit:4.12'
-    compile files('libs/nineoldandroids-2.4.0.jar')
 }

@@ -5,41 +5,27 @@ import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.moscase.shouhuan.fragment.XinlvFragment;
 import com.moscase.shouhuan.fragment.ZhibiaoFragment;
+import com.moscase.shouhuan.fragment.ZhuangtaiFragment;
 import com.nineoldandroids.view.ViewHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import me.relex.circleindicator.CircleIndicator;
 
 public class MainActivity extends FragmentActivity {
     private DrawerLayout mDrawerLayout;
-    private ViewPager mViewPager;
-    private View view1;
-    private View view2;
-    private List<View> viewList;
-    private RelativeLayout mRelativeLayout;
     private FragmentManager mFragmentManager;
     private FragmentTransaction mFragmentTransaction;
     private XinlvFragment mXinlvFragment;
     private ZhibiaoFragment mZhibiaoFragment;
+    private ZhuangtaiFragment mZhuangtaiFragment;
     private FrameLayout mFrameLayout;
-    private CircleIndicator mIndicator;
 
 
     @Override
@@ -50,16 +36,23 @@ public class MainActivity extends FragmentActivity {
 
         initView();
         initEvents();
-
-
         initBottomBar();
 
+        setDefaultFragment();
 
+    }
+
+    private void setDefaultFragment() {
+        mFragmentManager = getSupportFragmentManager();
+        mFragmentTransaction = mFragmentManager.beginTransaction();
+        mFragmentTransaction.replace(R.id.fl_content, mZhuangtaiFragment);
+        mFragmentTransaction.commit();
     }
 
     //底部的三个bar
     private void initBottomBar() {
-        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id
+                .bottom_navigation);
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("状态", R.drawable.zhuangtai);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem("心率", R.drawable.healthy);
@@ -73,32 +66,24 @@ public class MainActivity extends FragmentActivity {
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                mFragmentTransaction = mFragmentManager.beginTransaction();
-                if (position == 0){
-                    mXinlvFragment = null;
-                    mZhibiaoFragment = null;
-                    mFrameLayout.setVisibility(View.GONE);
-                    mViewPager.setVisibility(View.VISIBLE);
-                    mIndicator.setVisibility(View.VISIBLE);
-                }else if (position == 1){
-                    mFrameLayout.setVisibility(View.VISIBLE);
-                    mViewPager.setVisibility(View.GONE);
-                    mIndicator.setVisibility(View.GONE);
+                FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+                if (position == 0) {
+                    if (mZhuangtaiFragment == null){
+                        mZhuangtaiFragment = new ZhuangtaiFragment();
+                    }
+                    fragmentTransaction.replace(R.id.fl_content,mZhuangtaiFragment);
+                } else if (position == 1) {
                     if (mXinlvFragment == null){
                         mXinlvFragment = new XinlvFragment(MainActivity.this);
                     }
-                    mFragmentTransaction.replace(R.id.fl_content,mXinlvFragment);
-                }else if (position == 2){
-                    mFrameLayout.setVisibility(View.VISIBLE);
-                    mViewPager.setVisibility(View.GONE);
-                    mIndicator.setVisibility(View.GONE);
+                    fragmentTransaction.replace(R.id.fl_content, mXinlvFragment);
+                } else if (position == 2) {
                     if (mZhibiaoFragment == null){
                         mZhibiaoFragment = new ZhibiaoFragment();
                     }
-                    mFragmentTransaction.replace(R.id.fl_content,mZhibiaoFragment);
+                    fragmentTransaction.replace(R.id.fl_content, mZhibiaoFragment);
                 }
-
-                mFragmentTransaction.commit();
+                fragmentTransaction.commit();
                 return true;
             }
         });
@@ -158,13 +143,10 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void initView() {
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mZhuangtaiFragment = new ZhuangtaiFragment();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.id_drawerLayout);
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
                 Gravity.RIGHT);
-        mRelativeLayout = (RelativeLayout) findViewById(R.id.zhujiemian);
-        viewList = new ArrayList<>();
-        mFragmentManager = getSupportFragmentManager();
         mFrameLayout = (FrameLayout) findViewById(R.id.fl_content);
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -172,48 +154,13 @@ public class MainActivity extends FragmentActivity {
                 mXinlvFragment = new XinlvFragment(MainActivity.this);
                 mZhibiaoFragment = new ZhibiaoFragment();
             }
-        },500);
-        mIndicator = (CircleIndicator) findViewById(R.id.indicator);
-        LayoutInflater inflater = getLayoutInflater();
-        view1 = inflater.inflate(R.layout.zhuangtai1, null);
-        view2 = inflater.inflate(R.layout.zhuangtai2, null);
-        viewList.add(view1);
-        viewList.add(view2);
-
-        mViewPager.setAdapter(pagerAdapter);
-        mIndicator.setViewPager(mViewPager);
+        }, 500);
     }
 
-    //ViewPager的Adapter
-    PagerAdapter pagerAdapter = new PagerAdapter() {
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-
-        @Override
-        public int getCount() {
-            return viewList.size();
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position,
-                                Object object) {
-            container.removeView(viewList.get(position));
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            container.addView(viewList.get(position));
-            return viewList.get(position);
-        }
-    };
 
     //打开左侧抽屉
     public void OpenLeftMenu(View view) {
         mDrawerLayout.openDrawer(Gravity.LEFT);
     }
-
 
 }

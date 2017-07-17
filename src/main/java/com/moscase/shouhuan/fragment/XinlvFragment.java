@@ -20,20 +20,20 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.bean.HeartTimes;
 import com.moscase.shouhuan.utils.GuideView;
 import com.moscase.shouhuan.view.DigitalGroupView;
 import com.moscase.shouhuan.view.DividerItemDecoration;
-import com.moscase.shouhuan.bean.HeartTimes;
 import com.moscase.shouhuan.view.HeartbeatView;
 
 import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,7 +46,6 @@ import java.util.List;
  */
 @SuppressLint("ValidFragment")
 public class XinlvFragment extends Fragment {
-
     private HeartbeatView mHeartbeatView;
     private RecyclerView mHeartbeatRecycler;
     private List<HeartbeatEntity> mData = new ArrayList<>();
@@ -58,7 +57,6 @@ public class XinlvFragment extends Fragment {
     private int i;
     private GuideView guideView;
     private Context mContext;
-
 
     @SuppressLint("ValidFragment")
     public XinlvFragment(Context context) {
@@ -106,14 +104,10 @@ public class XinlvFragment extends Fragment {
 
                 int randomNum = (int) (50 + Math.random() * 50);
                 HeartbeatEntity e = new HeartbeatEntity();
-                String Month = String.valueOf(mC.get(Calendar.MONTH) > 10 ? mC.get(Calendar.MONTH) : "0" + mC.get(Calendar.MONTH));
-                String Day = String.valueOf(mC.get(Calendar.DAY_OF_MONTH));
-                if (Integer.parseInt(Day) < 10) {
-                    Day = "0" + Day;
-                }
-                e.date = mC.get(Calendar.YEAR) + "-" + Month + "-" + Day;
+                SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String date = sDateFormat.format(new java.util.Date());
+                e.date = date;
                 e.datum = String.valueOf(randomNum);
-                Log.d("次数是:", e.datum);
                 HeartTimes mHeartTimes = new HeartTimes();
                 mHeartTimes.setTime(e.date);
                 mHeartTimes.setTimes(e.datum);
@@ -163,7 +157,6 @@ public class XinlvFragment extends Fragment {
         mAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                Toast.makeText(mContext, "点击了dasdasfasdgfdsgdsfgdsfdgsew", Toast.LENGTH_SHORT).show();
             }
         });
     }
