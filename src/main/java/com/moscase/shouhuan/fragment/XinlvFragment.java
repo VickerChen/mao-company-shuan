@@ -4,12 +4,13 @@ package com.moscase.shouhuan.fragment;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,7 +41,6 @@ import java.util.Date;
 import java.util.List;
 
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -54,7 +54,7 @@ public class XinlvFragment extends Fragment {
     private TextView mTextUnit;
     private Calendar mC;
     private List<HeartTimes> mHeartTimesList = new ArrayList<>();
-    private int i;
+    private int HeartTimeId = 0;
     private GuideView guideView;
     private Context mContext;
 
@@ -77,7 +77,6 @@ public class XinlvFragment extends Fragment {
     }
 
     private void initView(View view) {
-        i = 0;
         SQLiteDatabase db = Connector.getDatabase();
         mC = Calendar.getInstance();
         mHeartbeatView = (HeartbeatView) view.findViewById(R.id.heartbeat);
@@ -93,7 +92,6 @@ public class XinlvFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mHeartbeatView.startAnim();
-
                 hideResult();
             }
         });
@@ -101,7 +99,6 @@ public class XinlvFragment extends Fragment {
         mHeartbeatView.setHeartBeatAnimListener(new HeartbeatView.HeartBeatAnimImpl() {
             @Override
             public void onAnimFinished() {
-
                 int randomNum = (int) (50 + Math.random() * 50);
                 HeartbeatEntity e = new HeartbeatEntity();
                 SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -112,51 +109,51 @@ public class XinlvFragment extends Fragment {
                 mHeartTimes.setTime(e.date);
                 mHeartTimes.setTimes(e.datum);
                 mHeartTimes.setDate(new Date());
-                mHeartTimes.setId(i);
-                i += 1;
+                mHeartTimes.setId(HeartTimeId);
+                HeartTimeId += 1;
                 mHeartTimes.save();
-                mHeartTimesList.add(0,mHeartTimes);
-                Log.d("陈航", "" + mHeartTimesList.size());
+                mHeartTimesList.add(0, mHeartTimes);
 
                 mAdapter.notifyItemInserted(0);
                 mHeartbeatRecycler.scrollToPosition(0);
                 showResult();
                 mDigiResult.setDigits(randomNum);
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mHeartTimesList.size() == 7){
-                            DataSupport.delete(HeartTimes.class, DataSupport.findFirst(HeartTimes.class).getId());
-                            mHeartTimesList.remove(6);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }
-                },500);
             }
-
-
         });
 
-        List<HeartTimes> heartTimes = DataSupport.where("times > ?", "0").order("mDate desc").find(HeartTimes.class);
+        List<HeartTimes> heartTimes = DataSupport.where("times > ?", "0").order("mDate desc")
+                .find(HeartTimes.class);
         for (HeartTimes heartTime : heartTimes) {
             HeartTimes e = new HeartTimes();
             e.setTime(heartTime.getTime());
             e.setTimes(heartTime.getTimes());
+            e.setId(heartTime.getId());
             mHeartTimesList.add(e);
         }
 
         mHeartbeatRecycler.setLayoutManager(new LinearLayoutManager(mContext));
-        mHeartbeatRecycler.addItemDecoration(new DividerItemDecoration(mContext, LinearLayoutManager.VERTICAL));
+        mHeartbeatRecycler.addItemDecoration(new DividerItemDecoration(mContext,
+                LinearLayoutManager.VERTICAL));
         mHeartbeatRecycler.setItemAnimator(new DefaultItemAnimator());
-
-
         mAdapter = new Adapter(R.layout.item_heartbeat, mHeartTimesList);
         mHeartbeatRecycler.setAdapter(mAdapter);
         mAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
-        mAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+        mAdapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {
             @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+            public boolean onItemLongClick(BaseQuickAdapter adapter, View view, final int
+                    position) {
+                new AlertDialog.Builder(mContext).setMessage("是否删除此数据").setPositiveButton("是",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                DataSupport.delete(HeartTimes.class, DataSupport.find(HeartTimes.class,
+                                        mHeartTimesList.get(position).getId()).getId());
+                                mHeartTimesList.remove(position);
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }).setNegativeButton("否", null).show();
+                return true;
             }
         });
     }
@@ -183,14 +180,11 @@ public class XinlvFragment extends Fragment {
     }
 
 
-
-
-
     private void setGuideView() {
-
-
-        final ImageView iv = new ImageView(mContext);
-        iv.setImageResource(R.drawable.img_new_task_guide);
+        ImageView iv = new ImageView(mContext);
+        iv.setImageResource(R.drawable.img_new_task_guide1);
+//        TextView textView = new TextView(mContext);
+//        textView.setText("点击开始测量心跳");
 
         guideView = GuideView.Builder
                 .newInstance(mContext)
@@ -214,7 +208,7 @@ public class XinlvFragment extends Fragment {
         setGuideView();
     }
 
-    public class Adapter extends BaseQuickAdapter<HeartTimes,BaseViewHolder>{
+    public class Adapter extends BaseQuickAdapter<HeartTimes, BaseViewHolder> {
 
 
         @Override
@@ -239,6 +233,20 @@ public class XinlvFragment extends Fragment {
     @Override
     public void onDestroy() {
         mHeartTimesList.clear();
+        mHeartbeatView.stopAnim();
+        Log.d("陈航 ","destroy");
         super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d("陈航 ","pause");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        Log.d("陈航 ","stop");
+        super.onStop();
     }
 }

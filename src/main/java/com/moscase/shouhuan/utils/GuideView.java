@@ -250,7 +250,7 @@ public class GuideView extends RelativeLayout implements ViewTreeObserver.OnGlob
 
         // Tips布局参数
         LayoutParams guideViewParams;
-        guideViewParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        guideViewParams = new LayoutParams(270, 280);
         guideViewParams.setMargins(0, center[1] + radius + 10, 0, 0);
 
         if (customGuideView != null) {

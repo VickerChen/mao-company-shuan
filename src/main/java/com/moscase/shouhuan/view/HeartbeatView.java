@@ -183,6 +183,11 @@ public class HeartbeatView extends View {
             public void onAnimationRepeat(Animator animation) {
                 isRepeat = true;
             }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                return;
+            }
         });
         heartBeatAnim.setRepeatCount(3);
         heartBeatAnim.setInterpolator(new LinearInterpolator());
@@ -206,6 +211,7 @@ public class HeartbeatView extends View {
         if (!isAnimating)
             return;
         mAnimatorSet.end();
+        mAnimatorSet.cancel();
     }
 
     public void setHeartBeatAnimListener(HeartBeatAnimImpl listener) {

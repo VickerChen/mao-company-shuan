@@ -48,7 +48,7 @@ public class HeartTimes extends DataSupport {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 }
