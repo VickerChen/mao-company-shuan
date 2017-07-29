@@ -4,15 +4,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.widget.FrameLayout;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -20,7 +17,6 @@ import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.fragment.XinlvFragment;
 import com.moscase.shouhuan.fragment.ZhibiaoFragment;
 import com.moscase.shouhuan.fragment.ZhuangtaiFragment;
-import com.moscase.shouhuan.view.ZoomOutPageTransformer;
 import com.nineoldandroids.view.ViewHelper;
 
 import java.util.ArrayList;
@@ -28,15 +24,12 @@ import java.util.List;
 
 public class MainActivity extends FragmentActivity {
     private DrawerLayout mDrawerLayout;
-    private FragmentManager mFragmentManager;
-    private FragmentTransaction mFragmentTransaction;
     private XinlvFragment mXinlvFragment;
     private ZhibiaoFragment mZhibiaoFragment;
     private ZhuangtaiFragment mZhuangtaiFragment;
-    private FrameLayout mFrameLayout;
     private AHBottomNavigation mBottomNavigation;
 
-    private ViewPager mViewPager;
+//    private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
 
 
@@ -49,42 +42,43 @@ public class MainActivity extends FragmentActivity {
         initView();
         initEvents();
         initBottomBar();
-        initDatas();
+        //这个是ViewPager的监听事件，这里我做了两手准备，本来用的是fragment的来回切换，用add方法
+        //后来想想又用了ViewPager的嵌套滑动切换fragment，想换回ViewPager的话那就在代码和布局里面相互注释和反注释掉就好了
+//        initDatas();
 
-//        setDefaultFragment();
+        setDefaultFragment();
 
     }
 
-    private void initDatas() {
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int
-                    positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                if (position == 0) {
-                    mBottomNavigation.setCurrentItem(0);
-                } else if (position == 1) {
-                    mBottomNavigation.setCurrentItem(1);
-                } else if (position == 2) {
-                    mBottomNavigation.setCurrentItem(2);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-    }
+//    private void initDatas() {
+//        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//            @Override
+//            public void onPageScrolled(int position, float positionOffset, int
+//                    positionOffsetPixels) {
+//
+//            }
+//
+//            @Override
+//            public void onPageSelected(int position) {
+//                if (position == 0) {
+//                    mBottomNavigation.setCurrentItem(0);
+//                } else if (position == 1) {
+//                    mBottomNavigation.setCurrentItem(1);
+//                } else if (position == 2) {
+//                    mBottomNavigation.setCurrentItem(2);
+//                }
+//            }
+//
+//            @Override
+//            public void onPageScrollStateChanged(int state) {
+//
+//            }
+//        });
+//    }
 
 
     //底部的三个bar
     private void initBottomBar() {
-
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("状态", R.drawable.zhuangtai);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem("心率", R.drawable.healthy);
@@ -101,22 +95,22 @@ public class MainActivity extends FragmentActivity {
                     if (mBottomNavigation.getCurrentItem() == 0) {
                         return true;
                     } else {
-//                        setDefaultFragment();
-                        mViewPager.setCurrentItem(0);
+                        setDefaultFragment();
+//                        mViewPager.setCurrentItem(0);
                     }
                 } else if (position == 1) {
                     if (mBottomNavigation.getCurrentItem() == 1) {
                         return true;
                     } else {
-//                        initXinlvFragment();
-                        mViewPager.setCurrentItem(1);
+                        initXinlvFragment();
+//                        mViewPager.setCurrentItem(1);
                     }
                 } else if (position == 2) {
                     if (mBottomNavigation.getCurrentItem() == 2) {
                         return true;
                     } else {
-//                        initZhibiaoFragment();
-                        mViewPager.setCurrentItem(2);
+                        initZhibiaoFragment();
+//                        mViewPager.setCurrentItem(2);
                     }
                 }
                 return true;
@@ -130,7 +124,6 @@ public class MainActivity extends FragmentActivity {
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
                 Gravity.RIGHT);
     }
-
 
     //初始化抽屉事件
     private void initEvents() {
@@ -159,7 +152,7 @@ public class MainActivity extends FragmentActivity {
                     mContent.invalidate();
                     ViewHelper.setScaleX(mContent, rightScale);
                     ViewHelper.setScaleY(mContent, rightScale);
-                } else{
+                } else {
                     ViewHelper.setTranslationX(mContent,
                             -mMenu.getMeasuredWidth() * slideOffset);
                     mContent.invalidate();
@@ -186,24 +179,19 @@ public class MainActivity extends FragmentActivity {
 //        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
 //        此行代码使抽屉拉出后屏幕不变暗
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mZhuangtaiFragment = new ZhuangtaiFragment();
-        mXinlvFragment = new XinlvFragment(this);
-        mXinlvFragment.setUserVisibleHint(true);
-        mZhibiaoFragment = new ZhibiaoFragment();
+//        mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mFragmentList = new ArrayList<>();
         mFragmentList.add(mZhuangtaiFragment);
         mFragmentList.add(mXinlvFragment);
         mFragmentList.add(mZhibiaoFragment);
-        mViewPager.setAdapter(mFragmentPagerAdapter);
-        mViewPager.setPageTransformer(true,new ZoomOutPageTransformer());
+//        mViewPager.setAdapter(mFragmentPagerAdapter);
+//        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
     }
 
     //打开左侧抽屉
     public void OpenLeftMenu(View view) {
         mDrawerLayout.openDrawer(Gravity.LEFT);
     }
-
 
     private void hideFragment(FragmentTransaction transaction) {
         if (mZhuangtaiFragment != null) {
@@ -217,44 +205,44 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-//    private void setDefaultFragment() {
-//        //开启事务，fragment的控制是由事务来实现的
-//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//        if (mZhuangtaiFragment == null) {
-//            mZhuangtaiFragment = new ZhuangtaiFragment();
-//            transaction.add(R.id.fl_content, mZhuangtaiFragment);
-//        }
-//        hideFragment(transaction);
-//        transaction.show(mZhuangtaiFragment);
-//        transaction.commit();
-//    }
-//
-//    private void initXinlvFragment() {
-//        //开启事务，fragment的控制是由事务来实现的
-//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//        if (mXinlvFragment == null) {
-//            mXinlvFragment = new XinlvFragment(this);
-//            transaction.add(R.id.fl_content, mXinlvFragment);
-//        }
-//        hideFragment(transaction);
-//        transaction.show(mXinlvFragment);
-//        transaction.commit();
-//    }
-//
-//    private void initZhibiaoFragment() {
-//        //开启事务，fragment的控制是由事务来实现的
-//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//        if (mZhibiaoFragment == null) {
-//            mZhibiaoFragment = new ZhibiaoFragment();
-//            transaction.add(R.id.fl_content, mZhibiaoFragment);
-//        }
-//        hideFragment(transaction);
-//        transaction.show(mZhibiaoFragment);
-//        transaction.commit();
-//    }
+    private void setDefaultFragment() {
+        //开启事务，fragment的控制是由事务来实现的
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        if (mZhuangtaiFragment == null) {
+            mZhuangtaiFragment = new ZhuangtaiFragment();
+            transaction.add(R.id.fl_content, mZhuangtaiFragment);
+        }
+        hideFragment(transaction);
+        transaction.show(mZhuangtaiFragment);
+        transaction.commit();
+    }
+
+    private void initXinlvFragment() {
+        //开启事务，fragment的控制是由事务来实现的
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        if (mXinlvFragment == null) {
+            mXinlvFragment = new XinlvFragment(this);
+            transaction.add(R.id.fl_content, mXinlvFragment);
+        }
+        hideFragment(transaction);
+        transaction.show(mXinlvFragment);
+        transaction.commit();
+    }
+
+    private void initZhibiaoFragment() {
+        //开启事务，fragment的控制是由事务来实现的
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        if (mZhibiaoFragment == null) {
+            mZhibiaoFragment = new ZhibiaoFragment();
+            transaction.add(R.id.fl_content, mZhibiaoFragment);
+        }
+        hideFragment(transaction);
+        transaction.show(mZhibiaoFragment);
+        transaction.commit();
+    }
 
     FragmentPagerAdapter mFragmentPagerAdapter = new FragmentPagerAdapter
             (getSupportFragmentManager()) {
@@ -262,7 +250,6 @@ public class MainActivity extends FragmentActivity {
         public Fragment getItem(int position) {
             return mFragmentList.get(position);
         }
-
 
         @Override
         public int getCount() {

@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -19,10 +18,6 @@ import com.moscase.shouhuan.R;
 
 public class CircleView extends View {
 
-    /**
-     * 整个View的宽高
-     * */
-    private int mTotalHeight, mTotalWidth;
 
     /**
      * 心跳线的总宽度 -- 圆环的宽度
@@ -81,6 +76,8 @@ public class CircleView extends View {
 
     Path path = new Path();
 
+    private Paint mLinePaint;
+
     private int width;
     private int height;
 
@@ -88,6 +85,9 @@ public class CircleView extends View {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLinePaint.setColor(mContext.getResources().getColor(R.color.white));
+        mLinePaint.setStyle(Paint.Style.FILL);
         if (!isInEditMode()) {
             // 造成错误的代码段
             mRingPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
@@ -101,17 +101,12 @@ public class CircleView extends View {
         mCircleAnimPaint.setColor(Color.WHITE);
         mRingAnimPaint.setColor(Color.WHITE);
 
-
-        //初始化心跳曲线
-        mDrawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);
     }
 
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mTotalHeight = h;
-        mTotalWidth = w;
         mHeartBeatWidth = w - mHeartPaintWidth*2-40; //内圆宽度
         x = getMeasuredWidth() / 2;
         y = (int) (getMeasuredHeight() / 2.25f);
@@ -125,17 +120,19 @@ public class CircleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.drawLine(x,y,mRadius,y,mLinePaint);
+        canvas.drawLine(x,y,mRadius + getMeasuredWidth()/2.5f,y,mLinePaint);
+        canvas.drawLine(x,y,x,getMeasuredHeight()/1.5f,mLinePaint);
         canvas.setDrawFilter(mDrawFilter);//在canvas上抗锯齿
 //        canvas.rotate((float) 44.5,x,y);
-        //由于drawArc默认从x轴开始画，因此需要将画布旋转或者绘制角度旋转，2种方案
         canvas.rotate(0.3f,x,y);
         for (int i = 0; i < 360;i+=3){
-            canvas.drawCircle(getMeasuredWidth()/2, getMeasuredHeight()/6.8f, getMeasuredWidth()/240, mCirclePaint);
+            canvas.drawCircle(getMeasuredWidth()/2, getMeasuredHeight()/6.5f, getMeasuredWidth()/240, mCirclePaint);
             canvas.rotate(3f,x,y);
         }
         if (mAnimAngle != -1) {// 如果开启了动画
             for (int i = 0; i < mAnimAngle; i += 3) {
-                canvas.drawCircle(getMeasuredWidth()/2, getMeasuredHeight()/6.8f, getMeasuredWidth()/240, mCircleAnimPaint);
+                canvas.drawCircle(getMeasuredWidth()/2, getMeasuredHeight()/6.5f, getMeasuredWidth()/240, mCircleAnimPaint);
                 canvas.rotate(3f,x,y);
             }
         }
@@ -161,7 +158,6 @@ public class CircleView extends View {
                     }
                     postInvalidate();
                 }
-//				mAnimAngle = -1;// 停止动画
             }
         }).start();
     }
@@ -171,12 +167,6 @@ public class CircleView extends View {
     }
 
 	/*---------------------------------动画  end------------------------------------*/
-
-
-
-
-
-
 
     public CircleView(Context context) {
         super(context);

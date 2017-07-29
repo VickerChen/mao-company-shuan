@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.moscase.shouhuan"
-        minSdkVersion 17
+        minSdkVersion 18
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -22,7 +22,9 @@ android {
     }
     allprojects {
         repositories {
-            maven { url "https://jitpack.io" }
+            maven { url "https://jitpack.io"
+                "http://dl.bintray.com/glomadrian/maven"
+            }
         }
     }
 }
@@ -33,6 +35,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile files('libs/nineoldandroids-2.4.0.jar')
+    compile 'q.rorbin:RadarView:1.0.2'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'org.litepal.android:core:1.5.1'
@@ -42,5 +45,7 @@ dependencies {
     compile 'me.relex:circleindicator:1.2.2@aar'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.zhy:autolayout:1.4.5'
+    compile 'com.github.glomadrian:Grav:1.1'
+    compile 'com.gelitenight.waveview:waveview:1.0.0'
     testCompile 'junit:junit:4.12'
 }

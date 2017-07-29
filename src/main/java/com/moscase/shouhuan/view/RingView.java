@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -71,6 +70,8 @@ public class RingView extends View {
 	 * */
 	private DrawFilter mDrawFilter;
 
+	private Paint mLinePaint;
+
 	Path path = new Path();
 
 	private boolean isAnimRunning;
@@ -80,14 +81,17 @@ public class RingView extends View {
 		setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		mRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		if (!isInEditMode()) {
 			// 造成错误的代码段
 			mRingPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
 			mCirclePaint.setColor(mContext.getResources().getColor(R.color.heart_default));
+			mLinePaint.setColor(mContext.getResources().getColor(R.color.white));
 		}
 
 		mRingPaint.setStyle(Paint.Style.STROKE);
 		mCirclePaint.setStyle(Paint.Style.FILL);
+		mLinePaint.setStyle(Paint.Style.FILL);
 		mRingAnimPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mRingAnimPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
 		mRingAnimPaint.setStyle(Paint.Style.STROKE);
@@ -96,8 +100,6 @@ public class RingView extends View {
 		mRingAnimPaint.setColor(Color.WHITE);
 
 
-		//初始化心跳曲线
-		mDrawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);
 	}
 
 
@@ -120,6 +122,7 @@ public class RingView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		canvas.setDrawFilter(mDrawFilter);//在canvas上抗锯齿
+
 		//由于drawArc默认从x轴开始画，因此需要将画布旋转或者绘制角度旋转，2种方案
 		//int level = canvas.save();
 		//canvas.rotate(-90, x, y);// 旋转的时候一定要指明中心

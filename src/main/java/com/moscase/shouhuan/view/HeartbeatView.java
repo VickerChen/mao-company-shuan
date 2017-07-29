@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
@@ -18,9 +19,6 @@ import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.DisplayUtils;
 
 
-/**
- * Created by Salmon on 2016/5/25 0025.
- */
 public class HeartbeatView extends View {
     private Paint mPaint;
     private Paint mBallPaint;
@@ -78,14 +76,17 @@ public class HeartbeatView extends View {
             resetPath();
             canvas.drawPath(mPath, mPaint);
             for (int i = -90; i < mAngle - 90; i += 3) {
+                Log.d("chenhang", "" + mAngle);
                 canvas.drawArc(mRectf, i, 1, false, mRingAnimPaint);
             }
         }
 
         if (mOffset > mAnimationMargin)
-            canvas.drawCircle(getMeasuredWidth() - mBallRadius - mAnimationMargin, yPos[mOffset - mAnimationMargin], mBallRadius, mBallPaint);
+            canvas.drawCircle(getMeasuredWidth() - mBallRadius - mAnimationMargin, yPos[mOffset -
+                    mAnimationMargin], mBallRadius, mBallPaint);
         else if (mOffset != 0)
-            canvas.drawCircle(getMeasuredWidth() - mBallRadius - mAnimationMargin, getMeasuredHeight() / 2, mBallRadius, mBallPaint);
+            canvas.drawCircle(getMeasuredWidth() - mBallRadius - mAnimationMargin,
+                    getMeasuredHeight() / 2, mBallRadius, mBallPaint);
     }
 
     @Override
@@ -107,7 +108,6 @@ public class HeartbeatView extends View {
 
         int amplitude = h / 5;
         mCycle = w * 3 / 2;
-
         yPos = new float[mCycle];
 
         for (int i = 0; i < w / 2; i++) {
@@ -121,12 +121,13 @@ public class HeartbeatView extends View {
     private void resetPath() {
         mPath.reset();
         int start = getMeasuredWidth() - mOffset;
-
         if (!isRepeat) {
             mPath.moveTo(start > mAnimationMargin ? start - mAnimationMargin : mAnimationMargin,
-                    start > mAnimationMargin ? getMeasuredHeight() / 2 : yPos[mOffset - getMeasuredWidth() + mAnimationMargin]);
+                    start > mAnimationMargin ? getMeasuredHeight() / 2 : yPos[mOffset -
+                            getMeasuredWidth() + mAnimationMargin]);
         } else {
-            mPath.moveTo(mAnimationMargin, start > mAnimationMargin ? getMeasuredHeight() / 2 : yPos[mOffset - getMeasuredWidth() + mAnimationMargin]);
+            mPath.moveTo(mAnimationMargin, start > mAnimationMargin ? getMeasuredHeight() / 2 :
+                    yPos[mOffset - getMeasuredWidth() + mAnimationMargin]);
         }
 
         if (mOffset < getMeasuredWidth() - mAnimationMargin) {
@@ -165,6 +166,7 @@ public class HeartbeatView extends View {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mOffset = (int) animation.getAnimatedValue();
+
                 invalidate();
             }
         });
@@ -182,6 +184,7 @@ public class HeartbeatView extends View {
             @Override
             public void onAnimationRepeat(Animator animation) {
                 isRepeat = true;
+
             }
 
             @Override

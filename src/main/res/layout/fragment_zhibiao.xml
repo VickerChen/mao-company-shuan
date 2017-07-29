@@ -1,14 +1,177 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="moscase.example.com.a538.fragment.ZhibiaoFragment">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+    android:orientation="vertical"
+    tools:context="com.moscase.shouhuan.fragment.ZhibiaoFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:textSize="50dp"
+    <com.zhy.autolayout.AutoLinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="指标界面"/>
+        android:layout_weight="1"
+        android:background="#000">
 
-</FrameLayout>
+        <rorbin.q.radarview.RadarView
+            android:id="@+id/radarView"
+            android:layout_width="720px"
+            android:layout_height="720px"
+            />
+
+    </com.zhy.autolayout.AutoLinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1.3">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#555">
+
+            <com.zhy.autolayout.AutoLinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="720px"
+                android:orientation="vertical">
+
+                <com.zhy.autolayout.AutoLinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="240px"
+                    android:orientation="horizontal">
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <com.github.glomadrian.grav.GravView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            app:animationGenerator="com.github.glomadrian.grav.generator.animation.SideToSideAnimator"
+                            app:array_colors="@array/red"
+                            app:ball_size_from_size="3dp"
+                            app:ball_size_to_size="6dp"
+                            app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
+                            app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
+                            app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
+                            app:regular_cell_size="50"
+                            app:regular_variance="20"
+                            app:side_to_side_min_duration="2000"
+                            app:side_to_side_max_duration="4000"
+                            app:side_to_side_direction="downToUp"
+                            />
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:id="@+id/two"
+                        android:layout_width="match_parent"
+                        android:layout_height="240px"
+                        android:layout_weight="1"
+                        android:background="#555">
+
+
+                        <com.gelitenight.waveview.library.WaveView
+                            android:id="@+id/wave"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+                </com.zhy.autolayout.AutoLinearLayout>
+
+                <com.zhy.autolayout.AutoLinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="240px"
+                    android:orientation="horizontal">
+
+
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="240px"
+                        android:background="#fff"
+                        android:layout_weight="1">
+
+
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="240px"
+                        android:layout_weight="1">
+                        <com.github.glomadrian.grav.GravView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            app:animationGenerator="com.moscase.shouhuan.view.ShakeAnimator"
+                            app:array_colors="@array/red"
+                            app:ball_size_from_size="3dp"
+                            app:ball_size_to_size="6dp"
+                            app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
+                            app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
+                            app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
+                            app:regular_cell_size="50"
+                            app:regular_variance="20"
+                            app:shake_direction="horizontal"
+                            app:shake_max_duration="3000"
+                            app:shake_min_duration="1000"
+                            app:shake_variance="15dp"
+                            />
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+                </com.zhy.autolayout.AutoLinearLayout>
+
+                <com.zhy.autolayout.AutoLinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="240px"
+                    android:orientation="horizontal">
+
+
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <com.github.glomadrian.grav.GravView
+                            android:id="@+id/grav"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            app:animationGenerator="com.moscase.shouhuan.view.ShakeAnimator"
+                            app:array_colors="@array/red"
+                            app:ball_size_from_size="3dp"
+                            app:ball_size_to_size="6dp"
+                            app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
+                            app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
+                            app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
+                            app:regular_cell_size="50"
+                            app:regular_variance="20"
+                            app:shake_direction="vertical"
+                            app:shake_max_duration="3000"
+                            app:shake_min_duration="1000"
+                            app:shake_variance="15dp"
+                            />
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+
+                    <com.zhy.autolayout.AutoLinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#fff">
+
+                    </com.zhy.autolayout.AutoLinearLayout>
+
+                </com.zhy.autolayout.AutoLinearLayout>
+
+            </com.zhy.autolayout.AutoLinearLayout>
+        </ScrollView>
+
+
+    </LinearLayout>
+
+</LinearLayout>

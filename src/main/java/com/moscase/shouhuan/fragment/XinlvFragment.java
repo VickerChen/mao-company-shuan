@@ -14,7 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -132,11 +132,14 @@ public class XinlvFragment extends Fragment {
             mHeartTimesList.add(e);
         }
 
-        mHeartbeatRecycler.setLayoutManager(new LinearLayoutManager(mContext));
+        //这里使用了自定义的WrapContentLinearLayoutManager是因为我用的第三方的adapter，在设置emptyview的时候在底层
+        //直接就报错了
+        mHeartbeatRecycler.setLayoutManager(new WrapContentLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mHeartbeatRecycler.addItemDecoration(new DividerItemDecoration(mContext,
                 LinearLayoutManager.VERTICAL));
         mHeartbeatRecycler.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new Adapter(R.layout.item_heartbeat, mHeartTimesList);
+        mAdapter.setEmptyView(R.layout.activity_splash, (ViewGroup) mHeartbeatRecycler.getParent());
         mHeartbeatRecycler.setAdapter(mAdapter);
         mAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
         mAdapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {
@@ -156,6 +159,7 @@ public class XinlvFragment extends Fragment {
                 return true;
             }
         });
+
     }
 
     private void hideResult() {
@@ -230,23 +234,27 @@ public class XinlvFragment extends Fragment {
     }
 
 
-    @Override
-    public void onDestroy() {
-        mHeartTimesList.clear();
-        mHeartbeatView.stopAnim();
-        Log.d("陈航 ","destroy");
-        super.onDestroy();
+    public class WrapContentLinearLayoutManager extends LinearLayoutManager {
+        public WrapContentLinearLayoutManager(Context context) {
+            super(context);
+        }
+
+        public WrapContentLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
+            super(context, orientation, reverseLayout);
+        }
+
+        public WrapContentLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
+
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+            try {
+                super.onLayoutChildren(recycler, state);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    @Override
-    public void onPause() {
-        Log.d("陈航 ","pause");
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        Log.d("陈航 ","stop");
-        super.onStop();
-    }
 }
