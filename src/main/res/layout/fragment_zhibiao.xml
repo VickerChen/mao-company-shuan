@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff"
+    android:background="#555"
     android:orientation="vertical"
     tools:context="com.moscase.shouhuan.fragment.ZhibiaoFragment">
 
@@ -12,13 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#000">
+        android:background="#555">
 
         <rorbin.q.radarview.RadarView
             android:id="@+id/radarView"
             android:layout_width="720px"
             android:layout_height="720px"
             />
+
 
     </com.zhy.autolayout.AutoLinearLayout>
 
@@ -41,10 +42,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="240px"
                     android:orientation="horizontal">
+
                     <com.zhy.autolayout.AutoLinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:background="#fff"/>
 
                         <com.github.glomadrian.grav.GravView
                             android:layout_width="match_parent"
@@ -59,20 +67,30 @@
                             app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
                             app:regular_cell_size="50"
                             app:regular_variance="20"
-                            app:side_to_side_min_duration="2000"
-                            app:side_to_side_max_duration="4000"
                             app:side_to_side_direction="downToUp"
+                            app:side_to_side_max_duration="4000"
+                            app:side_to_side_min_duration="2000"
                             />
+
                     </com.zhy.autolayout.AutoLinearLayout>
 
+                    <View
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"
+                        android:background="#fff"/>
 
                     <com.zhy.autolayout.AutoLinearLayout
                         android:id="@+id/two"
                         android:layout_width="match_parent"
                         android:layout_height="240px"
                         android:layout_weight="1"
-                        android:background="#555">
+                        android:background="#555"
+                        android:orientation="vertical">
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:background="#fff"/>
 
                         <com.gelitenight.waveview.library.WaveView
                             android:id="@+id/wave"
@@ -88,29 +106,50 @@
                     android:layout_height="240px"
                     android:orientation="horizontal">
 
-
                     <com.zhy.autolayout.AutoLinearLayout
+                        android:id="@+id/bmiview"
                         android:layout_width="match_parent"
                         android:layout_height="240px"
+                        android:layout_weight="1"
                         android:background="#fff"
-                        android:layout_weight="1">
+                        android:orientation="vertical">
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:background="#fff"/>
+
+                        <com.moscase.shouhuan.view.BMIView
+                            android:id="@+id/bmi"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
 
                     </com.zhy.autolayout.AutoLinearLayout>
 
+                    <View
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"
+                        android:background="#fff"/>
 
                     <com.zhy.autolayout.AutoLinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="240px"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:background="#fff"/>
+
                         <com.github.glomadrian.grav.GravView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_centerInParent="true"
                             app:animationGenerator="com.moscase.shouhuan.view.ShakeAnimator"
                             app:array_colors="@array/red"
-                            app:ball_size_from_size="3dp"
-                            app:ball_size_to_size="6dp"
+                            app:ball_size_from_size="3px"
+                            app:ball_size_to_size="6px"
                             app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
                             app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
                             app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
@@ -119,7 +158,7 @@
                             app:shake_direction="horizontal"
                             app:shake_max_duration="3000"
                             app:shake_min_duration="1000"
-                            app:shake_variance="15dp"
+                            app:shake_variance="30px"
                             />
                     </com.zhy.autolayout.AutoLinearLayout>
 
@@ -130,47 +169,112 @@
                     android:layout_height="240px"
                     android:orientation="horizontal">
 
-
-                    <com.zhy.autolayout.AutoLinearLayout
+                    <com.zhy.autolayout.AutoRelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                        <com.github.glomadrian.grav.GravView
-                            android:id="@+id/grav"
+                        <View
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_centerInParent="true"
-                            app:animationGenerator="com.moscase.shouhuan.view.ShakeAnimator"
-                            app:array_colors="@array/red"
-                            app:ball_size_from_size="3dp"
-                            app:ball_size_to_size="6dp"
-                            app:colorGenerator="com.github.glomadrian.grav.generator.paint.ArrayColorGenerator"
-                            app:gravGenerator="com.github.glomadrian.grav.generator.grav.BallGenerator"
-                            app:pointGenerator="com.github.glomadrian.grav.generator.point.RegularPointGenerator"
-                            app:regular_cell_size="50"
-                            app:regular_variance="20"
-                            app:shake_direction="vertical"
-                            app:shake_max_duration="3000"
-                            app:shake_min_duration="1000"
-                            app:shake_variance="15dp"
-                            />
-                    </com.zhy.autolayout.AutoLinearLayout>
+                            android:layout_height="1px"
+                            android:background="#fff"/>
 
+                        <com.moscase.shouhuan.view.RulerView
+                            android:id="@+id/ruler_height"
+                            android:layout_width="fill_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="24.0dip"
+                            app:alphaEnable="true"
+                            app:lineColor="#d3d3d3"
+                            app:lineMaxHeight="40dp"
+                            app:lineMidHeight="30dp"
+                            app:lineMinHeight="20dp"
+                            app:lineSpaceWidth="10dp"
+                            app:lineWidth="2dip"
+                            app:maxValue="250.0"
+                            app:minValue="80.0"
+                            app:perValue="1"
+                            app:selectorValue="165.0"
+                            app:textColor="@color/black"
+                            />
+
+                        <ImageView
+                            android:layout_width="14.0dip"
+                            android:layout_height="46.0dip"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="11.0dip"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/user_info_ruler_height"/>
+
+                        <TextView
+                            android:id="@+id/tizhong"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"/>
+
+                    </com.zhy.autolayout.AutoRelativeLayout>
+
+                    <View
+                        android:layout_width="1px"
+                        android:layout_height="match_parent"
+                        android:background="#fff"/>
 
                     <com.zhy.autolayout.AutoLinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="#fff">
+                        android:background="#555"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1px"
+                            android:background="#fff"/>
+
+                        <com.zhy.autolayout.AutoLinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1">
+
+                                <com.moscase.shouhuan.view.PieChart
+                                    android:id="@+id/piechart"
+                                    android:layout_marginTop="25px"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"/>
+
+                            </LinearLayout>
+
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1">
+
+
+                            </LinearLayout>
+
+
+
+
+                        </com.zhy.autolayout.AutoLinearLayout>
+
+
+
 
                     </com.zhy.autolayout.AutoLinearLayout>
 
                 </com.zhy.autolayout.AutoLinearLayout>
 
             </com.zhy.autolayout.AutoLinearLayout>
-        </ScrollView>
 
+        </ScrollView>
 
     </LinearLayout>
 

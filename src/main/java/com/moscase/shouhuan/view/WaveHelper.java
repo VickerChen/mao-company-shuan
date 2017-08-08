@@ -70,6 +70,8 @@ public class WaveHelper {
 
         mAnimatorSet = new AnimatorSet();
         mAnimatorSet.playTogether(animators);
+
+
     }
 
     public void cancel() {

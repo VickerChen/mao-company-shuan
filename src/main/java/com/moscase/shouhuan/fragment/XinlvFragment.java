@@ -15,6 +15,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,26 +100,30 @@ public class XinlvFragment extends Fragment {
         mHeartbeatView.setHeartBeatAnimListener(new HeartbeatView.HeartBeatAnimImpl() {
             @Override
             public void onAnimFinished() {
-                int randomNum = (int) (50 + Math.random() * 50);
-                HeartbeatEntity e = new HeartbeatEntity();
-                SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String date = sDateFormat.format(new java.util.Date());
-                e.date = date;
-                e.datum = String.valueOf(randomNum);
-                HeartTimes mHeartTimes = new HeartTimes();
-                mHeartTimes.setTime(e.date);
-                mHeartTimes.setTimes(e.datum);
-                mHeartTimes.setDate(new Date());
-                mHeartTimes.setId(HeartTimeId);
-                HeartTimeId += 1;
-                mHeartTimes.save();
-                mHeartTimesList.add(0, mHeartTimes);
+                if (mHeartbeatView.isAutoEnd()){
+                    showResult();
+                    Log.d("koma","到了这一步");
+                }else {
+                    int randomNum = (int) (50 + Math.random() * 50);
+                    HeartbeatEntity e = new HeartbeatEntity();
+                    SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    String date = sDateFormat.format(new java.util.Date());
+                    e.date = date;
+                    e.datum = String.valueOf(randomNum);
+                    HeartTimes mHeartTimes = new HeartTimes();
+                    mHeartTimes.setTime(e.date);
+                    mHeartTimes.setTimes(e.datum);
+                    mHeartTimes.setDate(new Date());
+                    mHeartTimes.setId(HeartTimeId);
+                    HeartTimeId += 1;
+                    mHeartTimes.save();
+                    mHeartTimesList.add(0, mHeartTimes);
 
-                mAdapter.notifyItemInserted(0);
-                mHeartbeatRecycler.scrollToPosition(0);
-                showResult();
-                mDigiResult.setDigits(randomNum);
-
+                    mAdapter.notifyItemInserted(0);
+                    mHeartbeatRecycler.scrollToPosition(0);
+                    showResult();
+                    mDigiResult.setDigits(randomNum);
+                }
             }
         });
 
@@ -154,6 +159,7 @@ public class XinlvFragment extends Fragment {
                                         mHeartTimesList.get(position).getId()).getId());
                                 mHeartTimesList.remove(position);
                                 mAdapter.notifyDataSetChanged();
+                                mDigiResult.setDigits(0);
                             }
                         }).setNegativeButton("否", null).show();
                 return true;
@@ -174,6 +180,12 @@ public class XinlvFragment extends Fragment {
     }
 
     private void showResult() {
+        AlphaAnimation mHiddenAction = new AlphaAnimation(1f, 0f);
+        mHiddenAction.setDuration(400);
+
+        mTextUnit.setAnimation(mHiddenAction);
+        mDigiResult.setAnimation(mHiddenAction);
+
         mTextUnit.setVisibility(View.VISIBLE);
         mDigiResult.setVisibility(View.VISIBLE);
     }
@@ -214,7 +226,6 @@ public class XinlvFragment extends Fragment {
 
     public class Adapter extends BaseQuickAdapter<HeartTimes, BaseViewHolder> {
 
-
         @Override
         protected void startAnim(Animator anim, int index) {
             super.startAnim(anim, index);
@@ -254,6 +265,16 @@ public class XinlvFragment extends Fragment {
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (hidden){
+            mHeartbeatView.stopAnim();
         }
     }
 

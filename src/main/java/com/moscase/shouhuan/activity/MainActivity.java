@@ -236,7 +236,7 @@ public class MainActivity extends FragmentActivity {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         if (mZhibiaoFragment == null) {
-            mZhibiaoFragment = new ZhibiaoFragment();
+            mZhibiaoFragment = new ZhibiaoFragment(this);
             transaction.add(R.id.fl_content, mZhibiaoFragment);
         }
         hideFragment(transaction);

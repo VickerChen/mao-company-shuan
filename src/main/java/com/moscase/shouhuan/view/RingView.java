@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.moscase.shouhuan.R;
@@ -110,7 +109,6 @@ public class RingView extends View {
 		mHeartPaintWidth = getMeasuredHeight()/10;
 		mRingPaint.setStrokeWidth(mHeartPaintWidth);
 		mRingAnimPaint.setStrokeWidth(mHeartPaintWidth);
-		Log.d("chenhang",mHeartPaintWidth+"");
 		x = getMeasuredWidth() / 2;
 		y = (int) (getMeasuredHeight() / 2.25f);
 		mRadius = w / 3 - mHeartPaintWidth / 2; //因为制定了Paint的宽度，因此计算半径需要减去这个

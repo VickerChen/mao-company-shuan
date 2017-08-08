@@ -39,6 +39,12 @@ public class HeartbeatView extends View {
     private boolean isRepeat = false;
     private AnimatorSet mAnimatorSet;
 
+    public boolean isAutoEnd() {
+        return isAutoEnd;
+    }
+
+    private boolean isAutoEnd;
+
     public HeartbeatView(Context context) {
         this(context, null);
     }
@@ -179,6 +185,8 @@ public class HeartbeatView extends View {
                 mOffset = 0;
                 if (mListener != null)
                     mListener.onAnimFinished();
+
+                isAutoEnd = false;
             }
 
             @Override
@@ -213,8 +221,10 @@ public class HeartbeatView extends View {
     public void stopAnim() {
         if (!isAnimating)
             return;
+//        mAnimatorSet.cancel();
+        isAutoEnd = true;
         mAnimatorSet.end();
-        mAnimatorSet.cancel();
+
     }
 
     public void setHeartBeatAnimListener(HeartBeatAnimImpl listener) {

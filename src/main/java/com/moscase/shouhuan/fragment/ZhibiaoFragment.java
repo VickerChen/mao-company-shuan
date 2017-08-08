@@ -1,6 +1,8 @@
 package com.moscase.shouhuan.fragment;
 
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,14 +10,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.gelitenight.waveview.library.WaveView;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.view.BMIView;
+import com.moscase.shouhuan.view.PieChart;
+import com.moscase.shouhuan.view.RulerView;
 import com.moscase.shouhuan.view.WaveHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import rorbin.q.radarview.RadarData;
 import rorbin.q.radarview.RadarView;
@@ -24,6 +31,7 @@ import rorbin.q.radarview.RadarView;
 /**
  * A simple {@link Fragment} subclass.
  */
+@SuppressLint("ValidFragment")
 public class ZhibiaoFragment extends Fragment {
     private List<Float> mCollectionsValues = new ArrayList<>();
     private RadarView mRadarView;
@@ -35,7 +43,7 @@ public class ZhibiaoFragment extends Fragment {
     private int jichudaixie;
     private int bmi;
     private int shuifen;
-
+    private Context mContext;
     private float tizhilvfloat;
     private float yaotunbifloat;
     private float quzhitizhongfloat;
@@ -46,10 +54,19 @@ public class ZhibiaoFragment extends Fragment {
     private WaveView mWaveView;
     private WaveHelper mWaveHelper;
 
+    private BMIView mBMIView;
+
+    private RulerView mRulerView;
+
+    private TextView mTiZhong;
+
+    private PieChart mPieChart;
 
     private LinearLayout mLinearLayout;
-    public ZhibiaoFragment() {
+    @SuppressLint("ValidFragment")
+    public ZhibiaoFragment(Context context) {
         // Required empty public constructor
+        mContext = context;
     }
 
 
@@ -84,7 +101,7 @@ public class ZhibiaoFragment extends Fragment {
     private void initFloat() {
         tizhilvfloat = (float) Math.random() * 100;
         yaotunbifloat = (float) Math.random() * 100;
-        quzhitizhongfloat = (float) Math.random() * 100;
+        quzhitizhongfloat = Math.max(new Random().nextFloat()*100,40);
         jichudaixiefloat = (float) Math.random() * 100;
         bmifloat = (float) Math.random() * 100;
         shuifenfloat = (float) Math.random() * 100;
@@ -100,7 +117,21 @@ public class ZhibiaoFragment extends Fragment {
     }
 
     private void initView(View view) {
+        mPieChart = (PieChart) view.findViewById(R.id.piechart);
+        mPieChart.initSrc(new float[]{20f,30f,40f}, new String[]{"#ff80FF",
+                "#ffFF00", "#6A5ACD"});
+
+        mTiZhong = (TextView) view.findViewById(R.id.tizhong);
+        mRulerView = (RulerView) view.findViewById(R.id.ruler_height);
+        mRulerView.setValue(quzhitizhongfloat, 40, 200, 1);
+        mRulerView.setClickable(false);
+
+        mTiZhong.setText("去脂体重:"+quzhitizhongfloat+"KG");
+
         mLinearLayout = (LinearLayout) view.findViewById(R.id.two);
+
+        mBMIView = (BMIView) view.findViewById(R.id.bmi);
+        mBMIView.setCreditValueWithAnim(bmi);
 
         mRadarView = (RadarView) view.findViewById(R.id.radarView);
 //          设置雷达图的圆形或者正多边形
@@ -109,7 +140,7 @@ public class ZhibiaoFragment extends Fragment {
         Collections.addAll(mCollectionsValues, tizhilvfloat, yaotunbifloat, quzhitizhongfloat,
                 jichudaixiefloat, bmifloat, shuifenfloat);
         mData = new RadarData(mCollectionsValues);
-        mData.setColor(0xffffff);
+        mData.setColor(Color.argb(255,255,255,255));
         mRadarView.addData(mData);
         mRadarView.setVertexText(mTextList);
         mRadarView.setRadarLineWidth(1);
@@ -148,6 +179,10 @@ public class ZhibiaoFragment extends Fragment {
                 mWaveHelper.setVertic(shuifenfloat/100);
                 mWaveHelper.initAnimation();
                 mWaveHelper.start();
+
+                mBMIView.setCreditValueWithAnim(bmi);
+                mRulerView.setValue(quzhitizhongfloat, 40, 200, 1);
+                mTiZhong.setText("去脂体重:"+quzhitizhongfloat+"KG");
             }
         });
     }

@@ -1,9 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias '13902965098'
+            keyPassword '13902965098'
+            storeFile file('H:/MyEclipse2/538KeyStore/538-KeyStore.jks')
+            storePassword '13902965098'
+        }
+    }
+
+
     compileSdkVersion 25
     buildToolsVersion "25.0.1"
-
     defaultConfig {
         applicationId "com.moscase.shouhuan"
         minSdkVersion 18
@@ -12,17 +21,27 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
+    sourceSets{
+        main{
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
     allprojects {
         repositories {
-            maven { url "https://jitpack.io"
+            maven {
+                url "https://jitpack.io"
                 "http://dl.bintray.com/glomadrian/maven"
             }
         }
@@ -47,5 +66,7 @@ dependencies {
     compile 'com.zhy:autolayout:1.4.5'
     compile 'com.github.glomadrian:Grav:1.1'
     compile 'com.gelitenight.waveview:waveview:1.0.0'
+    compile 'com.zkk.view:ZkkRulerView:1.0.0'
+    compile 'cn.aigestudio.datepicker:DatePicker:2.2.0'
     testCompile 'junit:junit:4.12'
 }

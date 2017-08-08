@@ -235,7 +235,8 @@
         <com.zhy.autolayout.AutoLinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/guiji">
 
             <com.zhy.autolayout.AutoRelativeLayout
                 android:layout_width="match_parent"

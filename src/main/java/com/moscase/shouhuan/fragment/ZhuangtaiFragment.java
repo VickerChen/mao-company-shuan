@@ -1,16 +1,27 @@
 package com.moscase.shouhuan.fragment;
 
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.activity.DistanceActivity;
+import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.CircleView;
 import com.moscase.shouhuan.view.RadarData;
 import com.moscase.shouhuan.view.RadarView;
@@ -36,6 +47,13 @@ public class ZhuangtaiFragment extends Fragment {
     private CircleView mCircleView;
     private TextView mDate;
     private RadarView mRadarView;
+    private LinearLayout mLinearLayout;
+    private String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE
+    };
+
     public ZhuangtaiFragment() {
         // Required empty public constructor
     }
@@ -57,7 +75,7 @@ public class ZhuangtaiFragment extends Fragment {
         viewList.add(mZhuangtai1View);
         viewList.add(mZhuangtai2View);
         mViewPager.setAdapter(pagerAdapter);
-        mViewPager.setPageTransformer(true,new ZoomOutPageTransformer());
+        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         mIndicator.setViewPager(mViewPager);
         return view;
     }
@@ -74,6 +92,18 @@ public class ZhuangtaiFragment extends Fragment {
     }
 
     private void initZhuangtai1View(View view) {
+        mLinearLayout = (LinearLayout) view.findViewById(R.id.guiji);
+        mLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Build.VERSION.SDK_INT >= 23) {
+                    //6.0之后动态申请权限
+                    showContacts(mLinearLayout);
+                } else {
+                    init();
+                }
+            }
+        });
         mDate = (TextView) view.findViewById(R.id.date);
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = sDateFormat.format(new java.util.Date());
@@ -83,7 +113,7 @@ public class ZhuangtaiFragment extends Fragment {
         mRingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!mRingView.getIsAnimRunning()){
+                if (!mRingView.getIsAnimRunning()) {
                     mRingView.startAnim();
                     mCircleView.startAnim();
                 }
@@ -117,4 +147,67 @@ public class ZhuangtaiFragment extends Fragment {
         }
     };
 
+    public void showContacts(View v) {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(v);
+        } else {
+            init();
+        }
+    }
+
+    private void requestPermissions(View v) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.READ_PHONE_STATE)
+                ) {
+            Snackbar.make(v, "需要申请权限才能完成定位",
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ok", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            ActivityCompat
+                                    .requestPermissions(getActivity(), permissions,
+                                            123);
+                        }
+                    }).show();
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), permissions, 123);
+        }
+    }
+
+    private void init() {
+        Intent intent = new Intent(getActivity(), DistanceActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode == 123) {
+            if (PermissionUtil.verifyPermissions(grantResults)) {
+                init();
+            } else {
+                Toast.makeText(getActivity(), "请授予权限", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 }

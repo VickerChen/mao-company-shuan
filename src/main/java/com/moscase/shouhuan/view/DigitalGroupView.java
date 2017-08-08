@@ -11,9 +11,6 @@ import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.DisplayUtils;
 
 
-/**
- * Created by Salmon on 2016/6/23 0023.
- */
 public class DigitalGroupView extends LinearLayout {
     private static final int DEFAULT_COLOR = Color.BLACK;
     private static final int DEFAULT_TEXT_SIZE = 16;
