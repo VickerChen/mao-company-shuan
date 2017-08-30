@@ -16,6 +16,7 @@
         android:src="@drawable/human"/>
 
     <com.zhy.autolayout.AutoLinearLayout
+        android:id="@+id/myInfo"
         android:layout_width="match_parent"
         android:layout_height="100px"
         android:gravity="center"

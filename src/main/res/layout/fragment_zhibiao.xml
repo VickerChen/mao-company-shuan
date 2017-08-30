@@ -80,7 +80,7 @@
                         android:background="#fff"/>
 
                     <com.zhy.autolayout.AutoLinearLayout
-                        android:id="@+id/two"
+                        android:id="@+id/takePhoto"
                         android:layout_width="match_parent"
                         android:layout_height="240px"
                         android:layout_weight="1"
@@ -92,10 +92,24 @@
                             android:layout_height="1px"
                             android:background="#fff"/>
 
-                        <com.gelitenight.waveview.library.WaveView
-                            android:id="@+id/wave"
+                        <RelativeLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/shuifentext"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:textSize="20dp"/>
+
+                            <com.gelitenight.waveview.library.WaveView
+                                android:id="@+id/wave"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"/>
+
+                        </RelativeLayout>
+
 
                     </com.zhy.autolayout.AutoLinearLayout>
 
@@ -245,9 +259,9 @@
 
                                 <com.moscase.shouhuan.view.PieChart
                                     android:id="@+id/piechart"
-                                    android:layout_marginTop="25px"
                                     android:layout_width="match_parent"
-                                    android:layout_height="match_parent"/>
+                                    android:layout_height="match_parent"
+                                    android:layout_marginTop="25px"/>
 
                             </LinearLayout>
 
@@ -261,11 +275,7 @@
                             </LinearLayout>
 
 
-
-
                         </com.zhy.autolayout.AutoLinearLayout>
-
-
 
 
                     </com.zhy.autolayout.AutoLinearLayout>

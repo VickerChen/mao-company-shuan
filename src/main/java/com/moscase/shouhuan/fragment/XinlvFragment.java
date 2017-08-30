@@ -43,7 +43,9 @@ import java.util.List;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created by 陈航 on 2017/7/20.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 @SuppressLint("ValidFragment")
 public class XinlvFragment extends Fragment {

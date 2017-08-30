@@ -3,11 +3,7 @@ package com.moscase.shouhuan.view;
 import android.annotation.SuppressLint;
 import android.support.v4.view.ViewPager.PageTransformer;
 import android.view.View;
-/**
- * 
- * @author way
- *
- */
+
 @SuppressLint("NewApi")
 public class ZoomOutPageTransformer implements PageTransformer {
 	private static float MIN_SCALE = 0.85f;

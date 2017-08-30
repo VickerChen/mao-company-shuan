@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
@@ -35,7 +34,9 @@ import java.util.List;
 import me.relex.circleindicator.CircleIndicator;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created by 陈航 on 2017/8/25.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 public class ZhuangtaiFragment extends Fragment {
     private ViewPager mViewPager;
@@ -176,16 +177,11 @@ public class ZhuangtaiFragment extends Fragment {
                 || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.READ_PHONE_STATE)
                 ) {
-            Snackbar.make(v, "需要申请权限才能完成定位",
-                    Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ok", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            ActivityCompat
-                                    .requestPermissions(getActivity(), permissions,
-                                            123);
-                        }
-                    }).show();
+
+            ActivityCompat
+                    .requestPermissions(getActivity(), permissions,
+                            123);
+
         } else {
             ActivityCompat.requestPermissions(getActivity(), permissions, 123);
         }
@@ -207,7 +203,7 @@ public class ZhuangtaiFragment extends Fragment {
                 Toast.makeText(getActivity(), "请授予权限", Toast.LENGTH_SHORT).show();
             }
         } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            Toast.makeText(getActivity(), "请授予权限", Toast.LENGTH_SHORT).show();
         }
     }
 }

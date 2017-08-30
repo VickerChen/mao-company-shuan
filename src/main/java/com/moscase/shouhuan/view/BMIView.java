@@ -29,6 +29,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Created by 陈航 on 2017/7/29.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class BMIView extends View {
 
     private int mRadius; // 画布边缘半径（去除padding后的半径）
@@ -59,7 +64,7 @@ public class BMIView extends View {
     private int mBackgroundColor;
     private int[] mBgColors;
     /**
-     * 由于真实的芝麻信用界面信用值不是线性排布，所以播放动画时若以信用值为参考，则会出现忽慢忽快
+     * 由于真实的界面不是线性排布，所以播放动画时若以信用值为参考，则会出现忽慢忽快
      * 的情况（开始以为是卡顿）。因此，先计算出最终到达角度，以扫过的角度为线性参考，动画就流畅了
      */
     private boolean isAnimFinish = true;

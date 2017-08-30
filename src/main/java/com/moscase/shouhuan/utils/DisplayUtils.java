@@ -3,7 +3,9 @@ package com.moscase.shouhuan.utils;
 import android.content.Context;
 
 /**
- * Created by Salmon on 2016/4/22 0022.
+ * Created by 陈航 on 2017/7/22.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 public class DisplayUtils {
 

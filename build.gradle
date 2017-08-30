@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'android-apt'
 android {
     signingConfigs {
         config {
@@ -15,7 +15,7 @@ android {
     buildToolsVersion "25.0.1"
     defaultConfig {
         applicationId "com.moscase.shouhuan"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -27,13 +27,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
+            debuggable true
         }
         debug {
             signingConfig signingConfigs.config
         }
     }
-    sourceSets{
-        main{
+    sourceSets {
+        main {
             jniLibs.srcDirs = ['libs']
         }
     }
@@ -67,6 +68,14 @@ dependencies {
     compile 'com.github.glomadrian:Grav:1.1'
     compile 'com.gelitenight.waveview:waveview:1.0.0'
     compile 'com.zkk.view:ZkkRulerView:1.0.0'
-    compile 'cn.aigestudio.datepicker:DatePicker:2.2.0'
+    compile 'com.github.florent37:camerafragment:1.0.7'
+    compile 'com.jakewharton:butterknife:8.1.0'
+    apt 'com.jakewharton:butterknife-compiler:8.1.0'
     testCompile 'junit:junit:4.12'
+    compile project(':smallchart')
+    compile project(':DatePicker')
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile('cn.qqtheme.framework:WheelPicker:1.5.4') {
+        exclude group: 'com.android.support'
+    }
 }

@@ -1,10 +1,9 @@
 package com.moscase.shouhuan.bean;
 
 /**
- * <b>饼状图数据实体</b>
- * <h2>ChartData.java</h2>
- * @author Jerry VeryEast
- * @since 2016年3月30日
+ * Created by 陈航 on 2017/8/15.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 public class ChartData {
 

@@ -5,7 +5,9 @@ import org.litepal.crud.DataSupport;
 import java.util.Date;
 
 /**
- * Created by Administrator on 2017/7/5.
+ * Created by 陈航 on 2017/7/5.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 
 public class HeartTimes extends DataSupport {

@@ -10,7 +10,11 @@ import android.widget.LinearLayout;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.DisplayUtils;
 
-
+/**
+ * Created by 陈航 on 2017/7/26.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class DigitalGroupView extends LinearLayout {
     private static final int DEFAULT_COLOR = Color.BLACK;
     private static final int DEFAULT_TEXT_SIZE = 16;

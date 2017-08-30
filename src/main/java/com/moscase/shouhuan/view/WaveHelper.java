@@ -12,6 +12,11 @@ import com.gelitenight.waveview.library.WaveView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Created by 陈航 on 2017/7/25.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class WaveHelper {
     private WaveView mWaveView;
 

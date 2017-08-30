@@ -40,6 +40,11 @@ import android.view.animation.Transformation;
 
 import java.util.ArrayList;
 
+/**
+ * Created by 陈航 on 2017/8/11.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class MaterialProgressDrawable extends Drawable implements Animatable {
     // Maps to ProgressBar.Large style
     public static final int LARGE = 0;

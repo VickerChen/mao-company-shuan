@@ -1,6 +1,8 @@
 package com.moscase.shouhuan.utils;
 
 import android.content.Context;
+import android.os.Build;
+import android.os.StrictMode;
 
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
@@ -10,7 +12,9 @@ import org.litepal.LitePalApplication;
 import org.litepal.exceptions.GlobalException;
 
 /**
- * Created by Administrator on 2017/8/3.
+ * Created by 陈航 on 2017/8/3.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 
 public class MyApplication extends LitePalApplication {
@@ -54,8 +58,16 @@ public class MyApplication extends LitePalApplication {
         super.onCreate();
         // 在使用 SDK 各组间之前初始化 context 信息，传入 ApplicationContext
         SDKInitializer.initialize(this);
-        //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
+        //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置使用的坐标类型.
         //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
         SDKInitializer.setCoordType(CoordType.BD09LL);
+
+        //公司新买的中兴手机7.0的系统，如果不做这一步的配置的话在我的信息界面调用
+        //系统相机时会崩掉
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
     }
+
 }

@@ -41,6 +41,11 @@ import java.util.List;
 
 import static com.moscase.shouhuan.R.id.mapView;
 
+/**
+ * Created by 陈航 on 2017/8/10.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class DistanceActivity extends Activity implements SensorEventListener {
 
     // 定位相关
@@ -54,8 +59,8 @@ public class DistanceActivity extends Activity implements SensorEventListener {
     private double mCurrentLon = 0.0;
     private float mCurrentAccracy;
 
-    MapView mMapView;
-    BaiduMap mBaiduMap;
+    private MapView mMapView;
+    private BaiduMap mBaiduMap;
 
     float mCurrentZoom = 18f;//默认地图缩放比例值
 

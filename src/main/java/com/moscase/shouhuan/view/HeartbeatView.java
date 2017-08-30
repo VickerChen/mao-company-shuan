@@ -18,7 +18,11 @@ import android.view.animation.LinearInterpolator;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.DisplayUtils;
 
-
+/**
+ * Created by 陈航 on 2017/7/25.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class HeartbeatView extends View {
     private Paint mPaint;
     private Paint mBallPaint;
@@ -82,7 +86,6 @@ public class HeartbeatView extends View {
             resetPath();
             canvas.drawPath(mPath, mPaint);
             for (int i = -90; i < mAngle - 90; i += 3) {
-                Log.d("chenhang", "" + mAngle);
                 canvas.drawArc(mRectf, i, 1, false, mRingAnimPaint);
             }
         }

@@ -79,7 +79,7 @@
 
         <fragment
             android:id="@+id/id_left_menu"
-            android:name="com.moscase.shouhuan.view.MenuLeftFragment"
+            android:name="com.moscase.shouhuan.fragment.MenuLeftFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
@@ -95,7 +95,7 @@
 
         <fragment
             android:id="@+id/id_right_menu"
-            android:name="com.moscase.shouhuan.view.MenuRightFragment"
+            android:name="com.moscase.shouhuan.fragment.MenuRightFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             />

@@ -13,7 +13,9 @@ import android.view.View;
 import com.moscase.shouhuan.R;
 
 /**
- * Created by Administrator on 2017/7/20.
+ * Created by 陈航 on 2017/7/25.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 
 public class CircleView extends View {

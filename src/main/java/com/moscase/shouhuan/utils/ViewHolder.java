@@ -10,7 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * Created by Administrator on 2017/3/4.
+ * Created by 陈航 on 2017/3/4.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 
 public class ViewHolder extends RecyclerView.ViewHolder{
@@ -100,6 +102,7 @@ public class ViewHolder extends RecyclerView.ViewHolder{
      * @param listener
      * @return
      */
+
     public ViewHolder setOnClickListener(int viewId, View.OnClickListener listener) {
         View view = getView(viewId);
         view.setOnClickListener(listener);

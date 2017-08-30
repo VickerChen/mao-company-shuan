@@ -22,6 +22,11 @@ import com.nineoldandroids.view.ViewHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Created by 陈航 on 2017/8/3.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class MainActivity extends FragmentActivity {
     private DrawerLayout mDrawerLayout;
     private XinlvFragment mXinlvFragment;
@@ -42,8 +47,9 @@ public class MainActivity extends FragmentActivity {
         initView();
         initEvents();
         initBottomBar();
-        //这个是ViewPager的监听事件，这里我做了两手准备，本来用的是fragment的来回切换，用add方法
-        //后来想想又用了ViewPager的嵌套滑动切换fragment，想换回ViewPager的话那就在代码和布局里面相互注释和反注释掉就好了
+
+//        这个是ViewPager的监听事件，这里我做了两手准备，本来用的是fragment的来回切换，用add方法
+//        后来想想又用了ViewPager的嵌套滑动切换fragment，想换回ViewPager的话那就在代码和布局里面相互注释和反注释掉就好了
 //        initDatas();
 
         setDefaultFragment();

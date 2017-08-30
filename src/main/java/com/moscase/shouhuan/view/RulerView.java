@@ -12,7 +12,11 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
 
-
+/**
+ * Created by 陈航 on 2017/8/01.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class RulerView extends View {
 
     private int mMinVelocity;
@@ -148,8 +152,6 @@ public class RulerView extends View {
 
         mMaxOffset = (int) (-(mTotalLine - 1) * mLineSpaceWidth);
         mOffset = (mMinValue - mSelectorValue) / mPerValue * mLineSpaceWidth * 10;
-        Log.d("zkk===","mOffset--           "+mOffset  +"         =====mMaxOffset    "+mMaxOffset
-        +"  mTotalLine  " +mTotalLine);
         invalidate();
         setVisibility(VISIBLE);
     }

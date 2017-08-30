@@ -9,6 +9,11 @@ import com.github.glomadrian.grav.R;
 import com.github.glomadrian.grav.figures.Grav;
 import com.github.glomadrian.grav.generator.animation.GravAnimatorGenerator;
 
+/**
+ * Created by 陈航 on 2017/7/30.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class ShakeAnimator extends GravAnimatorGenerator<Grav> {
   private float variance = 50;
   private long minAnimationDuration = 2000;

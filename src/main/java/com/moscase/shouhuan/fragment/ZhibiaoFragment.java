@@ -29,7 +29,9 @@ import rorbin.q.radarview.RadarView;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created by 陈航 on 2017/7/20.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 @SuppressLint("ValidFragment")
 public class ZhibiaoFragment extends Fragment {
@@ -61,6 +63,8 @@ public class ZhibiaoFragment extends Fragment {
     private TextView mTiZhong;
 
     private PieChart mPieChart;
+
+    private TextView mShuifen;
 
     private LinearLayout mLinearLayout;
     @SuppressLint("ValidFragment")
@@ -126,9 +130,12 @@ public class ZhibiaoFragment extends Fragment {
         mRulerView.setValue(quzhitizhongfloat, 40, 200, 1);
         mRulerView.setClickable(false);
 
+        mShuifen = (TextView) view.findViewById(R.id.shuifentext);
+        mShuifen.setText("水份: " + shuifen + "%");
+
         mTiZhong.setText("去脂体重:"+quzhitizhongfloat+"KG");
 
-        mLinearLayout = (LinearLayout) view.findViewById(R.id.two);
+        mLinearLayout = (LinearLayout) view.findViewById(R.id.takePhoto);
 
         mBMIView = (BMIView) view.findViewById(R.id.bmi);
         mBMIView.setCreditValueWithAnim(bmi);
@@ -183,6 +190,7 @@ public class ZhibiaoFragment extends Fragment {
                 mBMIView.setCreditValueWithAnim(bmi);
                 mRulerView.setValue(quzhitizhongfloat, 40, 200, 1);
                 mTiZhong.setText("去脂体重:"+quzhitizhongfloat+"KG");
+                mShuifen.setText("水份: " + shuifen + "%");
             }
         });
     }
@@ -207,6 +215,7 @@ public class ZhibiaoFragment extends Fragment {
             mWaveHelper.cancel();
         }else {
             mWaveHelper.start();
+            mBMIView.setCreditValueWithAnim(bmi);
         }
     }
 }

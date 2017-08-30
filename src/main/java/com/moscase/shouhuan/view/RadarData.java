@@ -1,9 +1,11 @@
 package com.moscase.shouhuan.view;
 
-/**
- * Created by jeanboy on 2016/10/31.
- */
 
+/**
+ * Created by 陈航 on 2017/7/30.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class RadarData {
 
     private String title;

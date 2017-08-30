@@ -19,7 +19,11 @@ import android.widget.ImageView;
 import com.moscase.shouhuan.R;
 import com.nineoldandroids.animation.ValueAnimator;
 
-
+/**
+ * Created by 陈航 on 2017/8/05.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class LoadToastView extends ImageView {
 
     private String mText = "";

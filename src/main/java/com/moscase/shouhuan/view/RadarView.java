@@ -10,9 +10,10 @@ import android.view.View;
 import java.util.List;
 
 /**
- * Created by jeanboy on 2016/10/17.
+ * Created by 陈航 on 2017/7/30.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
-
 public class RadarView extends View {
 
     private final static String TAG = RadarView.class.getSimpleName();

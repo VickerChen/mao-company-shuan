@@ -10,7 +10,11 @@ import android.view.animation.DecelerateInterpolator;
 import com.nineoldandroids.view.ViewHelper;
 import com.nineoldandroids.view.ViewPropertyAnimator;
 
-
+/**
+ * Created by 陈航 on 2017/8/05.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class LoadToast {
 
     private String mText = "";

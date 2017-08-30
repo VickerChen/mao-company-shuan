@@ -22,7 +22,9 @@ import com.moscase.shouhuan.R;
 import java.util.List;
 
 /**
- * Created by zhouweixian on 2016/1/23.
+ * Created by 陈航 on 2017/7/23.
+ *
+ * 少年一事能狂  敢骂天地不仁
  */
 public class GuideView extends RelativeLayout implements ViewTreeObserver.OnGlobalLayoutListener {
     private final String TAG = getClass().getSimpleName();

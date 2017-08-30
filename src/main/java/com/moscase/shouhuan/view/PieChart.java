@@ -11,6 +11,11 @@ import android.view.View;
 
 import java.text.DecimalFormat;
 
+/**
+ * Created by 陈航 on 2017/7/29.
+ *
+ * 少年一事能狂  敢骂天地不仁
+ */
 public class PieChart extends View {
 	private float[] item;// 每一项的值
 	private float total; // 总共的值

@@ -17,5 +17,55 @@
         <item name="android:textColor">#ff25adff</item>
     </style>
 
+    <style name="AppTheme.NoBar">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+
+    <!--ToggleButton-->
+    <declare-styleable name="SwitchButton">
+        <attr name="sb_shadow_radius" format="reference|dimension"/>
+        <attr name="sb_shadow_offset" format="reference|dimension"/>
+        <attr name="sb_shadow_color" format="reference|color"/>
+        <attr name="sb_uncheck_color" format="reference|color"/>
+        <attr name="sb_checked_color" format="reference|color"/>
+
+        <attr name="sb_border_width" format="reference|dimension"/>
+        <attr name="sb_checkline_color" format="reference|color"/>
+        <attr name="sb_checkline_width" format="reference|dimension"/>
+        <attr name="sb_uncheckcircle_color" format="reference|color"/>
+        <attr name="sb_uncheckcircle_width" format="reference|dimension"/>
+        <attr name="sb_uncheckcircle_radius" format="reference|dimension"/>
+
+        <attr name="sb_checked" format="reference|boolean"/>
+        <attr name="sb_shadow_effect" format="reference|boolean"/>
+        <attr name="sb_effect_duration" format="reference|integer"/>
+        <attr name="sb_button_color" format="reference|color"/>
+        <attr name="sb_show_indicator" format="reference|boolean"/>
+        <attr name="sb_background" format="reference|color"/>
+        <attr name="sb_enable_effect" format="reference|boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="BarChartView">
+        <attr name="axisColor" format="color" />
+        <attr name="axisWidth" format="integer" />
+        <attr name="xAxisTxtColor" format="color"/>
+        <attr name="yAxisTxtColor" format="color"/>
+        <attr name="barColor" format="color"/>
+        <attr name="hideGirdLine" format="boolean"/>
+        <attr name="max" format="integer"/>
+        <attr name="barPressEnable" format="boolean"/>
+        <attr name="radius" format="integer"/>
+        <attr name="type" format="enum">
+            <enum name="bar" value="0"/>
+            <enum name="line" value="1"/>
+        </attr>
+    </declare-styleable>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
 
 </resources>

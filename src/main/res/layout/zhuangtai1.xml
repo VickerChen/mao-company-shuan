@@ -17,7 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="单位:步"
-            android:textColor="#fff"/>
+            android:textColor="#fff"
+            android:textSize="15dp"/>
 
         <TextView
             android:id="@+id/mubiao"
@@ -25,7 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/bu"
             android:text="目标:"
-            android:textColor="#fff"/>
+            android:textColor="#fff"
+            android:textSize="15dp"/>
 
         <TextView
             android:id="@+id/bushu"
@@ -33,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/bu"
             android:layout_toRightOf="@id/mubiao"
+            android:textSize="15dp"
             android:text="10000步"
             android:textColor="#fff"/>
 
@@ -233,27 +236,27 @@
         </com.zhy.autolayout.AutoLinearLayout>
 
         <com.zhy.autolayout.AutoLinearLayout
+            android:id="@+id/guiji"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:id="@+id/guiji">
+            android:layout_weight="1">
 
             <com.zhy.autolayout.AutoRelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/symbol"
                     android:layout_width="60px"
-                    android:layout_height="60px"/>
+                    android:layout_height="60px"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/symbol"/>
 
                 <ImageView
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/location"
-                    android:layout_marginLeft="100px"
                     android:layout_width="60px"
-                    android:layout_height="60px"/>
+                    android:layout_height="60px"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="100px"
+                    android:src="@drawable/location"/>
 
                 <TextView
                     android:layout_width="wrap_content"

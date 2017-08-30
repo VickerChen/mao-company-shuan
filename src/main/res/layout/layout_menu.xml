@@ -6,6 +6,7 @@
     >
 
     <com.zhy.autolayout.AutoRelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
@@ -14,6 +15,7 @@
 
         <com.zhy.autolayout.AutoRelativeLayout
             android:id="@+id/one"
+            android:layout_marginTop="100px"
             android:layout_width="match_parent"
             android:layout_height="70sp"
             android:layout_gravity="center"
@@ -58,7 +60,7 @@
 
 
         <com.zhy.autolayout.AutoLinearLayout
-            android:id="@+id/two"
+            android:id="@+id/takePhoto"
             android:layout_width="match_parent"
             android:layout_height="50sp"
             android:layout_below="@id/one"
@@ -85,7 +87,7 @@
             android:id="@+id/calendar"
             android:layout_width="match_parent"
             android:layout_height="50sp"
-            android:layout_below="@id/two"
+            android:layout_below="@id/takePhoto"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -93,19 +95,20 @@
                 android:layout_width="35sp"
                 android:layout_height="35sp"
                 android:layout_marginLeft="16sp"
-                android:src="@drawable/photo"/>
+                android:src="@drawable/calendar"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30sp"
-                android:text="日历"
+                android:text="记录"
                 android:textColor="#fff"
                 android:textSize="17dp"/>
 
         </com.zhy.autolayout.AutoLinearLayout>
 
         <com.zhy.autolayout.AutoLinearLayout
+            android:id="@+id/notify"
             android:layout_width="match_parent"
             android:layout_height="50sp"
             android:layout_below="@id/calendar"
