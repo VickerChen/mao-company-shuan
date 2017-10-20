@@ -68,4 +68,18 @@
         <item name="android:windowExitAnimation">@anim/slide_down</item>
     </style>
 
+    <style name="progress">
+        　　<item name="android:indeterminateDrawable">@drawable/progress_start_scan</item>
+    </style>
+
+    <style name="progressstop">
+        　　<item name="android:indeterminateDrawable">@drawable/stop_scan</item>
+    </style>
+    
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+    </style>
+
 </resources>

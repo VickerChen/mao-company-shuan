@@ -80,6 +80,8 @@ public class RingView extends View {
 
     private boolean isAnimRunning;
 
+    private int mNeedToShow = 300;
+
     private void init() {
 
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -87,7 +89,7 @@ public class RingView extends View {
         mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         if (!isInEditMode()) {
-            mRingPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
+            mRingPaint.setColor(mContext.getResources().getColor(R.color.black));
             mCirclePaint.setColor(mContext.getResources().getColor(R.color.heart_default));
             mLinePaint.setColor(mContext.getResources().getColor(R.color.white));
         }
@@ -100,7 +102,6 @@ public class RingView extends View {
         mRingAnimPaint.setStyle(Paint.Style.STROKE);
         mCircleAnimPaint = new Paint(mCirclePaint);
         mCircleAnimPaint.setColor(Color.WHITE);
-        mRingAnimPaint.setColor(Color.WHITE);
 
 
     }
@@ -152,13 +153,13 @@ public class RingView extends View {
             @Override
             public void run() {
                 isAnimRunning = true;
-                while (mAnimAngle < 300) {
+                while (mAnimAngle < mNeedToShow) {
                     mAnimAngle++;
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        Thread.sleep(10);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                     postInvalidate();
                 }
                 isAnimRunning = false;
@@ -173,6 +174,12 @@ public class RingView extends View {
 
     public void startAnim() {
         startRingAnim();
+    }
+
+    public void setAngel(double baifenbi){
+        mNeedToShow = (int) (360 * baifenbi);
+        startAnim();
+//        postInvalidate();
     }
 
 	/*---------------------------------动画  end------------------------------------*/

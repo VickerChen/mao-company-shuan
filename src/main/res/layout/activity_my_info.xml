@@ -118,16 +118,13 @@
 
                 <TextView
                     android:id="@+id/bodyHeight"
-                    android:layout_toLeftOf="@id/heightcm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/heightcm"
                     android:text="170"
                     android:textSize="40px"/>
             </RelativeLayout>
-
-
-
 
 
         </com.zhy.autolayout.AutoRelativeLayout>
@@ -154,6 +151,7 @@
                 android:id="@+id/weight"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
                 <TextView
                     android:id="@+id/weightcm"
                     android:layout_width="wrap_content"
@@ -167,8 +165,8 @@
                     android:id="@+id/bodyWeight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/weightcm"
                     android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/weightcm"
                     android:text="60"
                     android:textSize="40px"/>
             </RelativeLayout>
@@ -242,6 +240,7 @@
                 android:id="@+id/tunweiLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
                 <TextView
                     android:id="@+id/tunweicm"
                     android:layout_width="wrap_content"
@@ -255,11 +254,55 @@
                     android:id="@+id/tunwei"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/tunweicm"
                     android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/tunweicm"
                     android:text="100"
                     android:textSize="40px"/>
 
+            </RelativeLayout>
+
+
+        </com.zhy.autolayout.AutoRelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#777"/>
+
+        <com.zhy.autolayout.AutoRelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90px">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15px"
+                android:text="步长"
+                android:textSize="40px"/>
+
+            <RelativeLayout
+                android:id="@+id/rl_buchang"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/buchangcm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:text=" cm"
+                    android:textSize="40px"/>
+
+                <TextView
+                    android:id="@+id/buchang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/buchangcm"
+                    android:text="75"
+                    android:textSize="40px"/>
             </RelativeLayout>
 
 
@@ -301,6 +344,8 @@
 
 
     </com.zhy.autolayout.AutoLinearLayout>
+
+
 
 
 </com.zhy.autolayout.AutoLinearLayout>

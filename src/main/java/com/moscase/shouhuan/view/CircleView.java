@@ -82,26 +82,27 @@ public class CircleView extends View {
 
     private int width;
     private int height;
+    private int mNeedToShow = 300;
 
     private void init() {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         mRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mLinePaint.setColor(mContext.getResources().getColor(R.color.white));
+        mLinePaint.setColor(mContext.getResources().getColor(R.color.black));
         mLinePaint.setStyle(Paint.Style.FILL);
         if (!isInEditMode()) {
             // 造成错误的代码段
             mRingPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
-            mCirclePaint.setColor(mContext.getResources().getColor(R.color.heart_default));
+            mCirclePaint.setColor(Color.BLACK);
         }
         mRingPaint.setStrokeWidth(mHeartPaintWidth);
         mRingPaint.setStyle(Paint.Style.STROKE);
         mCirclePaint.setStyle(Paint.Style.FILL);
         mRingAnimPaint = new Paint(mRingPaint);
         mCircleAnimPaint = new Paint(mCirclePaint);
-        mCircleAnimPaint.setColor(Color.WHITE);
-        mRingAnimPaint.setColor(Color.WHITE);
+        mCircleAnimPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
+        mRingAnimPaint.setColor(mContext.getResources().getColor(R.color.heart_default));
 
     }
 
@@ -140,6 +141,12 @@ public class CircleView extends View {
         }
     }
 
+    public void setAngel(double baifenbi){
+        mNeedToShow = (int) (360 * baifenbi);
+        startAnim();
+//        postInvalidate();
+    }
+
 
 	/*---------------------------------动画-----------------------------------------*/
     /**
@@ -151,13 +158,13 @@ public class CircleView extends View {
 
             @Override
             public void run() {
-                while (mAnimAngle < 300) {
+                while (mAnimAngle < mNeedToShow) {
                     mAnimAngle++;
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        Thread.sleep(10);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                     postInvalidate();
                 }
             }

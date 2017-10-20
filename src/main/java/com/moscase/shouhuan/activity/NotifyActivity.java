@@ -25,7 +25,7 @@ public class NotifyActivity extends Activity {
         setContentView(R.layout.activity_notify);
         mToggleButton = (ToggleButton) findViewById(R.id.toggleButton);
         mSharedPreferences = getSharedPreferences("ToggleButton",MODE_PRIVATE);
-        isChecked = mSharedPreferences.getBoolean("isChecked",false);
+        isChecked = mSharedPreferences.getBoolean("isChecked",true);
         if (isChecked){
             mToggleButton.setChecked(isChecked);
         }

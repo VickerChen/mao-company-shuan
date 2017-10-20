@@ -198,7 +198,7 @@ public class BarChartView extends View {
 
             }
 
-            canvas.drawText((i + 1) + "", startX + range * i + (range / 2), getHeight() -
+            canvas.drawText((i + 1) + "", startX + range * i + (range / 2)+3, getHeight() -
                     dp2px(15), txtXPaint);
 
 

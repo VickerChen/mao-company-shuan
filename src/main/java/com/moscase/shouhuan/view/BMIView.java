@@ -309,19 +309,7 @@ public class BMIView extends View {
         mPaint.setTextSize(sp2px(12));
         canvas.drawText(mHeaderText, mCenterX, mCenterY - dp2px(20), mPaint);
 
-        /**
-         * 画信用描述
-         */
-        mPaint.setAlpha(255);
-        mPaint.setTextSize(sp2px(20));
-        canvas.drawText(calculateCreditDescription(), mCenterX, mCenterY + dp2px(55), mPaint);
 
-        /**
-         * 画评估时间
-         */
-        mPaint.setAlpha(160);
-        mPaint.setTextSize(sp2px(10));
-        canvas.drawText(getFormatTimeStr(), mCenterX, mCenterY + dp2px(70), mPaint);
     }
 
     private int dp2px(int dp) {
@@ -406,21 +394,6 @@ public class BMIView extends View {
         }
     }
 
-    /**
-     * 信用分对应信用描述
-     */
-    private String calculateCreditDescription() {
-        if (mSolidCreditValue > 700) {
-            return "信用极好";
-        } else if (mSolidCreditValue > 650) {
-            return "信用优秀";
-        } else if (mSolidCreditValue > 600) {
-            return "信用良好";
-        } else if (mSolidCreditValue > 550) {
-            return "信用中等";
-        }
-        return "信用较差";
-    }
 
     private SimpleDateFormat mDateFormat;
 

@@ -47,4 +47,8 @@
     <color name="color_accent">#7c4dff</color>
     <color name="color_success">#3CCD88</color>
     <color name="color_error">#f44336</color>
+
+    <color name="def_wheel_color">#4E4988</color>
+    <color name="def_reached_color">#FFD844</color>
+    <color name="def_pointer_color">#FFFFFF</color>
 </resources>

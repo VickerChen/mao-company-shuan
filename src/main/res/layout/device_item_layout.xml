@@ -1,0 +1,49 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:alpha="0.7"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/device_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:padding="5dp"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="16dp"/>
+
+
+    <TextView
+        android:id="@+id/ble_states"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="5dp"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="16dp"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toLeftOf="@+id/ble_states"
+        android:padding="5dp"
+        android:text="MAC:"
+        android:textColor="@color/black"
+        android:textSize="12dp"/>
+
+
+</RelativeLayout>

@@ -1,6 +1,7 @@
 package com.moscase.shouhuan.activity;
 
 import android.Manifest;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -11,11 +12,15 @@ import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.clj.fastble.conn.BleCharacterCallback;
+import com.clj.fastble.exception.BleException;
+import com.clj.fastble.utils.HexUtil;
 import com.github.florent37.camerafragment.CameraFragment;
 import com.github.florent37.camerafragment.CameraFragmentApi;
 import com.github.florent37.camerafragment.configuration.Configuration;
@@ -29,7 +34,13 @@ import com.github.florent37.camerafragment.widgets.FlashSwitchView;
 import com.github.florent37.camerafragment.widgets.MediaActionSwitchView;
 import com.github.florent37.camerafragment.widgets.RecordButton;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.utils.MessageEvent;
+import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -39,6 +50,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
 
 /**
  * Created by 陈航 on 2017/8/25.
@@ -82,6 +94,7 @@ public class PhotoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         mDate = sDateFormat.format(new java.util.Date());
         if (Build.VERSION.SDK_INT >= 23) {
@@ -120,8 +133,10 @@ public class PhotoActivity extends AppCompatActivity {
                     Intent intent = PreviewActivity
                             .newIntentVideo(PhotoActivity
                                     .this, filePath);
+
                     startActivityForResult(intent,
                             REQUEST_PREVIEW_CODE);
+
                 }
 
                 @Override
@@ -133,6 +148,7 @@ public class PhotoActivity extends AppCompatActivity {
                     Intent intent = PreviewActivity
                             .newIntentPhoto(PhotoActivity
                                     .this, filePath);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivityForResult(intent,
                             REQUEST_PREVIEW_CODE);
                 }
@@ -359,7 +375,7 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
-//    这里如果不做延迟处理的话，在进入拍照Activity的时候趁相机还没初始化就返回的话会崩溃
+//    这里如果不做延迟处理的话，在刚刚进入这个Activity的时候趁相机还没初始化就立即返回的话会崩溃
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK){
@@ -368,8 +384,72 @@ public class PhotoActivity extends AppCompatActivity {
                 public void run() {
                   finish();
                 }
-            },1000);
+            },600);
         }
         return true;
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(MessageEvent event) {
+        if (event.getMsg() == 73) {
+            Toast.makeText(this, "拍照", Toast.LENGTH_SHORT).show();
+            recordButton.performClick();
+            //拍照成功后发OK
+            MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
+                    ("6f6b"), new BleCharacterCallback() {
+                @Override
+                public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+                }
+
+                @Override
+                public void onFailure(BleException exception) {
+
+                }
+
+                @Override
+                public void onInitiatedResult(boolean result) {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        isEnterPhotoActivity = true;
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        isEnterPhotoActivity = false;
+        Log.d("变了没",isEnterPhotoActivity+"");
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        isEnterPhotoActivity = false;
+        //退出界面发exit
+        MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
+                ("65786974"), new BleCharacterCallback() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+            }
+
+            @Override
+            public void onFailure(BleException exception) {
+
+            }
+
+            @Override
+            public void onInitiatedResult(boolean result) {
+
+            }
+        });
+        super.onDestroy();
     }
 }

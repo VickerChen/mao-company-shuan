@@ -1,13 +1,18 @@
 package com.moscase.shouhuan.activity;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -16,8 +21,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.utils.ComputeMyInfo;
+import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.BottomDialog;
 
 import java.io.File;
@@ -39,13 +47,24 @@ import static android.os.Environment.getExternalStorageDirectory;
 
 /**
  * Created by 陈航 on 2017/8/27.
- *
+ * <p>
  * 少年一事能狂  敢骂天地不仁
  */
 
 public class MyInfoActivity extends FragmentActivity {
     public static final int TAKE_PHOTO = 1;
     private static final int SELECT_PHOTO = 2;
+    private String[] permissionCamera = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE};
+
+
+    //每次点开选择出生年月界面时保存的上一次选择的值
+    private int lastSelectedYear;
+    private int lastSelectedMonth;
+    private int lastSelectedDay;
 
     @BindView(R.id.userName)
     TextView mUserName;
@@ -87,24 +106,46 @@ public class MyInfoActivity extends FragmentActivity {
     private SharedPreferences mSharePreferences;
     private boolean isMale = true;
 
+    private TextView mBuchang;
+    private RelativeLayout mRlBuchang;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_info);
         ButterKnife.bind(this);
+        if (Build.VERSION.SDK_INT >= 23) {
+//            6.0以上系统动态申请权限
+            showCameranPermission();
+        } else {
+            initView();
+        }
 
+    }
+
+    private void initView() {
         mSharePreferences = getSharedPreferences("myInfo", MODE_PRIVATE);
+        mBuchang = (TextView) findViewById(R.id.buchang);
+        mRlBuchang = (RelativeLayout) findViewById(R.id.rl_buchang);
+        //从shareprefernces中获取各种参数
+        lastSelectedYear = mSharePreferences.getInt("lastSelectedYear", 1989);
+        lastSelectedMonth = mSharePreferences.getInt("lastSelectedMonth", 02);
+        lastSelectedDay = mSharePreferences.getInt("lastSelectedDay", 14);
         mUserName.setText(mSharePreferences.getString("userName", "用户名"));
-        mBodyHeight.setText(mSharePreferences.getInt("height", 170) + "");
-        mBodyWeight.setText(mSharePreferences.getInt("weight", 60) + "");
+        mBodyHeight.setText(mSharePreferences.getInt("height", 178) + "");
+        mBodyWeight.setText(mSharePreferences.getInt("weight", 120) + "");
         mYaowei.setText(mSharePreferences.getInt("yaowei", 70) + "");
         mTunwei.setText(mSharePreferences.getInt("tunwei", 100) + "");
         mBirthday.setText(mSharePreferences.getString("birthday", "1989/02/14"));
+        mBuchang.setText(mSharePreferences.getInt("buchang",75)+"");
         isMale = mSharePreferences.getBoolean("isMale", true);
         if (isMale) {
             mMan.setImageResource(R.drawable.man1);
             mWoman.setImageResource(R.drawable.women2);
-            mSex.setText( "男");
+            mSex.setText("男");
         } else {
             mMan.setImageResource(R.drawable.man2);
             mWoman.setImageResource(R.drawable.women1);
@@ -124,6 +165,7 @@ public class MyInfoActivity extends FragmentActivity {
                 "/蓝牙手表图片/UserPhoto.jpg");
         if (bitmap != null)
             mCircleImageView.setImageBitmap(bitmap);
+
         mCircleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,6 +173,31 @@ public class MyInfoActivity extends FragmentActivity {
                 showDialig();
             }
         });
+
+
+        mRlBuchang.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NumberPicker pickerHeight = new NumberPicker(MyInfoActivity.this);
+                pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
+                pickerHeight.setCycleDisable(false);
+                pickerHeight.setDividerVisible(false);
+                pickerHeight.setOffset(2);//偏移量
+                pickerHeight.setRange(60, 94, 1);//数字范围
+                pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
+                pickerHeight.setLabel("厘米");
+                pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                    @Override
+                    public void onNumberPicked(int index, Number item) {
+                        mBuchang.setText(item + "");
+                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                        mEditor.putInt("buchang", (Integer) item).commit();
+                    }
+                });
+                pickerHeight.show();
+            }
+        });
+
     }
 
     private void showDialig() {
@@ -177,7 +244,7 @@ public class MyInfoActivity extends FragmentActivity {
                 "IMG_" + mDate + "" + ".jpg");
         try {
             if (outputImage.exists()) {
-                outputImage.delete();
+                outputImage.delete();//只保存一个图片
             }
             outputImage.createNewFile();
         } catch (IOException e) {
@@ -279,6 +346,11 @@ public class MyInfoActivity extends FragmentActivity {
                 builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int which) {
+                        if (inputServer.getText().toString().equals("")) {
+                            Toast.makeText(MyInfoActivity.this, "用户名不能为空", Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
                         mUserName.setText(inputServer.getText().toString());
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putString("userName", inputServer.getText().toString());
@@ -294,6 +366,7 @@ public class MyInfoActivity extends FragmentActivity {
                 SharedPreferences.Editor mEditorMale = mSharePreferences.edit();
                 mEditorMale.putBoolean("isMale", isMale).commit();
                 mSex.setText("男");
+                ComputeMyInfo.getInstance().setSex("男");
                 break;
             case R.id.woman:
                 mWoman.setImageResource(R.drawable.women1);
@@ -302,6 +375,7 @@ public class MyInfoActivity extends FragmentActivity {
                 SharedPreferences.Editor mEditorFemale = mSharePreferences.edit();
                 mEditorFemale.putBoolean("isMale", isMale).commit();
                 mSex.setText("女");
+                ComputeMyInfo.getInstance().setSex("女");
                 break;
             case R.id.birthday:
                 final DatePicker picker = new DatePicker(this);
@@ -310,18 +384,26 @@ public class MyInfoActivity extends FragmentActivity {
                 picker.setTopPadding(ConvertUtils.toPx(this, 10));
                 picker.setRangeEnd(2111, 01, 11);
                 picker.setRangeStart(1900, 01, 01);
-                picker.setSelectedItem(1995, 02, 21);
+                picker.setSelectedItem(lastSelectedYear, lastSelectedMonth, lastSelectedDay);
                 picker.setResetWhileWheel(false);
                 picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {
                     @Override
                     public void onDatePicked(String year, String month, String day) {
+                        lastSelectedYear = Integer.parseInt(year.toString());
+                        lastSelectedMonth = Integer.parseInt(month.toString());
+                        lastSelectedDay = Integer.parseInt(day.toString());
                         mBirthday.setText(year + "/" + month + "/" + day);
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putString("birthday", year + "/" + month + "/" + day);
+                        mEditor.putInt("lastSelectedYear", lastSelectedYear);
+                        mEditor.putInt("lastSelectedMonth", lastSelectedMonth);
+                        mEditor.putInt("lastSelectedDay", lastSelectedDay);
                         mEditor.commit();
+                        ComputeMyInfo.getInstance().setBirthday(Integer.parseInt(year));
                     }
                 });
                 picker.show();
+
                 break;
             case R.id.height:
                 NumberPicker pickerHeight = new NumberPicker(this);
@@ -329,18 +411,20 @@ public class MyInfoActivity extends FragmentActivity {
                 pickerHeight.setCycleDisable(false);
                 pickerHeight.setDividerVisible(false);
                 pickerHeight.setOffset(2);//偏移量
-                pickerHeight.setRange(145, 200, 1);//数字范围
+                pickerHeight.setRange(142, 224, 1);//数字范围
                 pickerHeight.setSelectedItem(Integer.parseInt(mBodyHeight.getText().toString()));
                 pickerHeight.setLabel("厘米");
                 pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                     @Override
                     public void onNumberPicked(int index, Number item) {
                         mBodyHeight.setText(item + "");
+                        ComputeMyInfo.getInstance().setShengao(item.intValue());
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putInt("height", (Integer) item).commit();
                     }
                 });
                 pickerHeight.show();
+
                 break;
             case R.id.weight:
                 NumberPicker pickerWeight = new NumberPicker(this);
@@ -349,12 +433,13 @@ public class MyInfoActivity extends FragmentActivity {
                 pickerWeight.setDividerVisible(false);
                 pickerWeight.setOffset(2);//偏移量
                 pickerWeight.setRange(40, 100, 1);//数字范围
-                pickerWeight.setSelectedItem(60);
+                pickerWeight.setSelectedItem(Integer.parseInt(mBodyWeight.getText().toString()));
                 pickerWeight.setLabel("kg");
                 pickerWeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                     @Override
                     public void onNumberPicked(int index, Number item) {
                         mBodyWeight.setText(item + "");
+                        ComputeMyInfo.getInstance().setTizhong(item.intValue());
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putInt("weight", (Integer) item).commit();
                     }
@@ -368,12 +453,13 @@ public class MyInfoActivity extends FragmentActivity {
                 pickerYaowei.setDividerVisible(false);
                 pickerYaowei.setOffset(2);//偏移量
                 pickerYaowei.setRange(40, 120, 1);//数字范围
-                pickerYaowei.setSelectedItem(70);
+                pickerYaowei.setSelectedItem(Integer.parseInt(mYaowei.getText().toString()));
                 pickerYaowei.setLabel("cm");
                 pickerYaowei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                     @Override
                     public void onNumberPicked(int index, Number item) {
                         mYaowei.setText(item + "");
+                        ComputeMyInfo.getInstance().setYaowei(item.intValue());
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putInt("yaowei", (Integer) item).commit();
                     }
@@ -387,18 +473,69 @@ public class MyInfoActivity extends FragmentActivity {
                 pickerTunwei.setDividerVisible(false);
                 pickerTunwei.setOffset(2);//偏移量
                 pickerTunwei.setRange(40, 120, 1);//数字范围
-                pickerTunwei.setSelectedItem(70);
+                pickerTunwei.setSelectedItem(Integer.parseInt(mTunwei.getText().toString()));
                 pickerTunwei.setLabel("cm");
                 pickerTunwei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                     @Override
                     public void onNumberPicked(int index, Number item) {
                         mTunwei.setText(item + "");
+                        ComputeMyInfo.getInstance().setTunwei(item.intValue());
                         SharedPreferences.Editor mEditor = mSharePreferences.edit();
                         mEditor.putInt("tunwei", (Integer) item).commit();
                     }
                 });
                 pickerTunwei.show();
                 break;
+        }
+    }
+
+    private void showCameranPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission
+                .CAMERA)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission
+                .RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission
+                .WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission
+                .READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermissions();
+        } else {
+            initView();
+        }
+    }
+
+    private void requestCameraPermissions() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA)
+                || ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.RECORD_AUDIO)
+                || ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                || ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                ) {
+            ActivityCompat
+                    .requestPermissions(this, permissionCamera,
+                            123);
+        } else {
+            ActivityCompat.requestPermissions(this, permissionCamera, 123);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == 123) {
+            if (PermissionUtil.verifyPermissions(grantResults)) {
+                initView();
+            } else {
+                Toast.makeText(this, "请授予权限", Toast.LENGTH_LONG).show();
+                finish();
+            }
         }
     }
 }

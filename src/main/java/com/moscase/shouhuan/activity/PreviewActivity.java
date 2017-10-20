@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +32,7 @@ import java.io.File;
 
 /**
  * Created by 陈航 on 2017/8/25.
- *
+ * <p>
  * 少年一事能狂  敢骂天地不仁
  */
 public class PreviewActivity extends AppCompatActivity implements View.OnClickListener {
@@ -88,6 +89,21 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent resultIntent = new Intent();
+                resultIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                resultIntent.putExtra(RESPONSE_CODE_ARG, ACTION_CONFIRM).putExtra(FILE_PATH_ARG,
+                        previewFilePath);
+                Toast.makeText(getBaseContext(), "照片已保存在  蓝牙手表图片  文件夹中 ", Toast.LENGTH_LONG).show();
+
+                setResult(RESULT_OK, resultIntent);
+                finish();
+                overridePendingTransition(0, 0);
+            }
+        }, 1500);
 
         String originalRatioLabel = getString(R.string.preview_controls_original_ratio_label);
         ratioLabels = new String[]{originalRatioLabel, "1:1", "4:3", "16:9"};
@@ -340,7 +356,8 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View view) {
         Intent resultIntent = new Intent();
         if (view.getId() == R.id.confirm_media_result) {
-            resultIntent.putExtra(RESPONSE_CODE_ARG, ACTION_CONFIRM).putExtra(FILE_PATH_ARG, previewFilePath);
+            resultIntent.putExtra(RESPONSE_CODE_ARG, ACTION_CONFIRM).putExtra(FILE_PATH_ARG,
+                    previewFilePath);
             Toast.makeText(getBaseContext(), "照片已保存在  蓝牙手表图片  文件夹中 ", Toast.LENGTH_LONG).show();
         } else if (view.getId() == R.id.re_take_media) {
             deleteMediaFile();

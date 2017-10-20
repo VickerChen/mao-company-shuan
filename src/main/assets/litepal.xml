@@ -5,8 +5,8 @@
     <version value="1"></version>  <!-- 数据库的版本号 -->
 
     <list>
-        <!-- 配置数据库中相应的表，暂时不写 -->
         <mapping class="com.moscase.shouhuan.bean.HeartTimes"></mapping>
+        <mapping class="com.moscase.shouhuan.bean.MyInfoBean"></mapping>
 
     </list>
 </resources>

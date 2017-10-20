@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.moscase.shouhuan">
+          package="com.moscase.shouhuan"
+          android:versionCode="1"
+          android:versionName="@string/version">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
 
     <!-- 这个权限用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -34,13 +39,32 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 
+    <!-- 蓝牙权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:name=".utils.MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/icon_app"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.moscase.shouhuan.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="2RFmT1fHdhaXqysEN9MjXsOVLG0n9YPE"/>
@@ -88,6 +112,7 @@
         </activity>
         <activity
             android:name=".activity.PhotoActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoBar">
         </activity>
@@ -100,8 +125,39 @@
             android:name=".activity.NotifyActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity android:name=".activity.MyInfoActivity">
+        </activity>
         <activity
-            android:name=".activity.MyInfoActivity">
+            android:name=".activity.TargetActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+        <service
+            android:name=".service.BluetoothService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <activity
+            android:name=".activity.BluetoothScanActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".activity.ClockActivity">
+        </activity>
+
+        <!-- 监听通知栏消息发给手表 -->
+        <service
+            android:name=".service.NotificationMonitorService"
+            android:label="NotificationMonitor"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".activity.AboutActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

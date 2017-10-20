@@ -17,8 +17,6 @@ android {
         applicationId "com.moscase.shouhuan"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -55,6 +53,11 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile files('libs/nineoldandroids-2.4.0.jar')
+    compile project(':smallchart')
+    compile project(':DatePicker')
+    compile('cn.qqtheme.framework:WheelPicker:1.5.4') {
+        exclude group: 'com.android.support'
+    }
     compile 'q.rorbin:RadarView:1.0.2'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
@@ -70,12 +73,10 @@ dependencies {
     compile 'com.zkk.view:ZkkRulerView:1.0.0'
     compile 'com.github.florent37:camerafragment:1.0.7'
     compile 'com.jakewharton:butterknife:8.1.0'
-    apt 'com.jakewharton:butterknife-compiler:8.1.0'
-    testCompile 'junit:junit:4.12'
-    compile project(':smallchart')
-    compile project(':DatePicker')
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile('cn.qqtheme.framework:WheelPicker:1.5.4') {
-        exclude group: 'com.android.support'
-    }
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
+    compile 'com.clj.fastble:FastBleLib:1.2.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
+    testCompile 'junit:junit:4.12'
+    apt 'com.jakewharton:butterknife-compiler:8.1.0'
 }

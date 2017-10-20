@@ -30,6 +30,7 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:background="#82212121"
+        android:visibility="invisible"
         android:orientation="horizontal"
         android:padding="10dp">
 

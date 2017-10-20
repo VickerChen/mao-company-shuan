@@ -16,8 +16,8 @@
 
         <rorbin.q.radarview.RadarView
             android:id="@+id/radarView"
-            android:layout_width="720px"
-            android:layout_height="720px"
+            android:layout_width="750px"
+            android:layout_height="750px"
             />
 
 

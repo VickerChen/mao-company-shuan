@@ -10,14 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#000">
+        android:background="#3f63ad">
 
         <TextView
             android:id="@+id/bu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="单位:步"
-            android:textColor="#fff"
+            android:textColor="#000"
             android:textSize="15dp"/>
 
         <TextView
@@ -26,61 +26,78 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/bu"
             android:text="目标:"
-            android:textColor="#fff"
+            android:textColor="#000"
             android:textSize="15dp"/>
 
         <TextView
-            android:id="@+id/bushu"
+            android:id="@+id/mubiaobushu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/bu"
             android:layout_toRightOf="@id/mubiao"
-            android:textSize="15dp"
-            android:text="10000步"
-            android:textColor="#fff"/>
+            android:text="10000"
+            android:textColor="#000"
+            android:textSize="15dp"/>
+
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="190px"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/bushu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="#000"
+                android:textSize="30dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="步"
+                android:textColor="#000"
+                android:textSize="20dp"/>
+        </com.zhy.autolayout.AutoLinearLayout>
 
 
         <TextView
+            android:id="@+id/zongjuli"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="280px"
-            android:layout_marginTop="200px"
-            android:text="XXXX步"
-            android:textColor="#fff"
-            android:textSize="50px"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="240px"
+            android:layout_marginLeft="250px"
             android:layout_marginTop="280px"
-            android:text="XXXXX"
-            android:textColor="#fff"/>
+            android:text="0.00"
+            android:textColor="#000"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="270px"
+            android:layout_marginLeft="250px"
             android:layout_marginTop="320px"
-            android:text="米"
-            android:textColor="#fff"/>
+            android:text="公里"
+            android:textColor="#000"/>
 
 
         <TextView
+            android:id="@+id/kaluli"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="380px"
             android:layout_marginTop="280px"
-            android:text="XXXXX"
-            android:textColor="#fff"/>
+            android:text="0.0000"
+            android:textColor="#000"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="380px"
+            android:layout_marginLeft="390px"
             android:layout_marginTop="320px"
-            android:text="卡路里"
-            android:textColor="#fff"/>
+            android:text="千卡"
+            android:textColor="#000"/>
 
         <com.moscase.shouhuan.view.RingView
             android:id="@+id/MiClockView"
@@ -95,12 +112,13 @@
             android:layout_alignParentTop="true"/>
 
         <TextView
+            android:id="@+id/moxige"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:gravity="center_horizontal"
-            android:text="≈10000个墨西哥鸡肉卷的热量"
-            android:textColor="#fff"/>
+            android:text="≈0个墨西哥鸡肉卷的热量"
+            android:textColor="#000"/>
 
     </com.zhy.autolayout.AutoRelativeLayout>
 
@@ -108,6 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1.3"
+        android:background="#fff"
         android:orientation="vertical">
 
         <com.zhy.autolayout.AutoLinearLayout
@@ -141,7 +160,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_alignParentBottom="true"
-                    android:background="#fff"/>
+                    android:background="#555"/>
 
             </com.zhy.autolayout.AutoRelativeLayout>
 
@@ -185,7 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_alignParentBottom="true"
-                    android:background="#fff"/>
+                    android:background="#555"/>
 
             </com.zhy.autolayout.AutoRelativeLayout>
 
@@ -229,58 +248,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_alignParentBottom="true"
-                    android:background="#fff"/>
+                    android:background="#555"/>
 
             </com.zhy.autolayout.AutoRelativeLayout>
 
         </com.zhy.autolayout.AutoLinearLayout>
 
-        <com.zhy.autolayout.AutoLinearLayout
-            android:id="@+id/guiji"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <com.zhy.autolayout.AutoRelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:layout_width="60px"
-                    android:layout_height="60px"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/symbol"/>
-
-                <ImageView
-                    android:layout_width="60px"
-                    android:layout_height="60px"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="100px"
-                    android:src="@drawable/location"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="轨迹与距离"
-                    android:textSize="60px"/>
-
-                <TextView
-                    android:id="@+id/date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"/>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1px"
-                    android:layout_alignParentBottom="true"
-                    android:background="#fff"/>
-
-            </com.zhy.autolayout.AutoRelativeLayout>
-
-        </com.zhy.autolayout.AutoLinearLayout>
 
     </com.zhy.autolayout.AutoLinearLayout>
 
