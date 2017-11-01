@@ -8,13 +8,14 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.moscase.shouhuan.R;
 
 /**
  * Created by 陈航 on 2017/7/30.
- *
+ * <p>
  * 少年一事能狂  敢骂天地不仁
  */
 public class RingView extends View {
@@ -176,10 +177,14 @@ public class RingView extends View {
         startRingAnim();
     }
 
-    public void setAngel(double baifenbi){
+    public void setAngel(double baifenbi) {
         mNeedToShow = (int) (360 * baifenbi);
+        Log.d("koma---百分比是", mNeedToShow + "");
+
+        mAnimAngle = -1;
+        postInvalidate();
         startAnim();
-//        postInvalidate();
+
     }
 
 	/*---------------------------------动画  end------------------------------------*/

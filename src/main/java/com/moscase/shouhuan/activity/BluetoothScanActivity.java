@@ -42,8 +42,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * 这是蓝牙扫描结果的界面
@@ -67,7 +65,6 @@ public class BluetoothScanActivity extends AppCompatActivity {
 
     private boolean isScanOver = false;
 
-    ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
     private MyReceiver mReceiver;
     private Handler mHandler;
 

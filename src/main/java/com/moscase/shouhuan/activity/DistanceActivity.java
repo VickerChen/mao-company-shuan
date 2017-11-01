@@ -44,6 +44,16 @@
 ///**
 // * Created by 陈航 on 2017/8/10.
 // *
+// * 这是展示用户当前运动轨迹的界面，这里我直接调用的是百度地图的API
+// * IOS那边用的是高德
+// *
+// *
+// *
+// * 2017/10/31
+// * 由于小胡经理说项目结构要调整，然后这个功能就不需要了，我就全部注释掉了
+// * 但我没有删除，下面这几百行代码就留着吧，搞不好以后又要开启这个任务那就懵逼了
+// *
+// *
 // * 此模块已废弃
 // */
 //public class DistanceActivity extends Activity implements SensorEventListener {
@@ -240,7 +250,7 @@
 //
 //                    //标记起点图层位置
 //                    MarkerOptions oStart = new MarkerOptions();// 地图标记覆盖物参数配置类
-//                    oStart.position(points.get(0));// 覆盖物位置点，第一个点为起点
+//                    oStart.position(points.getDate(0));// 覆盖物位置点，第一个点为起点
 //                    oStart.icon(startBD);// 设置覆盖物图片
 //                    mBaiduMap.addOverlay(oStart); // 在地图上添加此图层
 //                    mLoadToast.success();
@@ -267,7 +277,7 @@
 //
 //                //起始点图层也会被清除，重新绘画
 //                MarkerOptions oStart = new MarkerOptions();
-//                oStart.position(points.get(0));
+//                oStart.position(points.getDate(0));
 //                oStart.icon(startBD);
 //                mBaiduMap.addOverlay(oStart);
 //

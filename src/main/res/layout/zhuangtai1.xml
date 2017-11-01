@@ -145,6 +145,7 @@
                     android:layout_width="60px"
                     android:layout_height="60px"
                     android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
                     android:src="@drawable/time"/>
 
                 <TextView
@@ -180,6 +181,7 @@
                     android:layout_width="60px"
                     android:layout_height="60px"
                     android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
                     android:src="@drawable/stepsize"/>
 
                 <TextView
@@ -192,6 +194,18 @@
                     android:textSize="30px"/>
 
                 <TextView
+                    android:id="@+id/buchang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/buchangcm"
+                    android:layout_marginRight="15px"
+                    android:text="30"
+                    android:textSize="40px"/>
+
+
+                <TextView
+                    android:id="@+id/buchangcm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
@@ -220,10 +234,11 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/buchang"
+                    android:id="@+id/bupin"
                     android:layout_width="60px"
                     android:layout_height="60px"
                     android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
                     android:src="@drawable/stridefrequency"/>
 
                 <TextView
@@ -231,7 +246,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="20px"
-                    android:layout_toRightOf="@id/buchang"
+                    android:layout_toRightOf="@id/bupin"
                     android:text="步频:"
                     android:textSize="30px"/>
 
@@ -241,7 +256,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="15px"
-                    android:text="步/秒"
+                    android:text="Step/MIN"
                     android:textSize="40px"/>
 
                 <View

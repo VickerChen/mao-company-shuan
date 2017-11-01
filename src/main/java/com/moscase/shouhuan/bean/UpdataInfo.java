@@ -1,4 +1,4 @@
-package com.moscase.shouhuan.utils;
+package com.moscase.shouhuan.bean;
 
 public class UpdataInfo {
 	private String version;  

@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,7 +29,6 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
@@ -46,7 +46,9 @@ import com.clj.fastble.data.ScanResult;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.utils.HexUtil;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.bean.BushuData;
 import com.moscase.shouhuan.bean.MyInfoBean;
+import com.moscase.shouhuan.bean.UpdataInfo;
 import com.moscase.shouhuan.fragment.XinlvFragment;
 import com.moscase.shouhuan.fragment.ZhibiaoFragment;
 import com.moscase.shouhuan.fragment.ZhuangtaiFragment;
@@ -54,7 +56,6 @@ import com.moscase.shouhuan.service.BluetoothService;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.ParseXml;
-import com.moscase.shouhuan.utils.UpdataInfo;
 import com.nineoldandroids.view.ViewHelper;
 
 import org.greenrobot.eventbus.EventBus;
@@ -84,50 +85,64 @@ import static com.moscase.shouhuan.utils.MyApplication.isResume;
  * 少年一事能狂  敢骂天地不仁
  */
 public class MainActivity extends FragmentActivity {
+    //两边的抽屉
     private DrawerLayout mDrawerLayout;
+    //心率fragment
     private XinlvFragment mXinlvFragment;
+    //指标fragment
     private ZhibiaoFragment mZhibiaoFragment;
+    //状态fragment
     private ZhuangtaiFragment mZhuangtaiFragment;
+    //地步的三个bar
     private AHBottomNavigation mBottomNavigation;
+    //是否是第一次进入APP，我要把个人信息数据存到数据库，不然第一次打开info的时候会崩溃
     private boolean isFistEnterAPP = false;
+    //更新界面的步数
     private String bushu;
+    //需要传给手表的是否是24小时制
     private String mTimeFormat;
+    //更新界面的总距离
     private float mGongli;
+    //更新界面的千卡
     private float mKaluli;
-    private String[] permissionSyorage = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE};
-
 
     //    private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
 
     private BluetoothService mBluetoothService;
+    //从提醒界面拿到是否是短连接，用于发送给手表
     private boolean mIsDuanlianjie;
 
 
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.arg1 == 111) {
-
-            }
-        }
-    };
     private SharedPreferences mDuanlianjie;
+    private SharedPreferences mMyInfoShared;
+
+
+    /**
+     * 这个日期，是用来往数据库里面存的，然后判断当前的步数是否是同一天
+     * 如果是，就更新数据而不是插入
+     */
+    private String riqi;
+    private int lastBushu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        //在第一次进入APP的时候就把默认信息给设定好存到数据库中
+
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
         isFistEnterAPP = sharedPreferences.getBoolean("isFistEnterAPP", false);
-
+        mMyInfoShared = getSharedPreferences("myInfo", MODE_PRIVATE);
+        //具体逻辑是，先从数据库拿到日期和步数，假如手表连接上的话，就判断是否是当天的数据，
+        //如果不是再判断是否比上一次的步数大，因为要存最大的数据
+        lastBushu = mMyInfoShared.getInt("lastbushu",0);
         mDuanlianjie = getSharedPreferences("ToggleButton", MODE_PRIVATE);
         mIsDuanlianjie = mDuanlianjie.getBoolean("isChecked", true);
-        Log.d("当前连接", mIsDuanlianjie + "");
+        //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
+        MyApplication.isInch = mDuanlianjie.getBoolean("isinch", false);
+
+        //在第一次进入APP的时候，把所有的默认数据都设置好存到数据库里
         if (!isFistEnterAPP) {
             MyInfoBean myInfoBean1 = new MyInfoBean();
             myInfoBean1.setSex("男");
@@ -135,16 +150,26 @@ public class MainActivity extends FragmentActivity {
             myInfoBean1.setYaowei(70);
             myInfoBean1.setTunwei(100);
             myInfoBean1.setShengao(178);
-            myInfoBean1.setTizhong(120);
+            myInfoBean1.setTizhong(68);
             myInfoBean1.save();
             isFistEnterAPP = true;
             sharedPreferences.edit().putBoolean("isFistEnterAPP", isFistEnterAPP).commit();
         }
 
 
+
+        BushuData bushuData = new BushuData();
+        bushuData.setRiqi(get());
+        bushuData.setBushu(30);
+        bushuData.save();
+
+
+
+
+
+        //当APP和手表已经连接上之后断开的时候，会重新连接，重新连接成功后发送广播，提醒主页面notify
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.chenhang.reconnect");
-        filter.addAction("android.bluetooth.adapter.action.STATE_CHANGED");
         filter.setPriority(Integer.MAX_VALUE);
         registerReceiver(myReceiver, filter);
 
@@ -163,6 +188,7 @@ public class MainActivity extends FragmentActivity {
 
         setDefaultFragment();
 
+        //检查版本更新
         check();
 
     }
@@ -290,6 +316,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void initView() {
+
         mBottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.id_drawerLayout);
 //        此行代码表示锁定右侧的抽屉，只能通过点击右上角才能滑出抽屉，不能通过侧滑
@@ -310,6 +337,7 @@ public class MainActivity extends FragmentActivity {
         mDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
+    //隐藏其他fragment
     private void hideFragment(FragmentTransaction transaction) {
         if (mZhuangtaiFragment != null) {
             transaction.hide(mZhuangtaiFragment);
@@ -322,6 +350,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    //设置进入APP后默认的fragment
     private void setDefaultFragment() {
         //开启事务，fragment的控制是由事务来实现的
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -361,19 +390,7 @@ public class MainActivity extends FragmentActivity {
         transaction.commit();
     }
 
-    FragmentPagerAdapter mFragmentPagerAdapter = new FragmentPagerAdapter
-            (getSupportFragmentManager()) {
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-    };
-
+    //绑定服务
     private void bindService() {
         Intent bindIntent = new Intent(this, BluetoothService.class);
         bindService(bindIntent, mFhrSCon, Context.BIND_AUTO_CREATE);
@@ -457,20 +474,54 @@ public class MainActivity extends FragmentActivity {
 
                                 if (value2.equals("1")) {
                                     Log.d("koma 截取的是", "1");
-
+                                    bushu = value1.substring(16, 22);
                                     mGongli = (Float.parseFloat(value1.substring(22, 28)) / 1.0f
                                             / 100);
                                     mKaluli = (Float.parseFloat(value1.substring(28, 34)) / 1.0f
                                             / 10 / 1000);
-                                    Log.d("koma---公里", mGongli + "");
-                                    Log.d("koma---卡路里", mKaluli + "");
+
+                                    if (value1.substring(2, 4).equals("01") && !MyApplication
+                                            .isInch) {
+                                        sendBroadcast(new Intent("com.chenhang.inch"));
+                                        MyApplication.isInch = true;
+                                        //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
+                                        mDuanlianjie.edit().putBoolean("isinch", MyApplication
+                                                .isInch).commit();
+                                        mMyInfoShared.edit().clear().commit();
+                                    } else if (value1.substring(2, 4).equals("00") && MyApplication
+                                            .isInch) {
+                                        sendBroadcast(new Intent("com.chenhang.inch"));
+                                        MyApplication.isInch = false;
+                                        //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
+                                        mDuanlianjie.edit().putBoolean("isinch", MyApplication
+                                                .isInch).commit();
+                                    }
+
+                                    if (riqi.equals(get())){
+                                        if (lastBushu < Integer.parseInt(bushu)){
+                                            lastBushu = Integer.parseInt(bushu);
+                                            mMyInfoShared.edit().putInt("lastbushu",lastBushu).commit();
+
+                                            ContentValues values = new ContentValues();
+                                            values.put("bushu", lastBushu);
+                                            DataSupport.updateAll(BushuData.class, values, "riqi = ?", get());
+                                        }
+
+                                    }else {
+
+                                        BushuData bushuData = new BushuData();
+                                        bushuData.setRiqi(get());
+                                        bushuData.setBushu(Integer.parseInt(bushu));
+                                        bushuData.save();
+
+                                        riqi = get();
+                                        lastBushu = Integer.parseInt(bushu);
+                                        mMyInfoShared.edit().putString("riqi",get()).commit();
+                                    }
 
                                 } else {
                                     Log.d("koma 截取的是", "2");
-                                    bushu = value1.substring(2, 8);
-                                    Log.d("koma 步数是", bushu);
                                 }
-
 
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -499,6 +550,7 @@ public class MainActivity extends FragmentActivity {
                                                                 (value[5]).equals("7f")
                                                         ) {
                                                     //如果收到time？
+
                                                     boolean isSuccess = MyApplication
                                                             .getBleManager()
                                                             .writeDevice
@@ -510,17 +562,13 @@ public class MainActivity extends FragmentActivity {
 
                                                                                 @Override
                                                                                 public void
-                                                                                onSuccess
-                                                                                        (BluetoothGattCharacteristic
-                                                                                                 characteristic) {
+                                                                                onSuccess(BluetoothGattCharacteristic characteristic) {
 
                                                                                 }
 
                                                                                 @Override
                                                                                 public void
-                                                                                onFailure
-                                                                                        (BleException
-                                                                                                 exception) {
+                                                                                onFailure(BleException exception) {
 
                                                                                 }
 
@@ -533,9 +581,9 @@ public class MainActivity extends FragmentActivity {
                                                                             });
 
                                                     if (isSuccess) {
-                                                        Log.d("koma1", "写入time成功");
+                                                        Log.d("koma1", "对时成功");
                                                     } else {
-                                                        Log.d("koma1", "写入time失败");
+                                                        Log.d("koma1", "对时失败");
                                                     }
                                                 } else if (MyApplication.toHexString1
                                                         (value[0]).equals("6f") &&
@@ -555,7 +603,7 @@ public class MainActivity extends FragmentActivity {
                                                         MyApplication.toHexString1(value[3])
                                                                 .equals("74") && MyApplication
                                                         .toHexString1(value[4]).equals("6f")) {
-                                                    //收到photo，跳转界面
+                                                    //收到photo，发OK然后跳转界面
                                                     MyApplication.getBleManager().writeDevice
                                                             ("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
                                                                     ("6f6b"), new
@@ -583,6 +631,7 @@ public class MainActivity extends FragmentActivity {
                                                                     });
 
                                                     if (!isEnterPhotoActivity) {
+
                                                         isEnterPhotoActivity = true;
                                                         Intent intent = new Intent(MainActivity
                                                                 .this, PhotoActivity.class);
@@ -595,7 +644,7 @@ public class MainActivity extends FragmentActivity {
                                                         .toHexString1(value[2]).equals("61") &&
                                                         MyApplication.toHexString1(value[3])
                                                                 .equals("70")) {
-                                                    //收到snap，拍照
+                                                    //收到snap，
 
                                                     EventBus.getDefault().post(new MessageEvent
                                                             (73));
@@ -606,8 +655,7 @@ public class MainActivity extends FragmentActivity {
                                                     updateUI();
                                                     String temp;
                                                     //这里，每次发数据前先检查是长连接还是短连接
-                                                    mIsDuanlianjie = mDuanlianjie.getBoolean
-                                                            ("isChecked", true);
+                                                    mIsDuanlianjie = mDuanlianjie.getBoolean("isChecked", true);
                                                     if (!mIsDuanlianjie) {
                                                         temp = "6f6e" + getInfo();
                                                     } else {
@@ -685,6 +733,7 @@ public class MainActivity extends FragmentActivity {
         return notify;
     }
 
+    //传到状态fragment去更新界面
     private void updateUI() {
         int result = Integer.parseInt(bushu);
         Log.d("bushushi+int", result + "");
@@ -704,6 +753,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    //getDate
     private String getDate() {
         long l = System.currentTimeMillis();
         Date date = new Date(l);
@@ -731,6 +781,7 @@ public class MainActivity extends FragmentActivity {
         date1 += hour;
         date1 += min;
 
+        //从闹钟界面拿到存储的开或者关
         boolean alarm1 = sharedPreferences.getBoolean("alarm1", false);
         boolean alarm2 = sharedPreferences.getBoolean("alarm2", false);
         boolean snooze = sharedPreferences.getBoolean
@@ -754,25 +805,56 @@ public class MainActivity extends FragmentActivity {
 
     private String getInfo() {
 //        "6f6e0170007500607f"
-        SharedPreferences sharedPreferences = getSharedPreferences("myInfo", MODE_PRIVATE);
-        String shengao = String.valueOf(DataSupport.find(MyInfoBean.class, 1).getShengao());
-        String tizhong = String.valueOf(DataSupport.find(MyInfoBean.class, 1).getTizhong());
-        String buchang = String.valueOf(sharedPreferences.getInt("buchang", 75));
+        if (MyApplication.isInch) {
+            //身高
+            String shengao = mMyInfoShared.getInt("heightft", 5) + "";
+            String temp = mMyInfoShared.getInt("heightinch", 11)+"";
+            if (Integer.parseInt(temp) < 10)
+                temp = "0" + temp;
+            shengao = shengao + temp;
 
-        shengao = "0" + shengao;
+            //体重
+            String tizhong = mMyInfoShared.getInt("weightft", 150) + "";
 
-        if (DataSupport.find(MyInfoBean.class, 1).getTizhong() < 100) {
-            tizhong = "00" + tizhong;
+            String buchang = mMyInfoShared.getInt("buchangft",30)+"";
+
+            shengao = "0" + shengao;
+
+            if (Integer.parseInt(tizhong) < 100) {
+                tizhong = "00" + tizhong;
+            } else {
+                tizhong = "0" + tizhong;
+            }
+            buchang = "00" + buchang;
+            String data = shengao + buchang + tizhong + "7f";
+            Log.d("koma---身高", shengao);
+            Log.d("koma---体重", tizhong);
+            Log.d("koma---步长", buchang);
+            Log.d("koma---总", data);
+            return data;
         } else {
-            tizhong = "0" + tizhong;
+            String shengao = String.valueOf(DataSupport.find(MyInfoBean.class, 1).getShengao());
+            String tizhong = String.valueOf(DataSupport.find(MyInfoBean.class, 1).getTizhong());
+            //步长是后面加上来的，我懒得弄了，直接用share吧,前面是以前写的我直接放到数据库里面
+            String buchang = String.valueOf(mMyInfoShared.getInt("buchang", 75));
+
+            shengao = "0" + shengao;
+
+            if (DataSupport.find(MyInfoBean.class, 1).getTizhong() < 100) {
+                tizhong = "00" + tizhong;
+            } else {
+                tizhong = "0" + tizhong;
+            }
+            buchang = "00" + buchang;
+            String data = shengao + buchang + tizhong + "7f";
+            Log.d("koma---身高", shengao);
+            Log.d("koma---体重", tizhong);
+            Log.d("koma---步长", buchang);
+            Log.d("koma---总", data);
+            return data;
+
         }
-        buchang = "00" + buchang;
-        String data = shengao + buchang + tizhong + "7f";
-        Log.d("koma---身高", shengao);
-        Log.d("koma---体重", tizhong);
-        Log.d("koma---步长", buchang);
-        Log.d("koma---总", data);
-        return data;
+
     }
 
 
@@ -780,6 +862,7 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Toast.makeText(MainActivity.this, "已连接！", Toast.LENGTH_SHORT).show();
             notifyMainActivity();
         }
 
@@ -808,11 +891,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         isResume = true;
-//        if (MyApplication.getBleManager().isInScanning()){
-//            MyApplication.getBleManager().cancelScan();
-//            scanOverScan();
-//        }
-//        scanOverScan();
+        riqi = mMyInfoShared.getString("riqi","2017-10-23");
         super.onResume();
     }
 
@@ -840,7 +919,7 @@ public class MainActivity extends FragmentActivity {
 
 
     /**
-     * 自动更新
+     * APP更新
      */
 
     private ProgressDialog progressDialog;
@@ -975,7 +1054,6 @@ public class MainActivity extends FragmentActivity {
         try {
             versionCode = this.getPackageManager().getPackageInfo(
                     getPackageName(), 0).versionCode;
-            Log.d("koma--版本号是", versionCode + "");
         } catch (PackageManager.NameNotFoundException e1) {
             e1.printStackTrace();
         }
@@ -1154,5 +1232,13 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+
+    //这是要存到数据库中的日期
+    String get(){
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-M-d");
+        String date1 = dateFormat.format(date);
+        return date1;
+    }
 
 }

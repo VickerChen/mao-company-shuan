@@ -204,32 +204,36 @@ public class BluetoothService extends Service {
                     public void run() {
                         final String mac = mSharedPreferences.getString("mac", "");
                         Log.d("koma", "断开连接!!!!!!!!!!!!!!!!!");
-                        bleManager.scanDevice(new ListScanCallback(Integer.MAX_VALUE) {
+                        new Handler().postDelayed(new Runnable() {
                             @Override
-                            public void onScanning(ScanResult result) {
-                                if (result.getDevice().getAddress().equals(mac)) {
-                                    bleManager.connectDevice(result, true, new BleGattCallback() {
-                                        @Override
-                                        public void onConnectError(BleException exception) {
+                            public void run() {
+                                bleManager.scanDevice(new ListScanCallback(10000*1000) {
+                                    @Override
+                                    public void onScanning(ScanResult result) {
+                                        if (result.getDevice().getAddress().equals(mac)) {
+                                            Log.d("koma","重新连接ing!!!!!!!!");
+                                            bleManager.connectDevice(result, true, new BleGattCallback() {
+                                                @Override
+                                                public void onConnectError(BleException exception) {
 
-                                        }
+                                                }
 
-                                        @Override
-                                        public void onConnectSuccess(BluetoothGatt gatt, int
-                                                status) {
+                                                @Override
+                                                public void onConnectSuccess(BluetoothGatt gatt, int
+                                                        status) {
 
-                                        }
+                                                }
 
-                                        @Override
-                                        public void onDisConnected(BluetoothGatt gatt, int
-                                                status, BleException exception) {
+                                                @Override
+                                                public void onDisConnected(BluetoothGatt gatt, int
+                                                        status, BleException exception) {
 
-                                        }
+                                                }
 
-                                        @Override
-                                        public void onServicesDiscovered(BluetoothGatt gatt, int
-                                                status) {
-                                            Log.d("koma---", "已重新连接");
+                                                @Override
+                                                public void onServicesDiscovered(BluetoothGatt gatt, int
+                                                        status) {
+                                                    Log.d("koma---", "已重新连接");
 //                                            //发现服务0.5秒后订阅notify
 //                                            new Handler().postDelayed(new Runnable() {
 //                                                @Override
@@ -238,17 +242,20 @@ public class BluetoothService extends Service {
 //                                                            (123));
 //                                                }
 //                                            }, 500);
-                                            sendBroadcast(new Intent("com.chenhang.reconnect"));
+                                                    sendBroadcast(new Intent("com.chenhang.reconnect"));
+                                                }
+                                            });
                                         }
-                                    });
-                                }
-                            }
+                                    }
 
-                            @Override
-                            public void onScanComplete(ScanResult[] results) {
+                                    @Override
+                                    public void onScanComplete(ScanResult[] results) {
 
+                                    }
+                                });
                             }
-                        });
+                        },1000);
+
                         if (mCallback != null) {
                             mCallback.onDisConnected(exception);
                         }

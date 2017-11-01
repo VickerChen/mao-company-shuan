@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by 陈航 on 2017/8/28.
  *
- * 少年一事能狂  敢骂天地不仁
+ *
  */
 
 public class BarChartView extends View {
@@ -356,5 +356,10 @@ public class BarChartView extends View {
         return (int) (v * value + 0.5f);
     }
 
+
+    public void setYmax(int value){
+        mYMaxValue = value;
+        postInvalidate();
+    }
 
 }

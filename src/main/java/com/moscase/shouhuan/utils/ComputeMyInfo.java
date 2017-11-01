@@ -52,7 +52,7 @@ public class ComputeMyInfo {
 
     public void setShengao(int shengao) {
         this.shengao = shengao;
-        Log.d("koma", "身高重新设置");
+        Log.d("koma", "身高重新设置" + shengao);
         ContentValues values = new ContentValues();
         values.put("shengao", shengao);
         DataSupport.update(MyInfoBean.class, values, 1);
@@ -60,7 +60,7 @@ public class ComputeMyInfo {
 
     public void setTizhong(int tizhong) {
         this.tizhong = tizhong;
-        Log.d("koma", "体重重新设置");
+        Log.d("koma", "体重重新设置" + tizhong);
         ContentValues values = new ContentValues();
         values.put("tizhong", tizhong);
         DataSupport.update(MyInfoBean.class, values, 1);
@@ -68,7 +68,7 @@ public class ComputeMyInfo {
 
     public void setTunwei(int tunwei) {
         this.tunwei = tunwei;
-        Log.d("koma", "臀围重新设置");
+        Log.d("koma", "臀围重新设置" + tunwei);
         ContentValues values = new ContentValues();
         values.put("tunwei", tunwei);
         DataSupport.update(MyInfoBean.class, values, 1);

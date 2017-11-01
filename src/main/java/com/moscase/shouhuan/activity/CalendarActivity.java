@@ -1,6 +1,11 @@
 package com.moscase.shouhuan.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -9,13 +14,17 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.idtk.smallchart.data.BarData;
 import com.idtk.smallchart.interfaces.iData.IBarData;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.bean.BushuData;
 import com.moscase.shouhuan.view.BarChartView;
+
+import org.litepal.crud.DataSupport;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,7 +34,6 @@ import cn.aigestudio.datepicker.bizs.calendars.DPCManager;
 import cn.aigestudio.datepicker.bizs.decors.DPDecor;
 import cn.aigestudio.datepicker.cons.DPMode;
 import cn.aigestudio.datepicker.views.DatePicker;
-
 
 
 public class CalendarActivity extends Activity {
@@ -41,23 +49,39 @@ public class CalendarActivity extends Activity {
     private int mCurrentMonth;
     private int mCurrentYear;
 
-    protected float[][] points = new float[][]{{1, 1}, {2, 2}, {3, 3500}, {4, 4900}, {5, 5600},
-            {6, 5600}, {7, 7},
-            {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14}, {15, 15}, {16, 16},
-            {17, 17},
-            {18, 18}, {19, 19}, {20, 20}, {21, 21}, {22, 22}, {23, 23}, {24, 24}, {25, 25}, {26,
-            26}, {27, 27},
-            {28, 28}, {29, 29}, {30, 30}, {31, 10000}};
+    private SharedPreferences mSharedPreferences;
 
-    private float[] pointBar = new float[]{30000,2500,2500,2500,2500,2500,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000
-    ,50000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,104000};
+//    protected float[][] points = new float[][]{{1, 1}, {2, 2}, {3, 3500}, {4, 4900}, {5, 5600},
+//            {6, 5600}, {7, 7},
+//            {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14}, {15, 15}, {16, 16},
+//            {17, 17},
+//            {18, 18}, {19, 19}, {20, 20}, {21, 21}, {22, 22}, {23, 23}, {24, 24}, {25, 25}, {26,
+//            26}, {27, 27},
+//            {28, 28}, {29, 29}, {30, 30}, {31, 10000}};
+
+    private float[] pointBar = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0
+            , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.chenhang.month");
+        filter.addAction("com.chenhang.year");
+        filter.setPriority(Integer.MAX_VALUE);
+        registerReceiver(myReceiver, filter);
+
+
+        mSharedPreferences = getSharedPreferences("myinfo", MODE_PRIVATE);
+
         mDatePicker = (DatePicker) findViewById(R.id.datepicker);
         mBarChartView = (BarChartView) findViewById(R.id.barChartView);
+        mBarChartView.setYmax(mSharedPreferences.getInt("mubiao", 10000));
         mBarChartView.setBarChartList(pointBar);
 
         new Handler().postDelayed(new Runnable() {
@@ -65,37 +89,32 @@ public class CalendarActivity extends Activity {
             public void run() {
                 mCurrentMonth = mDatePicker.getMonth();
                 mCurrentYear = mDatePicker.getYear();
-                Toast.makeText(CalendarActivity.this, ""+mCurrentYear+mCurrentMonth, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CalendarActivity.this, "" + mCurrentYear + mCurrentMonth, Toast
+                        .LENGTH_SHORT).show();
+
+
             }
-        }, 100);
-//        mBarChart = (BarChart) findViewById(R.id.combineChart);
-//
-////        是否开启动画
-////        mBarChart.isAnimated = false;
-//        mBarChart.setBarWidth(5);
-//        mBarChart.setAxisTextSize(pxTodp(13));
-//
-//        mBarData.setColor(Color.RED);
-////        mBarData.setPaintWidth(5);
-////        是否显示Y轴的值
-////        mBarData.setIsTextSize(false);
-//        mBarData.setTextSize(pxTodp(6));
-//        points[0][1] = 1400;
-//        for (int i =0; i<31;i++){
-//            mPointArrayList3.add(new PointF(points[i][0], points[i][1]));
-//        }
-//        mBarData.setValue(mPointArrayList3);
-//        mDataList.add(mBarData);
-//        mBarChart.setDataList(mDataList);
-//        mBarChart.computeYAxis();
+        }, 500);
 
-        //画右上角的点
 
-        List<String> tmpTR = new ArrayList<>();
-        for (int i = 1; i <= 31; i++) {
-            tmpTR.add("2017-8-" + i);
+        /**
+         * 我不知道为什么，本来画红点是能画的，但是无论是在广播里还是在哪儿，都画不了，我只能在onCreate里画，我也懒得研究
+         * 所以本来主页面存储日期的格式是 20171024的，我不得已给换成2017-10-24了，因为画点的时候只能用后面这个格式，
+         * 所以我本来查数据库的时候挺方便的，现在还要把"-"replace成""了
+         */
+        List<BushuData> bushuDatas = DataSupport.findAll(BushuData.class);
+        List<String> mTmpTR = new ArrayList<>();
+        for (BushuData bushuData : bushuDatas) {
+            if (bushuData.getBushu() != 0){
+                mTmpTR.add(bushuData.getRiqi());
+                Log.d("koma红点日期是",bushuData.getRiqi());
+            }
         }
-        DPCManager.getInstance().setDecorTR(tmpTR);
+
+        //画右上角的红点
+        DPCManager.getInstance().setDecorTR(mTmpTR);
+        DPCManager.getInstance().setDecorTR(mTmpTR);
+        DPCManager.getInstance().setDecorTR(mTmpTR);
         mDatePicker.setDPDecor(new DPDecor() {
             @Override
             public void drawDecorTR(Canvas canvas, Rect rect, Paint paint) {
@@ -104,6 +123,8 @@ public class CalendarActivity extends Activity {
                         paint);
             }
         });
+
+
 
 
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-M-d");
@@ -119,6 +140,7 @@ public class CalendarActivity extends Activity {
             }
         });
 
+
     }
 
     protected float pxTodp(float value) {
@@ -128,4 +150,88 @@ public class CalendarActivity extends Activity {
         return valueDP;
     }
 
+    String getDate() {
+//        Date date = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMd");
+//        String date1 = dateFormat.format(date);
+//        Log.d("koma---当前数据是",date1);
+        String temp = mCurrentYear + "-" + mCurrentMonth+"-";
+        return temp;
+    }
+
+    void setData() {
+
+
+        pointBar = null;
+
+
+//        for (int i =1;i<mCurrentMonth)
+
+        int days = 0;
+
+        if (mCurrentMonth == 2) {
+            days = 28;
+            pointBar = new float[28];
+        } else if (mCurrentMonth == 1 || mCurrentMonth == 3 || mCurrentMonth == 5 ||
+                mCurrentMonth == 7 || mCurrentMonth == 8 || mCurrentMonth == 10 || mCurrentMonth
+                == 12) {
+            days = 31;
+            pointBar = new float[31];
+        } else {
+            days = 30;
+            pointBar = new float[30];
+        }
+        for (int i = 1; i <= days; i++) {
+            List<BushuData> bushuDatas = DataSupport.where("riqi = ?", (getDate() + i)).find
+                    (BushuData.class);
+
+            if (bushuDatas.size() == 0) {
+                pointBar[i-1] = 1;
+            } else {
+                if (bushuDatas.get(0).getBushu() == 0) {
+                    pointBar[i-1] = 1;
+                } else {
+                    pointBar[i-1] = bushuDatas.get(0).getBushu();
+                }
+
+            }
+
+        }
+
+
+        mBarChartView.setBarChartList(pointBar);
+    }
+
+
+    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.chenhang.month")) {
+                int month = intent.getIntExtra("month", 1);
+                mCurrentMonth = month;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setData();
+                    }
+                }, 500);
+            }
+
+            if (intent.getAction().equals("com.chenhang.year")) {
+                int year = intent.getIntExtra("year", 2000);
+                mCurrentYear = year;
+            }
+
+
+        }
+
+    };
+
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(myReceiver);
+        super.onDestroy();
+    }
 }

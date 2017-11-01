@@ -37,6 +37,11 @@ public class MyApplication extends LitePalApplication {
 
     public final static String XmlPath = "https://app.moscase8.com/apps/538/BluetoothWatch.xml";
 
+    /**
+     * 是否是英制单位
+     */
+    public static boolean isInch = false;
+
 
 
 

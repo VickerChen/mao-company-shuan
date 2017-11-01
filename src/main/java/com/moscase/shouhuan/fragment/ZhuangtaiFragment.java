@@ -2,6 +2,11 @@ package com.moscase.shouhuan.fragment;
 
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,13 +20,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.CircleView;
 import com.moscase.shouhuan.view.NumAnim;
 import com.moscase.shouhuan.view.RingView;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.moscase.shouhuan.utils.MyApplication.isResume;
 
 //import com.moscase.shouhuan.activity.DistanceActivity;
@@ -39,7 +47,11 @@ public class ZhuangtaiFragment extends Fragment {
     private TextView mZongjuli;
     private TextView mKaluli;
     private TextView mMoxige;
+    private TextView mBuchangCM;
+    private TextView mBuchang;
     private int lastBushu;
+    private int mubiao;
+    private SharedPreferences mSharedPreferences;
     private String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -55,16 +67,24 @@ public class ZhuangtaiFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.zhuangtai1, container, false);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.chenhang.inch");
+        filter.setPriority(Integer.MAX_VALUE);
+        getActivity().registerReceiver(myReceiver, filter);
+        mSharedPreferences = getActivity().getSharedPreferences("myinfo",MODE_PRIVATE);
         initView(view);
         return view;
     }
 
 
     private void initView(View view) {
+        mBuchang = (TextView) view.findViewById(R.id.buchang);
+        mBuchangCM = (TextView) view.findViewById(R.id.buchangcm);
+        if (MyApplication.isInch)
+            mBuchangCM.setText("inch");
         mZongjuli = (TextView) view.findViewById(R.id.zongjuli);
         mKaluli = (TextView) view.findViewById(R.id.kaluli);
         mMubiao = (TextView) view.findViewById(R.id.mubiaobushu);
-        mMubiao.setText("" + 10000);
         mMoxige = (TextView) view.findViewById(R.id.moxige);
         mBushu = (TextView) view.findViewById(R.id.bushu);
         mRingView = (RingView) view.findViewById(R.id.MiClockView);
@@ -78,6 +98,7 @@ public class ZhuangtaiFragment extends Fragment {
 //                }
 //            }
 //        });
+
     }
 
 
@@ -135,14 +156,25 @@ public class ZhuangtaiFragment extends Fragment {
         }
     }
 
-    public void setAngel(int result,float zongjuli,float kaluli) {
+    public void setAngel(int result, float zongjuli, float kaluli) {
         Log.d("resultis", result + "");
 
-        mZongjuli.setText(zongjuli+"");
-        mKaluli.setText(kaluli+"");
-        int temp = (int) (kaluli/307);
-        Log.d("moxige",temp+"");
-        mMoxige.setText("≈"+temp+"个墨西哥鸡肉卷的热量");
+        if (zongjuli == 0){
+            mZongjuli.setText("0.00");
+        }else {
+            mZongjuli.setText(zongjuli + "");
+        }
+
+        if (kaluli == 0){
+            mKaluli.setText("0.0000");
+        }else {
+            DecimalFormat   df   =   new DecimalFormat( "#,##0.0000");
+            mKaluli.setText(df.format(kaluli));
+        }
+
+        int temp = (int) (kaluli / 307);
+        Log.d("moxige", temp + "");
+        mMoxige.setText("≈" + temp + "个墨西哥鸡肉卷的热量");
 
         //当这次拿到的步数和上一次的步数不一样的时候才有动画
         if (lastBushu != result)
@@ -152,12 +184,40 @@ public class ZhuangtaiFragment extends Fragment {
         NumberFormat numberFormat = NumberFormat.getInstance();
         // 设置精确到小数点后4位
         numberFormat.setMaximumFractionDigits(6);
-        double baifenbi = Double.parseDouble(numberFormat.format((float) result / (float) 10000));
-        Log.d("koma---百分比是", baifenbi + "");
+        double baifenbi = Double.parseDouble(numberFormat.format((float) result / (float) mubiao));
+
         if (isResume) {
             mRingView.setAngel(baifenbi);
             mCircleView.setAngel(baifenbi);
 //            mRingView.performClick();
         }
+    }
+
+    public void setInch() {
+        if (MyApplication.isInch){
+            mBuchangCM.setText("inch");
+            mBuchang.setText(""+mSharedPreferences.getInt("buchangft",30));
+        } else{
+            mBuchang.setText(""+mSharedPreferences.getInt("buchang",75));
+            mBuchangCM.setText("cm");
+        }
+
+    }
+
+    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("koma---修改公英制",MyApplication.isInch+"");
+            setInch();
+        }
+
+    };
+
+    @Override
+    public void onResume() {
+        mubiao = mSharedPreferences.getInt("mubiao",10000);
+        mMubiao.setText(mubiao+"");
+        super.onResume();
     }
 }

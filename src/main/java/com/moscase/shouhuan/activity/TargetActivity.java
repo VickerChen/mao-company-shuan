@@ -26,7 +26,7 @@ public class TargetActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_target);
-        mSharedPreferences = getSharedPreferences("mubiao",MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences("myinfo",MODE_PRIVATE);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("设置目标");
         toolbar.setTitleTextColor(Color.GRAY);

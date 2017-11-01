@@ -2,6 +2,8 @@ package com.moscase.shouhuan.utils;
 
 import android.util.Xml;
 
+import com.moscase.shouhuan.bean.UpdataInfo;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.InputStream;
@@ -19,11 +21,11 @@ public class ParseXml {
 			
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				switch (eventType) {
-				case XmlPullParser.START_DOCUMENT:		
+				case XmlPullParser.START_DOCUMENT:
 					break;
 				case XmlPullParser.START_TAG:
 					if ("version".equals(parser.getName())) {
-						String version = parser.nextText();	
+						String version = parser.nextText();
 						ui.setVersion(version);
 					}else if ("name".equals(parser.getName())) {
 						String name = parser.nextText();

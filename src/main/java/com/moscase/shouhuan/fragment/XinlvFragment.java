@@ -20,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -198,32 +197,32 @@ public class XinlvFragment extends Fragment {
     }
 
 
-    private void setGuideView() {
-        ImageView iv = new ImageView(mContext);
-        iv.setImageResource(R.drawable.img_new_task_guide1);
-//        TextView textView = new TextView(mContext);
-//        textView.setText("点击开始测量心跳");
-
-        guideView = GuideView.Builder
-                .newInstance(mContext)
-                .setTargetView(mDigiResult)//设置目标
-                .setCustomGuideView(iv)
-                .setDirction(GuideView.Direction.LEFT_BOTTOM)
-                .setShape(GuideView.MyShape.CIRCULAR)   // 设置圆形显示区域，
-                .setBgColor(getResources().getColor(R.color.shadow))
-                .setOnclickListener(new GuideView.OnClickCallback() {
-                    @Override
-                    public void onClickedGuideView() {
-                        guideView.hide();
-                    }
-                }).build();
-        guideView.show();
-    }
+//    private void setGuideView() {
+//        ImageView iv = new ImageView(mContext);
+//        iv.setImageResource(R.drawable.img_new_task_guide1);
+////        TextView textView = new TextView(mContext);
+////        textView.setText("点击开始测量心跳");
+//
+//        guideView = GuideView.Builder
+//                .newInstance(mContext)
+//                .setTargetView(mDigiResult)//设置目标
+//                .setCustomGuideView(iv)
+//                .setDirction(GuideView.Direction.LEFT_BOTTOM)
+//                .setShape(GuideView.MyShape.CIRCULAR)   // 设置圆形显示区域，
+//                .setBgColor(getResources().getColor(R.color.shadow))
+//                .setOnclickListener(new GuideView.OnClickCallback() {
+//                    @Override
+//                    public void onClickedGuideView() {
+//                        guideView.hide();
+//                    }
+//                }).build();
+//        guideView.show();
+//    }
 
     @Override
     public void onResume() {
         super.onResume();
-        setGuideView();
+//        setGuideView();
     }
 
     public class Adapter extends BaseQuickAdapter<HeartTimes, BaseViewHolder> {

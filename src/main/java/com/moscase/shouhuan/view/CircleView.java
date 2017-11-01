@@ -143,8 +143,10 @@ public class CircleView extends View {
 
     public void setAngel(double baifenbi){
         mNeedToShow = (int) (360 * baifenbi);
+        mAnimAngle = -1;
+        postInvalidate();
         startAnim();
-//        postInvalidate();
+
     }
 
 

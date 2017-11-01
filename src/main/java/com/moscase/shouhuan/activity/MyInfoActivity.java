@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.ComputeMyInfo;
+import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.BottomDialog;
 
@@ -33,12 +35,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.qqtheme.framework.picker.DatePicker;
+import cn.qqtheme.framework.picker.DoublePicker;
 import cn.qqtheme.framework.picker.NumberPicker;
 import cn.qqtheme.framework.util.ConvertUtils;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -66,6 +70,7 @@ public class MyInfoActivity extends FragmentActivity {
     private int lastSelectedMonth;
     private int lastSelectedDay;
 
+
     @BindView(R.id.userName)
     TextView mUserName;
     @BindView(R.id.man)
@@ -92,6 +97,16 @@ public class MyInfoActivity extends FragmentActivity {
     RelativeLayout mYaoweiLayout;
     @BindView(R.id.tunweiLayout)
     RelativeLayout mTunweiLayout;
+    @BindView(R.id.heightcm)
+    TextView mHeightcm;
+    @BindView(R.id.weightcm)
+    TextView mWeightcm;
+    @BindView(R.id.yaoweicm)
+    TextView mYoweicm;
+    @BindView(R.id.tunweicm)
+    TextView mTunweicm;
+    @BindView(R.id.buchangcm)
+    TextView mBuchangcm;
 
 
     private CircleImageView mCircleImageView;
@@ -108,8 +123,8 @@ public class MyInfoActivity extends FragmentActivity {
 
     private TextView mBuchang;
     private RelativeLayout mRlBuchang;
-
-
+    private NumberPicker mPickerYaoweiInch;
+    private NumberPicker mPickerTunweiInch;
 
 
     @Override
@@ -127,6 +142,9 @@ public class MyInfoActivity extends FragmentActivity {
     }
 
     private void initView() {
+        mPickerYaoweiInch = new NumberPicker(this);
+        mPickerTunweiInch = new NumberPicker(this);
+
         mSharePreferences = getSharedPreferences("myInfo", MODE_PRIVATE);
         mBuchang = (TextView) findViewById(R.id.buchang);
         mRlBuchang = (RelativeLayout) findViewById(R.id.rl_buchang);
@@ -135,12 +153,32 @@ public class MyInfoActivity extends FragmentActivity {
         lastSelectedMonth = mSharePreferences.getInt("lastSelectedMonth", 02);
         lastSelectedDay = mSharePreferences.getInt("lastSelectedDay", 14);
         mUserName.setText(mSharePreferences.getString("userName", "用户名"));
-        mBodyHeight.setText(mSharePreferences.getInt("height", 178) + "");
-        mBodyWeight.setText(mSharePreferences.getInt("weight", 120) + "");
-        mYaowei.setText(mSharePreferences.getInt("yaowei", 70) + "");
-        mTunwei.setText(mSharePreferences.getInt("tunwei", 100) + "");
+        if (MyApplication.isInch){
+            //各种转化成英制
+            mHeightcm.setText("in");
+            mBodyHeight.setText(mSharePreferences.getInt("heightft", 5) + "ft"+mSharePreferences.getInt("heightinch", 11));
+
+            mWeightcm.setText("lb");
+            mBodyWeight.setText(mSharePreferences.getInt("weightft", 150) + "");
+
+            mYoweicm.setText("inch");
+            //为了保留一位小数
+            mYaowei.setText(String.format("%.1f", mSharePreferences.getFloat("yaoweift", 27.5f)));
+
+            mTunweicm.setText("inch");
+            mTunwei.setText(String.format("%.1f", mSharePreferences.getFloat("tunweift", 39.3f)));
+
+            mBuchangcm.setText("inch");
+            mBuchang.setText(mSharePreferences.getInt("buchangft",30)+"");
+        }else {
+            mBodyHeight.setText(mSharePreferences.getInt("height", 178) + "");
+            mBodyWeight.setText(mSharePreferences.getInt("weight", 120) + "");
+            mYaowei.setText(mSharePreferences.getInt("yaowei", 70) + "");
+            mTunwei.setText(mSharePreferences.getInt("tunwei", 100) + "");
+            mBuchang.setText(mSharePreferences.getInt("buchang",75)+"");
+        }
+
         mBirthday.setText(mSharePreferences.getString("birthday", "1989/02/14"));
-        mBuchang.setText(mSharePreferences.getInt("buchang",75)+"");
         isMale = mSharePreferences.getBoolean("isMale", true);
         if (isMale) {
             mMan.setImageResource(R.drawable.man1);
@@ -178,23 +216,44 @@ public class MyInfoActivity extends FragmentActivity {
         mRlBuchang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NumberPicker pickerHeight = new NumberPicker(MyInfoActivity.this);
-                pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
-                pickerHeight.setCycleDisable(false);
-                pickerHeight.setDividerVisible(false);
-                pickerHeight.setOffset(2);//偏移量
-                pickerHeight.setRange(60, 94, 1);//数字范围
-                pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
-                pickerHeight.setLabel("厘米");
-                pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
-                    @Override
-                    public void onNumberPicked(int index, Number item) {
-                        mBuchang.setText(item + "");
-                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                        mEditor.putInt("buchang", (Integer) item).commit();
-                    }
-                });
-                pickerHeight.show();
+                if (!MyApplication.isInch){
+                    NumberPicker pickerHeight = new NumberPicker(MyInfoActivity.this);
+                    pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
+                    pickerHeight.setCycleDisable(false);
+                    pickerHeight.setDividerVisible(false);
+                    pickerHeight.setOffset(2);//偏移量
+                    pickerHeight.setRange(12, 96, 1);//数字范围
+                    pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
+                    pickerHeight.setLabel("inch");
+                    pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mBuchang.setText(item + "");
+                            int temp = (int) (item.floatValue() / 0.3937008);
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("buchangft", temp).commit();
+                        }
+                    });
+                    pickerHeight.show();
+                }else {
+                    NumberPicker pickerHeight = new NumberPicker(MyInfoActivity.this);
+                    pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
+                    pickerHeight.setCycleDisable(false);
+                    pickerHeight.setDividerVisible(false);
+                    pickerHeight.setOffset(2);//偏移量
+                    pickerHeight.setRange(12, 96, 1);//数字范围
+                    pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
+                    pickerHeight.setLabel("厘米");
+                    pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mBuchang.setText(item + "");
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("buchang", (Integer) item).commit();
+                        }
+                    });
+                    pickerHeight.show();
+                }
             }
         });
 
@@ -406,85 +465,190 @@ public class MyInfoActivity extends FragmentActivity {
 
                 break;
             case R.id.height:
-                NumberPicker pickerHeight = new NumberPicker(this);
-                pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
-                pickerHeight.setCycleDisable(false);
-                pickerHeight.setDividerVisible(false);
-                pickerHeight.setOffset(2);//偏移量
-                pickerHeight.setRange(142, 224, 1);//数字范围
-                pickerHeight.setSelectedItem(Integer.parseInt(mBodyHeight.getText().toString()));
-                pickerHeight.setLabel("厘米");
-                pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
-                    @Override
-                    public void onNumberPicked(int index, Number item) {
-                        mBodyHeight.setText(item + "");
-                        ComputeMyInfo.getInstance().setShengao(item.intValue());
-                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                        mEditor.putInt("height", (Integer) item).commit();
-                    }
-                });
-                pickerHeight.show();
+                if (MyApplication.isInch){
+                    final ArrayList<String> firstData = new ArrayList<>();
+                    firstData.add("4");
+                    firstData.add("5");
+                    firstData.add("6");
+                    firstData.add("7");
+                    final ArrayList<String> secondData = new ArrayList<>();
+                    secondData.add("1");
+                    secondData.add("2");
+                    secondData.add("3");
+                    secondData.add("4");
+                    secondData.add("5");
+                    secondData.add("6");
+                    secondData.add("7");
+                    secondData.add("8");
+                    secondData.add("9");
+                    secondData.add("10");
+                    secondData.add("11");
+                    final DoublePicker picker1 = new DoublePicker(this, firstData, secondData);
+                    picker1.setDividerVisible(true);
+                    picker1.setSelectedIndex(mSharePreferences.getInt("selectedFirstIndex",1), mSharePreferences.getInt("selectedSecondIndex",10));
+                    picker1.setSecondLabel("ft", "in");
+                    picker1.setTextSize(20);
+                    picker1.setOnPickListener(new DoublePicker.OnPickListener() {
+                        @Override
+                        public void onPicked(int selectedFirstIndex, int selectedSecondIndex) {
+                            Log.d("koma-index",selectedFirstIndex+"/"+selectedSecondIndex);
+                            mSharePreferences.edit().putInt("heightft",selectedFirstIndex+4).commit();
+                            mSharePreferences.edit().putInt("heightinch",selectedSecondIndex+1).commit();
+                            mSharePreferences.edit().putInt("selectedFirstIndex",selectedFirstIndex).commit();
+                            mSharePreferences.edit().putInt("selectedSecondIndex",selectedSecondIndex).commit();
+                            mBodyHeight.setText(selectedFirstIndex + 4 + "ft"+(selectedSecondIndex+1));
+                            int temp = (int) (((selectedFirstIndex+4)*12+(selectedSecondIndex+1))/0.3937008);
+                            ComputeMyInfo.getInstance().setShengao(temp);
+                        }
+                    });
+                    picker1.show();
+                }else {
+                    NumberPicker pickerHeight = new NumberPicker(this);
+                    pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
+                    pickerHeight.setCycleDisable(false);
+                    pickerHeight.setDividerVisible(false);
+                    pickerHeight.setOffset(2);//偏移量
+                    pickerHeight.setRange(142, 224, 1);//数字范围
+                    pickerHeight.setSelectedItem(Integer.parseInt(mBodyHeight.getText().toString()));
+                    pickerHeight.setLabel("厘米");
+                    pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mBodyHeight.setText(item + "");
+                            ComputeMyInfo.getInstance().setShengao(item.intValue());
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("height", (Integer) item).commit();
+                        }
+                    });
+                    pickerHeight.show();
+                }
 
                 break;
             case R.id.weight:
-                NumberPicker pickerWeight = new NumberPicker(this);
-                pickerWeight.setWidth(pickerWeight.getScreenWidthPixels());
-                pickerWeight.setCycleDisable(false);
-                pickerWeight.setDividerVisible(false);
-                pickerWeight.setOffset(2);//偏移量
-                pickerWeight.setRange(40, 100, 1);//数字范围
-                pickerWeight.setSelectedItem(Integer.parseInt(mBodyWeight.getText().toString()));
-                pickerWeight.setLabel("kg");
-                pickerWeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
-                    @Override
-                    public void onNumberPicked(int index, Number item) {
-                        mBodyWeight.setText(item + "");
-                        ComputeMyInfo.getInstance().setTizhong(item.intValue());
-                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                        mEditor.putInt("weight", (Integer) item).commit();
-                    }
-                });
-                pickerWeight.show();
+                if (MyApplication.isInch){
+                    NumberPicker pickerWeight = new NumberPicker(this);
+                    pickerWeight.setWidth(pickerWeight.getScreenWidthPixels());
+                    pickerWeight.setCycleDisable(false);
+                    pickerWeight.setDividerVisible(false);
+                    pickerWeight.setOffset(2);//偏移量
+                    pickerWeight.setRange(60, 300, 1);//数字范围
+                    pickerWeight.setSelectedItem(mSharePreferences.getInt("weightft",150));
+                    pickerWeight.setLabel("lb");
+                    pickerWeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mBodyWeight.setText(item + "");
+                            int temp = (int) (item.intValue() * 0.4535924);
+                            ComputeMyInfo.getInstance().setTizhong(temp);
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("weightft", (Integer) item).commit();
+                        }
+                    });
+                    pickerWeight.show();
+                }else {
+                    NumberPicker pickerWeight = new NumberPicker(this);
+                    pickerWeight.setWidth(pickerWeight.getScreenWidthPixels());
+                    pickerWeight.setCycleDisable(false);
+                    pickerWeight.setDividerVisible(false);
+                    pickerWeight.setOffset(2);//偏移量
+                    pickerWeight.setRange(40, 100, 1);//数字范围
+                    pickerWeight.setSelectedItem(Integer.parseInt(mBodyWeight.getText().toString()));
+                    pickerWeight.setLabel("kg");
+                    pickerWeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mBodyWeight.setText(item + "");
+                            ComputeMyInfo.getInstance().setTizhong(item.intValue());
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("weight", (Integer) item).commit();
+                        }
+                    });
+                    pickerWeight.show();
+                }
                 break;
             case R.id.yaoweiLayout:
-                NumberPicker pickerYaowei = new NumberPicker(this);
-                pickerYaowei.setWidth(pickerYaowei.getScreenWidthPixels());
-                pickerYaowei.setCycleDisable(false);
-                pickerYaowei.setDividerVisible(false);
-                pickerYaowei.setOffset(2);//偏移量
-                pickerYaowei.setRange(40, 120, 1);//数字范围
-                pickerYaowei.setSelectedItem(Integer.parseInt(mYaowei.getText().toString()));
-                pickerYaowei.setLabel("cm");
-                pickerYaowei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
-                    @Override
-                    public void onNumberPicked(int index, Number item) {
-                        mYaowei.setText(item + "");
-                        ComputeMyInfo.getInstance().setYaowei(item.intValue());
-                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                        mEditor.putInt("yaowei", (Integer) item).commit();
-                    }
-                });
-                pickerYaowei.show();
+                if (MyApplication.isInch){
+                    mPickerYaoweiInch.setWidth(mPickerYaoweiInch.getScreenWidthPixels());
+                    mPickerYaoweiInch.setCycleDisable(false);
+                    mPickerYaoweiInch.setDividerVisible(false);
+                    mPickerYaoweiInch.setOffset(2);//偏移量
+                    mPickerYaoweiInch.setRange(15.7f,70.8f, 0.1f);//数字范围
+                    mPickerYaoweiInch.setSelectedItem(Float.parseFloat(mYaowei.getText().toString()));
+                    mPickerYaoweiInch.setLabel("inch");
+                    mPickerYaoweiInch.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mYaowei.setText(String.format("%.1f", item));
+                            int temp = (int) (item.floatValue() / 0.3937008);
+                            ComputeMyInfo.getInstance().setYaowei(temp);
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putFloat("yaoweift", item.floatValue()).commit();
+                        }
+                    });
+                    mPickerYaoweiInch.show();
+                }else {
+                    NumberPicker pickerYaowei = new NumberPicker(this);
+                    pickerYaowei.setWidth(pickerYaowei.getScreenWidthPixels());
+                    pickerYaowei.setCycleDisable(false);
+                    pickerYaowei.setDividerVisible(false);
+                    pickerYaowei.setOffset(2);//偏移量
+                    pickerYaowei.setRange(40, 120, 1);//数字范围
+                    pickerYaowei.setSelectedItem(Integer.parseInt(mYaowei.getText().toString()));
+                    pickerYaowei.setLabel("cm");
+                    pickerYaowei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mYaowei.setText(item + "");
+                            ComputeMyInfo.getInstance().setYaowei(item.intValue());
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("yaowei", (Integer) item).commit();
+                        }
+                    });
+                    pickerYaowei.show();
+                }
+
                 break;
             case R.id.tunweiLayout:
-                NumberPicker pickerTunwei = new NumberPicker(this);
-                pickerTunwei.setWidth(pickerTunwei.getScreenWidthPixels());
-                pickerTunwei.setCycleDisable(false);
-                pickerTunwei.setDividerVisible(false);
-                pickerTunwei.setOffset(2);//偏移量
-                pickerTunwei.setRange(40, 120, 1);//数字范围
-                pickerTunwei.setSelectedItem(Integer.parseInt(mTunwei.getText().toString()));
-                pickerTunwei.setLabel("cm");
-                pickerTunwei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
-                    @Override
-                    public void onNumberPicked(int index, Number item) {
-                        mTunwei.setText(item + "");
-                        ComputeMyInfo.getInstance().setTunwei(item.intValue());
-                        SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                        mEditor.putInt("tunwei", (Integer) item).commit();
-                    }
-                });
-                pickerTunwei.show();
+                if (MyApplication.isInch){
+                    mPickerTunweiInch.setWidth(mPickerTunweiInch.getScreenWidthPixels());
+                    mPickerTunweiInch.setCycleDisable(false);
+                    mPickerTunweiInch.setDividerVisible(false);
+                    mPickerTunweiInch.setOffset(2);//偏移量
+                    mPickerTunweiInch.setRange(19.6f, 78.7f, 0.1f);//数字范围
+                    mPickerTunweiInch.setSelectedItem(Float.parseFloat(mTunwei.getText().toString()));
+                    mPickerTunweiInch.setLabel("inch");
+                    mPickerTunweiInch.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mTunwei.setText(String.format("%.1f", item));
+                            int temp = (int) (item.floatValue() / 0.3937008);
+                            ComputeMyInfo.getInstance().setTunwei(temp);
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putFloat("tunweift", item.floatValue()).commit();
+                        }
+                    });
+                    mPickerTunweiInch.show();
+                }else {
+                    NumberPicker pickerTunwei = new NumberPicker(this);
+                    pickerTunwei.setWidth(pickerTunwei.getScreenWidthPixels());
+                    pickerTunwei.setCycleDisable(false);
+                    pickerTunwei.setDividerVisible(false);
+                    pickerTunwei.setOffset(2);//偏移量
+                    pickerTunwei.setRange(40, 120, 1);//数字范围
+                    pickerTunwei.setSelectedItem(Integer.parseInt(mTunwei.getText().toString()));
+                    pickerTunwei.setLabel("cm");
+                    pickerTunwei.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+                        @Override
+                        public void onNumberPicked(int index, Number item) {
+                            mTunwei.setText(item + "");
+                            ComputeMyInfo.getInstance().setTunwei(item.intValue());
+                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
+                            mEditor.putInt("tunwei", (Integer) item).commit();
+                        }
+                    });
+                    pickerTunwei.show();
+                }
+
                 break;
         }
     }
@@ -538,4 +702,6 @@ public class MyInfoActivity extends FragmentActivity {
             }
         }
     }
+
+
 }

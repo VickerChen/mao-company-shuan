@@ -72,6 +72,11 @@
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait">
+
+        </activity>
+        <activity
+            android:name=".activity.SplashActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -86,11 +91,6 @@
         <meta-data
             android:name="design_height"
             android:value="1280"/>
-
-        <activity
-            android:name=".activity.SplashActivity"
-            android:screenOrientation="portrait">
-        </activity>
 
         <service
             android:name="com.baidu.location.f"
@@ -158,6 +158,22 @@
         <activity
             android:name=".activity.AboutActivity"
             android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name="com.tencent.tauth.AuthActivity"
+            android:launchMode="singleTask"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="tencent1106501598"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".activity.LoginQQActivity">
         </activity>
     </application>
 
