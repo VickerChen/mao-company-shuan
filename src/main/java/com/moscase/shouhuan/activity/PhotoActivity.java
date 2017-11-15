@@ -12,7 +12,6 @@ import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -55,7 +54,6 @@ import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
 /**
  * Created by 陈航 on 2017/8/25.
  *
- * 少年一事能狂  敢骂天地不仁
  */
 public class PhotoActivity extends AppCompatActivity {
 
@@ -354,10 +352,7 @@ public class PhotoActivity extends AppCompatActivity {
                 || ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 ) {
-            ActivityCompat
-                    .requestPermissions(this, permissionCamera,
-                            123);
-        } else {
+         } else {
             ActivityCompat.requestPermissions(this, permissionCamera, 123);
         }
     }
@@ -391,8 +386,8 @@ public class PhotoActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(MessageEvent event) {
+        //我懒得重新写全局的常量了
         if (event.getMsg() == 73) {
-            Toast.makeText(this, "拍照", Toast.LENGTH_SHORT).show();
             recordButton.performClick();
             //拍照成功后发OK
             MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
@@ -424,7 +419,6 @@ public class PhotoActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         isEnterPhotoActivity = false;
-        Log.d("变了没",isEnterPhotoActivity+"");
         super.onPause();
     }
 

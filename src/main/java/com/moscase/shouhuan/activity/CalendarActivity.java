@@ -105,9 +105,9 @@ public class CalendarActivity extends Activity {
         List<BushuData> bushuDatas = DataSupport.findAll(BushuData.class);
         List<String> mTmpTR = new ArrayList<>();
         for (BushuData bushuData : bushuDatas) {
-            if (bushuData.getBushu() != 0){
+            if (bushuData.getBushu() != 0) {
                 mTmpTR.add(bushuData.getRiqi());
-                Log.d("koma红点日期是",bushuData.getRiqi());
+                Log.d("koma红点日期是", bushuData.getRiqi());
             }
         }
 
@@ -125,8 +125,6 @@ public class CalendarActivity extends Activity {
         });
 
 
-
-
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-M-d");
         String date = sDateFormat.format(new java.util.Date());
         mDate = date.split("-");
@@ -136,7 +134,7 @@ public class CalendarActivity extends Activity {
         mDatePicker.setOnDatePickedListener(new DatePicker.OnDatePickedListener() {
             @Override
             public void onDatePicked(String date) {
-                Toast.makeText(CalendarActivity.this, date, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(CalendarActivity.this, date, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -155,7 +153,7 @@ public class CalendarActivity extends Activity {
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMd");
 //        String date1 = dateFormat.format(date);
 //        Log.d("koma---当前数据是",date1);
-        String temp = mCurrentYear + "-" + mCurrentMonth+"-";
+        String temp = mCurrentYear + "-" + mCurrentMonth + "-";
         return temp;
     }
 
@@ -186,12 +184,12 @@ public class CalendarActivity extends Activity {
                     (BushuData.class);
 
             if (bushuDatas.size() == 0) {
-                pointBar[i-1] = 1;
+                pointBar[i - 1] = 1;
             } else {
                 if (bushuDatas.get(0).getBushu() == 0) {
-                    pointBar[i-1] = 1;
+                    pointBar[i - 1] = 1;
                 } else {
-                    pointBar[i-1] = bushuDatas.get(0).getBushu();
+                    pointBar[i - 1] = bushuDatas.get(0).getBushu();
                 }
 
             }

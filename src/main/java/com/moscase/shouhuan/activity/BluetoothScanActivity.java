@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +55,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
     private List<String> scanCompareListAddress = new ArrayList<>();
     private List<String> scanListAddress = new ArrayList<>();
     private ListView mListView;
-    private String mCurrentConnectedBlueName;
+    private TextView mCurrentConnectedName;
+    private RelativeLayout mRl_name;
 
     //连接时的dialog
     private ProgressDialog mConnectingDialog;
@@ -75,6 +77,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_scan);
+
+
         mSharedPreferences = getSharedPreferences("ToggleButton", MODE_PRIVATE);
         mHandler = new Handler();
         mRefreshButton = (ImageButton) findViewById(R.id.btn_refresh);
@@ -133,6 +137,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
                 finish();
             }
         });
+        mCurrentConnectedName = (TextView) findViewById(R.id.connectedname);
+        mRl_name = (RelativeLayout) findViewById(R.id.rl_name);
 
 
         mListView = (ListView) findViewById(R.id.list_device);
@@ -145,8 +151,12 @@ public class BluetoothScanActivity extends AppCompatActivity {
                 if (mBluetoothService != null) {
                     mBluetoothService.connectDevice(mMyAdapter.getItem(i));
                     String mac = mMyAdapter.getItem(i).getDevice().getAddress();
+                    String currentname = mMyAdapter.getItem(i).getDevice().getName();
                     mSharedPreferences.edit().putString("mac", mac).commit();
+                    mSharedPreferences.edit().putString("currentname",currentname).commit();
                     mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
+                    mConnectingDialog.setCanceledOnTouchOutside(false);
+                    mConnectingDialog.setCancelable(false);
                     mConnectingDialog.setMessage("正在连接...");
                     mConnectingDialog.show();
                 }
@@ -328,7 +338,6 @@ public class BluetoothScanActivity extends AppCompatActivity {
 //            mMyAdapter.clear();
 //            scanCompareList.clear();
             mMyAdapter.notifyDataSetChanged();
-            Log.d("koma", "开始扫描");
         }
 
         @Override
@@ -341,10 +350,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
                 if (!scanListAddress.contains(result.getDevice().getAddress())) {
                     mMyAdapter.addResult(result);
                     scanListAddress.add(result.getDevice().getAddress());
-                    Log.d("koma", "要展示的添加了一个" + result.getDevice().getName());
                 }
 
-                Log.d("koma", "添加了一个");
                 scanCompareListAddress.add(result.getDevice().getAddress());
                 scanCompareList.add(result);
 
@@ -366,7 +373,6 @@ public class BluetoothScanActivity extends AppCompatActivity {
             isScanOver = true;
 
             mMyAdapter.compare(scanCompareList);
-            Log.d("koma", "扫描完毕");
 
 
             mHandler.postDelayed(new Runnable() {
@@ -400,11 +406,11 @@ public class BluetoothScanActivity extends AppCompatActivity {
         @Override
         public void onDisConnected(BleException exp) {
             Toast.makeText(mBluetoothService, "断开连接", Toast.LENGTH_SHORT).show();
-            mMyAdapter.removeItem(mCurrentConnectedBlueName);
             mMyAdapter.notifyDataSetChanged();
             if (mConnectingDialog != null)
                 mConnectingDialog.dismiss();
             Log.e("koma", "断开连接" + exp);
+            mRl_name.setVisibility(View.GONE);
         }
 
         @Override
@@ -413,6 +419,9 @@ public class BluetoothScanActivity extends AppCompatActivity {
             mConnectingDialog.dismiss();
             Toast.makeText(mBluetoothService, "连接成功", Toast.LENGTH_SHORT).show();
             Log.d("koma", "连接成功");
+            mRl_name.setVisibility(View.VISIBLE);
+            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname",""));
+
 
             //发现服务0.5秒后订阅notify
             new Handler().postDelayed(new Runnable() {
@@ -468,6 +477,16 @@ public class BluetoothScanActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+
+    @Override
+    protected void onResume() {
+        if (mSharedPreferences.getBoolean("isconnected",false)){
+            mRl_name.setVisibility(View.VISIBLE);
+            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname",""));
+        }
+        super.onResume();
     }
 
     @Override

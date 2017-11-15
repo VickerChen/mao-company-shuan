@@ -15,6 +15,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -28,10 +30,10 @@ import android.os.StatFs;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -45,6 +47,11 @@ import com.clj.fastble.conn.BleCharacterCallback;
 import com.clj.fastble.data.ScanResult;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.utils.HexUtil;
+import com.elbbbird.android.socialsdk.SocialSDK;
+import com.elbbbird.android.socialsdk.model.SocialToken;
+import com.elbbbird.android.socialsdk.model.SocialUser;
+import com.elbbbird.android.socialsdk.otto.BusProvider;
+import com.elbbbird.android.socialsdk.otto.SSOBusEvent;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.bean.BushuData;
 import com.moscase.shouhuan.bean.MyInfoBean;
@@ -57,6 +64,7 @@ import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.ParseXml;
 import com.nineoldandroids.view.ViewHelper;
+import com.tencent.connect.common.Constants;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -64,6 +72,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.crud.DataSupport;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +85,7 @@ import java.util.Date;
 import java.util.List;
 
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Environment.getExternalStorageDirectory;
 import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
 import static com.moscase.shouhuan.utils.MyApplication.isResume;
 
@@ -84,7 +94,7 @@ import static com.moscase.shouhuan.utils.MyApplication.isResume;
  * <p>
  * 少年一事能狂  敢骂天地不仁
  */
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
     //两边的抽屉
     private DrawerLayout mDrawerLayout;
     //心率fragment
@@ -158,10 +168,7 @@ public class MainActivity extends FragmentActivity {
 
 
 
-        BushuData bushuData = new BushuData();
-        bushuData.setRiqi(get());
-        bushuData.setBushu(30);
-        bushuData.save();
+
 
 
 
@@ -175,6 +182,7 @@ public class MainActivity extends FragmentActivity {
 
 
         //注册事件
+        BusProvider.getInstance().register(this);//QQ登录
         EventBus.getDefault().register(this);
         bindService();
 
@@ -751,6 +759,7 @@ public class MainActivity extends FragmentActivity {
         if (event.getMsg() == 123) {
             notifyMainActivity();
         }
+
     }
 
     //getDate
@@ -857,6 +866,12 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Constants.REQUEST_LOGIN || requestCode == Constants.REQUEST_APPBAR) {
+            SocialSDK.oauthQQCallback(requestCode, resultCode, data);
+        }
+    }
 
     private BroadcastReceiver myReceiver = new BroadcastReceiver() {
 
@@ -892,6 +907,7 @@ public class MainActivity extends FragmentActivity {
     protected void onResume() {
         isResume = true;
         riqi = mMyInfoShared.getString("riqi","2017-10-23");
+
         super.onResume();
     }
 
@@ -914,8 +930,168 @@ public class MainActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
         unbindService(mFhrSCon);
         unregisterReceiver(myReceiver);
+        BusProvider.getInstance().unregister(this);
+        SocialSDK.revokeQQ(this);
         super.onDestroy();
     }
+
+
+
+
+
+    /**
+     * 下面这些代码是QQ登录的回调方法
+     * 本来是准备调用LoginQQActivity代码复用一下的
+     * 发现有点问题，我就单独写在闪屏页了
+     */
+    @Subscribe
+    public void onOauthResult(SSOBusEvent event) {
+        switch (event.getType()) {
+            case SSOBusEvent.TYPE_GET_TOKEN:
+                SocialToken token = event.getToken();
+                Log.i("koma---QQ", "onOauthResult#BusEvent.TYPE_GET_TOKEN " + token.toString());
+                break;
+            case SSOBusEvent.TYPE_GET_USER:
+
+                SocialUser user = event.getUser();
+                mMyInfoShared.edit().putString("userName", user.getName()).commit();
+                if (user.getGender() == 1) {
+                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
+
+                } else if (user.getGender() == 2) {
+                    mMyInfoShared.edit().putBoolean("isMale", false).commit();
+                } else {
+                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
+                }
+
+                new MyTask(user.getAvatar()).execute();
+
+
+                break;
+            case SSOBusEvent.TYPE_FAILURE:
+                Exception e = event.getException();
+                Log.i("koma---QQ", "授权失败 " + e.toString());
+                break;
+            case SSOBusEvent.TYPE_CANCEL:
+                Log.i("koma---QQ", "用户取消授权");
+                break;
+        }
+    }
+
+
+    //从连接中获取bitmap
+    public Bitmap returnBitMap(String url) {
+        URL myFileUrl = null;
+        Bitmap bitmap = null;
+        try {
+            myFileUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        try {
+            HttpURLConnection conn = (HttpURLConnection) myFileUrl
+                    .openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            bitmap = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+    //把bitmap保存到文件夹
+    public void saveMyBitmap(String path, Bitmap mBitmap) {
+        File f = new File(path);
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            Log.e("koma---保存图片出错", e.toString());
+        }
+        FileOutputStream fOut = null;
+        try {
+            fOut = new FileOutputStream(f);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+        } catch (Exception e) {
+        }
+        try {
+            fOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private class MyTask extends AsyncTask<Void, Void, Void> {
+
+        Bitmap bitmap;
+        String murl;
+
+        public MyTask(String url) {
+            murl = url;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d("koma", "开始下载图片");
+            bitmap = returnBitMap(murl);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.d("koma", "开始保存图片");
+            saveMyBitmap(getExternalStorageDirectory() +
+                    "/蓝牙手表图片/UserPhoto.jpg", bitmap);
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -1134,7 +1310,7 @@ public class MainActivity extends FragmentActivity {
             File file1 = null;
             if (Environment.getExternalStorageState().equals(
                     Environment.MEDIA_MOUNTED)) {
-                File sdcard = Environment.getExternalStorageDirectory();
+                File sdcard = getExternalStorageDirectory();
                 file1 = new File(sdcard, "update.apk");
             }
             //下载完成之后自动安装
@@ -1173,7 +1349,7 @@ public class MainActivity extends FragmentActivity {
             // 判定SD卡是否能用 能用则下载文件
             if (Environment.getExternalStorageState().equals(
                     Environment.MEDIA_MOUNTED)) {
-                File sdcard = Environment.getExternalStorageDirectory();
+                File sdcard = getExternalStorageDirectory();
 
                 file = new File(sdcard, "update.apk");
                 // 获得输出流

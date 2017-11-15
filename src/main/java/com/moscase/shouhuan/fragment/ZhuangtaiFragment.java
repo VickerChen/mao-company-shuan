@@ -71,7 +71,7 @@ public class ZhuangtaiFragment extends Fragment {
         filter.addAction("com.chenhang.inch");
         filter.setPriority(Integer.MAX_VALUE);
         getActivity().registerReceiver(myReceiver, filter);
-        mSharedPreferences = getActivity().getSharedPreferences("myinfo",MODE_PRIVATE);
+        mSharedPreferences = getActivity().getSharedPreferences("myInfo",MODE_PRIVATE);
         initView(view);
         return view;
     }
@@ -218,6 +218,7 @@ public class ZhuangtaiFragment extends Fragment {
     public void onResume() {
         mubiao = mSharedPreferences.getInt("mubiao",10000);
         mMubiao.setText(mubiao+"");
+        setInch();
         super.onResume();
     }
 }

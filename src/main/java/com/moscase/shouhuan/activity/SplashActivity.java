@@ -62,6 +62,9 @@ public class SplashActivity extends FragmentActivity {
     private Button mShiyongButton;
     private boolean isFistEnterAPP;
 
+
+
+
     private SharedPreferences mSharedPreferences;
     private String[] permission = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -71,6 +74,11 @@ public class SplashActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        if (Build.VERSION.SDK_INT >= 23) {
+//            6.0以上系统动态申请权限
+            showPermission();
+        }
+
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
         isFistEnterAPP = sharedPreferences.getBoolean("isFistEnterAPP", false);
         BusProvider.getInstance().register(this);
@@ -82,6 +90,7 @@ public class SplashActivity extends FragmentActivity {
             startActivity(intent);
             finish();
         }
+
 
     }
 
@@ -225,7 +234,7 @@ public class SplashActivity extends FragmentActivity {
                                            @NonNull int[] grantResults) {
         if (requestCode == 123) {
             if (PermissionUtil.verifyPermissions(grantResults)) {
-                initLogin();
+//                initLogin();
             } else {
                 Toast.makeText(this, "请授予权限", Toast.LENGTH_LONG).show();
             }
