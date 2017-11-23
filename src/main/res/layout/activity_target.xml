@@ -80,7 +80,6 @@
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             app:wheel_max_process="20000"
-            app:wheel_scroll_only_one_circle="true"
             />
 
     </com.zhy.autolayout.AutoRelativeLayout>
@@ -108,6 +107,7 @@
             android:textSize="20dp"/>
 
         <TextView
+            android:id="@+id/walk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -125,6 +125,7 @@
         android:background="#555"/>
 
     <RelativeLayout
+        android:id="@+id/rl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -147,6 +148,7 @@
             android:textSize="20dp"/>
 
         <TextView
+            android:id="@+id/run"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"

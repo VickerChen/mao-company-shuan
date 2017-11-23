@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -58,6 +59,7 @@ public class ZhibiaoFragment extends Fragment {
     private RulerView mRulerView;
     private TextView mTiZhong;
     private PieChart mPieChart;
+    private ImageView mIv_tixing;
     private TextView mShuifen;
     private LinearLayout mLinearLayout;
     private boolean isFirst = false;
@@ -123,8 +125,10 @@ public class ZhibiaoFragment extends Fragment {
 
 
     private void initData() {
-        mPieChart.initSrc(new float[]{20f, 30f, 40f}, new String[]{"#ff80FF",
+        mPieChart.initSrc(new float[]{70, 100f}, new String[]{"#ff80FF",
                 "#ffFF00", "#6A5ACD"});
+
+        mIv_tixing.setImageResource(R.drawable.tixing1);
 
         mRulerView.setValue(quzhitizhongfloat, 40, 200, 1);
         mRulerView.setClickable(false);
@@ -163,6 +167,7 @@ public class ZhibiaoFragment extends Fragment {
     }
 
     private void initView(View view) {
+        mIv_tixing = (ImageView) view.findViewById(R.id.iv_tixing);
         mPieChart = (PieChart) view.findViewById(R.id.piechart);
         mTiZhong = (TextView) view.findViewById(R.id.tizhong);
         mRulerView = (RulerView) view.findViewById(R.id.ruler_height);

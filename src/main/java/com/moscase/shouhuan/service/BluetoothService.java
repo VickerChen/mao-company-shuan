@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.conn.BleCharacterCallback;
@@ -48,7 +49,7 @@ public class BluetoothService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        bleManager = null;
+//        bleManager = null;
         mCallback = null;
         mCallback2 = null;
     }
@@ -60,7 +61,7 @@ public class BluetoothService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        bleManager.closeBluetoothGatt();
+//        bleManager.closeBluetoothGatt();
         return super.onUnbind(intent);
     }
 
@@ -189,6 +190,7 @@ public class BluetoothService extends Service {
                 runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
+                        mSharedPreferences.edit().putBoolean("isconnected",true).commit();
                         if (mCallback != null) {
                             mCallback.onServicesDiscovered();
                         }
@@ -204,14 +206,16 @@ public class BluetoothService extends Service {
                     public void run() {
                         final String mac = mSharedPreferences.getString("mac", "");
                         Log.d("koma", "断开连接!!!!!!!!!!!!!!!!!");
+                        mSharedPreferences.edit().putBoolean("isconnected",false).commit();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                bleManager.scanDevice(new ListScanCallback(10000*1000) {
+                                MyApplication.getBleManager().scanDevice(new ListScanCallback(10000*1000) {
                                     @Override
                                     public void onScanning(ScanResult result) {
                                         if (result.getDevice().getAddress().equals(mac)) {
-                                            Log.d("koma","重新连接ing!!!!!!!!");
+                                            Toast.makeText(BluetoothService.this, "正在重新连接", Toast
+                                                    .LENGTH_SHORT).show();
                                             bleManager.connectDevice(result, true, new BleGattCallback() {
                                                 @Override
                                                 public void onConnectError(BleException exception) {
@@ -234,6 +238,10 @@ public class BluetoothService extends Service {
                                                 public void onServicesDiscovered(BluetoothGatt gatt, int
                                                         status) {
                                                     Log.d("koma---", "已重新连接");
+                                                    Toast.makeText(BluetoothService.this, "已重新连接", Toast
+                                                            .LENGTH_SHORT).show();
+                                                    mSharedPreferences.edit().putBoolean("isconnected",true).commit();
+
 //                                            //发现服务0.5秒后订阅notify
 //                                            new Handler().postDelayed(new Runnable() {
 //                                                @Override
@@ -791,7 +799,12 @@ public class BluetoothService extends Service {
         }
     }
 
+    public boolean isConnected(){
+        return bleManager.isConnected();
+    }
+
     public static BleManager getBleManager() {
         return bleManager;
     }
+
 }

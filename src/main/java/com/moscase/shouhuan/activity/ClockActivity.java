@@ -34,8 +34,11 @@ public class ClockActivity extends Activity {
                 Context.MODE_PRIVATE);
         alarm1 = preferences.getBoolean("alarm1", false);
         alarm2 = preferences.getBoolean("alarm2", false);
+
         isSnooze = preferences.getBoolean("isSnooze", false);
         editor = preferences.edit();
+
+
         mTimePicker = (TimePicker) findViewById(R.id.timePic1);
         Alarmbtn1 = (ToggleButton) findViewById(R.id.AlarmBtn1);
         Alarmbtn2 = (ToggleButton) findViewById(R.id.AlarmBtn2);

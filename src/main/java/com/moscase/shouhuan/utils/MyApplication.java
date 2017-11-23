@@ -36,6 +36,7 @@ public class MyApplication extends LitePalApplication {
     public static boolean isEnterPhotoActivity;
 
     public final static String XmlPath = "https://app.moscase8.com/apps/538/BluetoothWatch.xml";
+    public final static int LOGIN = 10000;
 
     /**
      * 是否是英制单位
@@ -93,6 +94,9 @@ public class MyApplication extends LitePalApplication {
             StrictMode.setVmPolicy(builder.build());
         }
 
+
+        //上传BUG日志的初始化
+        CrashHandler.getInstance().init(this);
     }
 
     public static synchronized BleManager getBleManager(){
@@ -109,5 +113,7 @@ public class MyApplication extends LitePalApplication {
             return s;
         }
     }
+
+
 
 }

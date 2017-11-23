@@ -187,7 +187,7 @@ public class LoginQQActivity extends AppCompatActivity {
             Log.d("koma", "开始保存图片");
             saveMyBitmap(getExternalStorageDirectory() +
                     "/蓝牙手表图片/UserPhoto.jpg", bitmap);
-            sendBroadcast(new Intent("com.chenhang.finish"));
+            finish();
         }
     }
 
@@ -252,6 +252,7 @@ public class LoginQQActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         BusProvider.getInstance().unregister(this);
+        SocialSDK.revokeQQ(this);
         super.onDestroy();
     }
 

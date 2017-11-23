@@ -200,7 +200,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toLeftOf="@id/buchangcm"
                     android:layout_marginRight="15px"
-                    android:text="30"
+                    android:text="75"
                     android:textSize="40px"/>
 
 

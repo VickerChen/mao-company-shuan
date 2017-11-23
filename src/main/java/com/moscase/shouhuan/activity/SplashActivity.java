@@ -12,13 +12,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.elbbbird.android.socialsdk.SocialSDK;
@@ -40,10 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import me.relex.circleindicator.CircleIndicator;
-
 import static android.os.Environment.getExternalStorageDirectory;
-import static com.moscase.shouhuan.R.id.indicator;
 
 /**
  * Created by 陈航 on 2017/8/20.
@@ -52,15 +45,12 @@ import static com.moscase.shouhuan.R.id.indicator;
  */
 public class SplashActivity extends FragmentActivity {
 
-    private ViewPager mViewPager;
-    private CircleIndicator mCircleIndicator;
-
-    private int[] mImageViewsId;
-    private ImageView[] mImageViews;
-
     private Button mQQButton;
     private Button mShiyongButton;
     private boolean isFistEnterAPP;
+
+
+
 
     private SharedPreferences mSharedPreferences;
     private String[] permission = {
@@ -71,6 +61,7 @@ public class SplashActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
         isFistEnterAPP = sharedPreferences.getBoolean("isFistEnterAPP", false);
         BusProvider.getInstance().register(this);
@@ -83,51 +74,13 @@ public class SplashActivity extends FragmentActivity {
             finish();
         }
 
+
     }
 
     private void initView() {
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mCircleIndicator = (CircleIndicator) findViewById(indicator);
         mQQButton = (Button) findViewById(R.id.loginQQ);
         mShiyongButton = (Button) findViewById(R.id.shiyong);
-        mImageViewsId = new int[]{R.drawable.guide1, R.drawable.guide2, R.drawable.guide3, R
-                .drawable.guide4};
 
-        mImageViews = new ImageView[mImageViewsId.length];
-        for (int i = 0; i < mImageViews.length; i++) {
-            ImageView imageView = new ImageView(this);
-            mImageViews[i] = imageView;
-            imageView.setBackgroundResource(mImageViewsId[i]);
-        }
-
-        mViewPager.setAdapter(mPagerAdapter);
-        mCircleIndicator.setViewPager(mViewPager);
-
-
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int
-                    positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                Log.d("koma", position + "");
-                if (position == 3) {
-                    mQQButton.setVisibility(View.VISIBLE);
-                    mShiyongButton.setVisibility(View.VISIBLE);
-                } else {
-                    mQQButton.setVisibility(View.GONE);
-                    mShiyongButton.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
 
         mQQButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,31 +115,6 @@ public class SplashActivity extends FragmentActivity {
         SocialSDK.oauthQQ(this);
     }
 
-
-    private PagerAdapter mPagerAdapter = new PagerAdapter() {
-        @Override
-        public int getCount() {
-            return mImageViews.length;
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {//必须实现，实例化
-            container.addView(mImageViews[position]);
-
-            return mImageViews[position];
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {//必须实现，销毁
-            container.removeView(mImageViews[position]);
-        }
-
-    };
 
 
     private void showPermission() {
@@ -364,7 +292,7 @@ public class SplashActivity extends FragmentActivity {
             Log.d("koma", "开始保存图片");
             saveMyBitmap(getExternalStorageDirectory() +
                     "/蓝牙手表图片/UserPhoto.jpg", bitmap);
-
+            mSharedPreferences.edit().putBoolean("islogin",true).commit();
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
             finish();

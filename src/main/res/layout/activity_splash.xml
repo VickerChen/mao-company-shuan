@@ -3,12 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/guide"
     >
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></android.support.v4.view.ViewPager>
 
     <Button
         android:id="@+id/loginQQ"
@@ -19,7 +16,7 @@
         android:layout_marginBottom="300px"
         android:background="@drawable/btn_bg_red"
         android:text="QQ登录"
-        android:visibility="gone"/>
+        />
 
     <Button
         android:id="@+id/shiyong"
@@ -30,7 +27,7 @@
         android:layout_marginBottom="150px"
         android:background="@drawable/btn_bg_red"
         android:text="试用"
-        android:visibility="gone"/>
+        />
 
     <me.relex.circleindicator.CircleIndicator
         android:id="@+id/indicator"

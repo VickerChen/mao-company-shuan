@@ -77,6 +77,8 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'me.relex:circleindicator:1.2.2@aar'
     compile 'com.elbbbird.android:socialsdk:0.2.0@aar'
+    compile 'com.lzy.net:okgo:3.0.4'
+    compile 'com.contrarywind:Android-PickerView:3.2.7'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
 }

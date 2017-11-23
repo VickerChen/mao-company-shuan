@@ -12,7 +12,6 @@ import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -54,8 +53,6 @@ import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
 
 /**
  * Created by 陈航 on 2017/8/25.
- *
- * 少年一事能狂  敢骂天地不仁
  */
 public class PhotoActivity extends AppCompatActivity {
 
@@ -171,8 +168,6 @@ public class PhotoActivity extends AppCompatActivity {
             cameraFragment.switchActionPhotoVideo();
         }
     }
-
-
 
 
     @RequiresPermission(Manifest.permission.CAMERA)
@@ -354,9 +349,6 @@ public class PhotoActivity extends AppCompatActivity {
                 || ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 ) {
-            ActivityCompat
-                    .requestPermissions(this, permissionCamera,
-                            123);
         } else {
             ActivityCompat.requestPermissions(this, permissionCamera, 123);
         }
@@ -375,27 +367,28 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
-//    这里如果不做延迟处理的话，在刚刚进入这个Activity的时候趁相机还没初始化就立即返回的话会崩溃
+    //    这里如果不做延迟处理的话，在刚刚进入这个Activity的时候趁相机还没初始化就立即返回的话会崩溃
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                  finish();
+                    finish();
                 }
-            },600);
+            }, 600);
         }
         return true;
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(MessageEvent event) {
+        //我懒得重新写全局的常量了
         if (event.getMsg() == 73) {
-            Toast.makeText(this, "拍照", Toast.LENGTH_SHORT).show();
             recordButton.performClick();
             //拍照成功后发OK
-            MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
+            MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
+                    "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
                     ("6f6b"), new BleCharacterCallback() {
                 @Override
                 public void onSuccess(BluetoothGattCharacteristic characteristic) {
@@ -418,13 +411,32 @@ public class PhotoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         isEnterPhotoActivity = true;
+        boolean isSuccess = MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
+                "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
+                ("70686f746f7f"), new BleCharacterCallback() {
+            @Override
+            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+
+            }
+
+            @Override
+            public void onFailure(BleException exception) {
+
+            }
+
+            @Override
+            public void onInitiatedResult(boolean result) {
+
+            }
+        });
+        if (isSuccess)
+            Toast.makeText(this, "发送photo成功", Toast.LENGTH_SHORT).show();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
         isEnterPhotoActivity = false;
-        Log.d("变了没",isEnterPhotoActivity+"");
         super.onPause();
     }
 
@@ -433,7 +445,8 @@ public class PhotoActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
         isEnterPhotoActivity = false;
         //退出界面发exit
-        MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb", "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
+        MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
+                "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
                 ("65786974"), new BleCharacterCallback() {
             @Override
             public void onSuccess(BluetoothGattCharacteristic characteristic) {

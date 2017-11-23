@@ -216,22 +216,21 @@ public class MyInfoActivity extends FragmentActivity {
         mRlBuchang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!MyApplication.isInch){
+                if (MyApplication.isInch){
                     NumberPicker pickerHeight = new NumberPicker(MyInfoActivity.this);
                     pickerHeight.setWidth(pickerHeight.getScreenWidthPixels());
                     pickerHeight.setCycleDisable(false);
                     pickerHeight.setDividerVisible(false);
                     pickerHeight.setOffset(2);//偏移量
                     pickerHeight.setRange(12, 96, 1);//数字范围
-                    pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
+                    pickerHeight.setSelectedItem(mSharePreferences.getInt("buchangft",30));
                     pickerHeight.setLabel("inch");
                     pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                         @Override
                         public void onNumberPicked(int index, Number item) {
                             mBuchang.setText(item + "");
                             int temp = (int) (item.floatValue() / 0.3937008);
-                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                            mEditor.putInt("buchangft", temp).commit();
+                            mSharePreferences.edit().putInt("buchangft",temp).commit();
                         }
                     });
                     pickerHeight.show();
@@ -242,14 +241,14 @@ public class MyInfoActivity extends FragmentActivity {
                     pickerHeight.setDividerVisible(false);
                     pickerHeight.setOffset(2);//偏移量
                     pickerHeight.setRange(12, 96, 1);//数字范围
-                    pickerHeight.setSelectedItem(Integer.parseInt(mBuchang.getText().toString()));
+                    pickerHeight.setSelectedItem(mSharePreferences.getInt("buchang",75));
                     pickerHeight.setLabel("厘米");
                     pickerHeight.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
                         @Override
                         public void onNumberPicked(int index, Number item) {
                             mBuchang.setText(item + "");
-                            SharedPreferences.Editor mEditor = mSharePreferences.edit();
-                            mEditor.putInt("buchang", (Integer) item).commit();
+                            mSharePreferences.edit().putInt("buchang",item.intValue()).commit();
+                            Log.d("koma","步长设置成"+item.intValue());
                         }
                     });
                     pickerHeight.show();

@@ -3,27 +3,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="180px"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
     >
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="100px"
         android:layout_height="80px"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:src="@drawable/tips"/>
 
     <RelativeLayout
+
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_toRightOf="@id/image">
 
         <com.zhy.autolayout.AutoLinearLayout
+            android:id="@+id/rl_duanlianjie"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="center">
 
             <com.zhy.autolayout.AutoLinearLayout
@@ -59,9 +60,9 @@
 
 
         <View
+            android:layout_below="@id/rl_duanlianjie"
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:layout_alignParentBottom="true"
             android:background="#000"/>
     </RelativeLayout>
 

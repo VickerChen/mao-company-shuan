@@ -23,7 +23,6 @@ import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.CircleView;
-import com.moscase.shouhuan.view.NumAnim;
 import com.moscase.shouhuan.view.RingView;
 
 import java.text.DecimalFormat;
@@ -71,7 +70,7 @@ public class ZhuangtaiFragment extends Fragment {
         filter.addAction("com.chenhang.inch");
         filter.setPriority(Integer.MAX_VALUE);
         getActivity().registerReceiver(myReceiver, filter);
-        mSharedPreferences = getActivity().getSharedPreferences("myinfo",MODE_PRIVATE);
+        mSharedPreferences = getActivity().getSharedPreferences("myInfo",MODE_PRIVATE);
         initView(view);
         return view;
     }
@@ -178,7 +177,8 @@ public class ZhuangtaiFragment extends Fragment {
 
         //当这次拿到的步数和上一次的步数不一样的时候才有动画
         if (lastBushu != result)
-            NumAnim.startAnim(mBushu, result);
+            mBushu.setText(""+result);
+//            NumAnim.startAnim(mBushu, result);
         lastBushu = result;
         // 创建一个数值格式化对象
         NumberFormat numberFormat = NumberFormat.getInstance();
@@ -218,6 +218,7 @@ public class ZhuangtaiFragment extends Fragment {
     public void onResume() {
         mubiao = mSharedPreferences.getInt("mubiao",10000);
         mMubiao.setText(mubiao+"");
+        setInch();
         super.onResume();
     }
 }
