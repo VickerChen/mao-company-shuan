@@ -168,6 +168,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         //当APP和手表已经连接上之后断开的时候，会重新连接，重新连接成功后发送广播，提醒主页面notify
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.chenhang.reconnect");
@@ -905,9 +915,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         isResume = true;
+<<<<<<< HEAD
         riqi = mMyInfoShared.getString("riqi", "2017-10-23");
 
         Log.d("koma",MyApplication.getBleManager().isConnected()+"");
+=======
+        riqi = mMyInfoShared.getString("riqi","2017-10-23");
+
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         super.onResume();
     }
 
@@ -934,6 +949,164 @@ public class MainActivity extends AppCompatActivity {
         SocialSDK.revokeQQ(this);
         super.onDestroy();
     }
+
+
+
+
+
+    /**
+     * 下面这些代码是QQ登录的回调方法
+     * 本来是准备调用LoginQQActivity代码复用一下的
+     * 发现有点问题，我就单独写在闪屏页了
+     */
+    @Subscribe
+    public void onOauthResult(SSOBusEvent event) {
+        switch (event.getType()) {
+            case SSOBusEvent.TYPE_GET_TOKEN:
+                SocialToken token = event.getToken();
+                Log.i("koma---QQ", "onOauthResult#BusEvent.TYPE_GET_TOKEN " + token.toString());
+                break;
+            case SSOBusEvent.TYPE_GET_USER:
+
+                SocialUser user = event.getUser();
+                mMyInfoShared.edit().putString("userName", user.getName()).commit();
+                if (user.getGender() == 1) {
+                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
+
+                } else if (user.getGender() == 2) {
+                    mMyInfoShared.edit().putBoolean("isMale", false).commit();
+                } else {
+                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
+                }
+
+                new MyTask(user.getAvatar()).execute();
+
+
+                break;
+            case SSOBusEvent.TYPE_FAILURE:
+                Exception e = event.getException();
+                Log.i("koma---QQ", "授权失败 " + e.toString());
+                break;
+            case SSOBusEvent.TYPE_CANCEL:
+                Log.i("koma---QQ", "用户取消授权");
+                break;
+        }
+    }
+
+
+    //从连接中获取bitmap
+    public Bitmap returnBitMap(String url) {
+        URL myFileUrl = null;
+        Bitmap bitmap = null;
+        try {
+            myFileUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        try {
+            HttpURLConnection conn = (HttpURLConnection) myFileUrl
+                    .openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            bitmap = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+    //把bitmap保存到文件夹
+    public void saveMyBitmap(String path, Bitmap mBitmap) {
+        File f = new File(path);
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            Log.e("koma---保存图片出错", e.toString());
+        }
+        FileOutputStream fOut = null;
+        try {
+            fOut = new FileOutputStream(f);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+        } catch (Exception e) {
+        }
+        try {
+            fOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private class MyTask extends AsyncTask<Void, Void, Void> {
+
+        Bitmap bitmap;
+        String murl;
+
+        public MyTask(String url) {
+            murl = url;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d("koma", "开始下载图片");
+            bitmap = returnBitMap(murl);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.d("koma", "开始保存图片");
+            saveMyBitmap(getExternalStorageDirectory() +
+                    "/蓝牙手表图片/UserPhoto.jpg", bitmap);
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**

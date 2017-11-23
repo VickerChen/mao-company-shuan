@@ -5,7 +5,7 @@ android {
         config {
             keyAlias '13902965098'
             keyPassword '13902965098'
-            storeFile file('H:/MyEclipse2/538KeyStore/538-KeyStore.jks')
+            storeFile file('D:/538KeyStore/538-KeyStore.jks')
             storePassword '13902965098'
         }
     }
@@ -72,7 +72,6 @@ dependencies {
     compile 'com.github.florent37:camerafragment:1.0.7'
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
     compile 'com.clj.fastble:FastBleLib:1.2.1'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'me.relex:circleindicator:1.2.2@aar'

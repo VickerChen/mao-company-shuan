@@ -46,7 +46,9 @@ import java.net.URL;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.os.Environment.getExternalStorageDirectory;
+import static com.tencent.open.utils.Global.getSharedPreferences;
 
 /**
  * Created by 陈航 on 2017/8/3.
@@ -62,9 +64,13 @@ public class MenuRightFragment extends Fragment {
     private Button mLoginButton;
     private Button mExitButton;
 
+<<<<<<< HEAD
     protected SharedPreferences mMyInfoShared;
 
     private SharedPreferences mSharedPreferences;
+=======
+    private SharedPreferences mMyInfoShared;
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
 
     private Tencent mTencent; //qq主操作对象
     private IUiListener loginListener; //授权登录监听器
@@ -90,9 +96,12 @@ public class MenuRightFragment extends Fragment {
 
         View view = View.inflate(getActivity(), R.layout.menu_layout_right, container);
 
+<<<<<<< HEAD
         mMyInfoShared = getActivity().getSharedPreferences("myInfo", getActivity().MODE_PRIVATE);
 
 
+=======
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         mMyInfo = (LinearLayout) view.findViewById(R.id.myInfo);
         mMyInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,6 +171,26 @@ public class MenuRightFragment extends Fragment {
                 } else {
                     initLogin();
                 }
+<<<<<<< HEAD
+=======
+//                Intent intent = new Intent(getActivity(), LoginQQActivity.class);
+//                startActivity(intent);
+            }
+        });
+
+        mMyInfoShared = getSharedPreferences("myInfo", MODE_PRIVATE);
+
+        mLoginButton = (Button) view.findViewById(R.id.login);
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= 23) {
+//            6.0以上系统动态申请权限
+                    showPermission();
+                } else {
+                    initLogin();
+                }
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
             }
         });
 
@@ -172,6 +201,7 @@ public class MenuRightFragment extends Fragment {
                 if (mTencent != null) {
                     //注销登录
                     mTencent.logout(getActivity());
+<<<<<<< HEAD
                     mMyInfoShared.edit().putBoolean("islogin",false).commit();
                 }
                 if (deleteFile(getExternalStorageDirectory() + "/蓝牙手表图片"+"/UserPhoto.jpg"))
@@ -179,6 +209,9 @@ public class MenuRightFragment extends Fragment {
 
 //                mUserPhoto.setImageDrawable(getDrawable(R.drawable.human));
                 mUserPhoto.setImageResource(R.drawable.human);
+=======
+                }
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
                 mLoginButton.setVisibility(View.VISIBLE);
                 mExitButton.setVisibility(View.GONE);
 
@@ -423,13 +456,17 @@ public class MenuRightFragment extends Fragment {
             if (bitmap != null)
                 mUserPhoto.setImageBitmap(bitmap);
 
+<<<<<<< HEAD
             mMyInfoShared.edit().putBoolean("islogin",true).commit();
+=======
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
             mLoginButton.setVisibility(View.GONE);
             mExitButton.setVisibility(View.VISIBLE);
 
         }
     }
 
+<<<<<<< HEAD
     //删除用户头像
     public boolean deleteFile(String filePath) {
         File file = new File(filePath);
@@ -439,6 +476,8 @@ public class MenuRightFragment extends Fragment {
         return false;
     }
 
+=======
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
     @Override
     public void onResume() {
         //从APP图片目录获取用户头像

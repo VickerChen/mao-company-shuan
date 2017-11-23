@@ -95,7 +95,10 @@ public class MyApplication extends LitePalApplication {
         }
 
 
+<<<<<<< HEAD
         //上传BUG日志的初始化
+=======
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         CrashHandler.getInstance().init(this);
     }
 

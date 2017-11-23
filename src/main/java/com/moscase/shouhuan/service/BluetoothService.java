@@ -241,7 +241,10 @@ public class BluetoothService extends Service {
                                                     Toast.makeText(BluetoothService.this, "已重新连接", Toast
                                                             .LENGTH_SHORT).show();
                                                     mSharedPreferences.edit().putBoolean("isconnected",true).commit();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
 //                                            //发现服务0.5秒后订阅notify
 //                                            new Handler().postDelayed(new Runnable() {
 //                                                @Override

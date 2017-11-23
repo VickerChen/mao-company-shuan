@@ -61,6 +61,13 @@ public class SplashActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+<<<<<<< HEAD
+=======
+        if (Build.VERSION.SDK_INT >= 23) {
+//            6.0以上系统动态申请权限
+            showPermission();
+        }
+>>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
 
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
         isFistEnterAPP = sharedPreferences.getBoolean("isFistEnterAPP", false);
@@ -153,7 +160,7 @@ public class SplashActivity extends FragmentActivity {
                                            @NonNull int[] grantResults) {
         if (requestCode == 123) {
             if (PermissionUtil.verifyPermissions(grantResults)) {
-                initLogin();
+//                initLogin();
             } else {
                 Toast.makeText(this, "请授予权限", Toast.LENGTH_LONG).show();
             }
