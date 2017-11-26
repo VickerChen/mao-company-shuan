@@ -41,7 +41,7 @@ import static android.os.Environment.getExternalStorageDirectory;
 /**
  * Created by 陈航 on 2017/8/20.
  * <p>
- * 少年一事能狂  敢骂天地不仁
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 public class SplashActivity extends FragmentActivity {
 
@@ -61,13 +61,11 @@ public class SplashActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-<<<<<<< HEAD
-=======
+
         if (Build.VERSION.SDK_INT >= 23) {
 //            6.0以上系统动态申请权限
             showPermission();
         }
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
 
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
         isFistEnterAPP = sharedPreferences.getBoolean("isFistEnterAPP", false);

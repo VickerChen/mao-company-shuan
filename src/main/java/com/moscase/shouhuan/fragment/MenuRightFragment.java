@@ -53,7 +53,7 @@ import static com.tencent.open.utils.Global.getSharedPreferences;
 /**
  * Created by 陈航 on 2017/8/3.
  * <p>
- * 少年一事能狂  敢骂天地不仁
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 public class MenuRightFragment extends Fragment {
     private LinearLayout mMyInfo;
@@ -64,13 +64,7 @@ public class MenuRightFragment extends Fragment {
     private Button mLoginButton;
     private Button mExitButton;
 
-<<<<<<< HEAD
-    protected SharedPreferences mMyInfoShared;
-
-    private SharedPreferences mSharedPreferences;
-=======
     private SharedPreferences mMyInfoShared;
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
 
     private Tencent mTencent; //qq主操作对象
     private IUiListener loginListener; //授权登录监听器
@@ -96,12 +90,6 @@ public class MenuRightFragment extends Fragment {
 
         View view = View.inflate(getActivity(), R.layout.menu_layout_right, container);
 
-<<<<<<< HEAD
-        mMyInfoShared = getActivity().getSharedPreferences("myInfo", getActivity().MODE_PRIVATE);
-
-
-=======
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         mMyInfo = (LinearLayout) view.findViewById(R.id.myInfo);
         mMyInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,24 +133,7 @@ public class MenuRightFragment extends Fragment {
             mTencent = Tencent.createInstance("1106501598", getActivity());
         }
         mUserPhoto = (CircleImageView) view.findViewById(R.id.yonghu);
-//        mUserPhoto.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (Build.VERSION.SDK_INT >= 23) {
-////            6.0以上系统动态申请权限
-//                    showPermission();
-//                } else {
-//                    initLogin();
-//                }
-////                Intent intent = new Intent(getActivity(), LoginQQActivity.class);
-////                startActivity(intent);
-//            }
-//        });
-
-
-
-        mLoginButton = (Button) view.findViewById(R.id.login);
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
+        mUserPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT >= 23) {
@@ -171,8 +142,6 @@ public class MenuRightFragment extends Fragment {
                 } else {
                     initLogin();
                 }
-<<<<<<< HEAD
-=======
 //                Intent intent = new Intent(getActivity(), LoginQQActivity.class);
 //                startActivity(intent);
             }
@@ -190,7 +159,6 @@ public class MenuRightFragment extends Fragment {
                 } else {
                     initLogin();
                 }
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
             }
         });
 
@@ -201,31 +169,12 @@ public class MenuRightFragment extends Fragment {
                 if (mTencent != null) {
                     //注销登录
                     mTencent.logout(getActivity());
-<<<<<<< HEAD
-                    mMyInfoShared.edit().putBoolean("islogin",false).commit();
                 }
-                if (deleteFile(getExternalStorageDirectory() + "/蓝牙手表图片"+"/UserPhoto.jpg"))
-                    Toast.makeText(getActivity(), "退出成功", Toast.LENGTH_SHORT).show();
-
-//                mUserPhoto.setImageDrawable(getDrawable(R.drawable.human));
-                mUserPhoto.setImageResource(R.drawable.human);
-=======
-                }
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
                 mLoginButton.setVisibility(View.VISIBLE);
                 mExitButton.setVisibility(View.GONE);
 
             }
         });
-
-        if (mMyInfoShared.getBoolean("islogin",false)){
-            mLoginButton.setVisibility(View.GONE);
-            mExitButton.setVisibility(View.VISIBLE);
-        }else {
-            mLoginButton.setVisibility(View.VISIBLE);
-            mExitButton.setVisibility(View.GONE);
-        }
-
         return view;
     }
 
@@ -456,28 +405,12 @@ public class MenuRightFragment extends Fragment {
             if (bitmap != null)
                 mUserPhoto.setImageBitmap(bitmap);
 
-<<<<<<< HEAD
-            mMyInfoShared.edit().putBoolean("islogin",true).commit();
-=======
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
             mLoginButton.setVisibility(View.GONE);
             mExitButton.setVisibility(View.VISIBLE);
 
         }
     }
 
-<<<<<<< HEAD
-    //删除用户头像
-    public boolean deleteFile(String filePath) {
-        File file = new File(filePath);
-        if (file.isFile() && file.exists()) {
-            return file.delete();
-        }
-        return false;
-    }
-
-=======
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
     @Override
     public void onResume() {
         //从APP图片目录获取用户头像

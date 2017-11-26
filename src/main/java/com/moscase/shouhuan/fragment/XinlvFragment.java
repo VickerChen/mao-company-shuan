@@ -26,7 +26,6 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.bean.HeartTimes;
-import com.moscase.shouhuan.utils.GuideView;
 import com.moscase.shouhuan.view.DigitalGroupView;
 import com.moscase.shouhuan.view.DividerItemDecoration;
 import com.moscase.shouhuan.view.HeartbeatView;
@@ -44,7 +43,7 @@ import java.util.List;
 /**
  * Created by 陈航 on 2017/7/20.
  *
- * 少年一事能狂  敢骂天地不仁
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 @SuppressLint("ValidFragment")
 public class XinlvFragment extends Fragment {
@@ -57,7 +56,6 @@ public class XinlvFragment extends Fragment {
     private Calendar mC;
     private List<HeartTimes> mHeartTimesList = new ArrayList<>();
     private int HeartTimeId = 0;
-    private GuideView guideView;
     private Context mContext;
 
     @SuppressLint("ValidFragment")
@@ -145,7 +143,7 @@ public class XinlvFragment extends Fragment {
                 LinearLayoutManager.VERTICAL));
         mHeartbeatRecycler.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new Adapter(R.layout.item_heartbeat, mHeartTimesList);
-        mAdapter.setEmptyView(R.layout.activity_splash, (ViewGroup) mHeartbeatRecycler.getParent());
+        mAdapter.setEmptyView(R.layout.empty_view, (ViewGroup) mHeartbeatRecycler.getParent());
         mHeartbeatRecycler.setAdapter(mAdapter);
         mAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
         mAdapter.setOnItemLongClickListener(new BaseQuickAdapter.OnItemLongClickListener() {

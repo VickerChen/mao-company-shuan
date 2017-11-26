@@ -5,7 +5,7 @@ android {
         config {
             keyAlias '13902965098'
             keyPassword '13902965098'
-            storeFile file('D:/538KeyStore/538-KeyStore.jks')
+            storeFile file('H:/MyEclipse2/538KeyStore/538-KeyStore.jks')
             storePassword '13902965098'
         }
     }

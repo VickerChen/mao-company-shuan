@@ -53,10 +53,8 @@ import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
 
 /**
  * Created by 陈航 on 2017/8/25.
-<<<<<<< HEAD
-=======
  *
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 public class PhotoActivity extends AppCompatActivity {
 
@@ -353,11 +351,7 @@ public class PhotoActivity extends AppCompatActivity {
                 || ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 ) {
-<<<<<<< HEAD
         } else {
-=======
-         } else {
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
             ActivityCompat.requestPermissions(this, permissionCamera, 123);
         }
     }

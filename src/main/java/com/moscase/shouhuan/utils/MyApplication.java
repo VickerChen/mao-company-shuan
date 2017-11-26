@@ -13,7 +13,7 @@ import org.litepal.exceptions.GlobalException;
 /**
  * Created by 陈航 on 2017/8/3.
  *
- * 少年一事能狂  敢骂天地不仁
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 
 public class MyApplication extends LitePalApplication {
@@ -95,10 +95,7 @@ public class MyApplication extends LitePalApplication {
         }
 
 
-<<<<<<< HEAD
         //上传BUG日志的初始化
-=======
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         CrashHandler.getInstance().init(this);
     }
 

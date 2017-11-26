@@ -3,6 +3,7 @@ package com.moscase.shouhuan.activity;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -12,7 +13,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -24,7 +24,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -45,6 +44,7 @@ import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.clj.fastble.conn.BleCharacterCallback;
+import com.clj.fastble.conn.BleGattCallback;
 import com.clj.fastble.data.ScanResult;
 import com.clj.fastble.exception.BleException;
 import com.clj.fastble.utils.HexUtil;
@@ -60,7 +60,6 @@ import com.moscase.shouhuan.bean.UpdataInfo;
 import com.moscase.shouhuan.fragment.XinlvFragment;
 import com.moscase.shouhuan.fragment.ZhibiaoFragment;
 import com.moscase.shouhuan.fragment.ZhuangtaiFragment;
-import com.moscase.shouhuan.service.BluetoothService;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.ParseXml;
@@ -93,7 +92,7 @@ import static com.moscase.shouhuan.utils.MyApplication.isResume;
 /**
  * Created by 陈航 on 2017/8/3.
  * <p>
- * 少年一事能狂  敢骂天地不仁
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 public class MainActivity extends AppCompatActivity {
     //两边的抽屉
@@ -120,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
     //    private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
 
-    private BluetoothService mBluetoothService;
     //从提醒界面拿到是否是短连接，用于发送给手表
     private boolean mIsDuanlianjie;
 
@@ -167,28 +165,44 @@ public class MainActivity extends AppCompatActivity {
             sharedPreferences.edit().putBoolean("isFistEnterAPP", isFistEnterAPP).commit();
         }
 
-
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         //当APP和手表已经连接上之后断开的时候，会重新连接，重新连接成功后发送广播，提醒主页面notify
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.chenhang.reconnect");
         filter.setPriority(Integer.MAX_VALUE);
         registerReceiver(myReceiver, filter);
 
-
         //注册事件
         BusProvider.getInstance().register(this);//QQ登录
         EventBus.getDefault().register(this);
-        bindService();
+
+
+
+        //来一只超级玛丽当分割线       --Create by chenhang
+        System.out.print(
+                "             来一只超级玛丽助助兴！  \n" +
+                        "                ********\n" +
+                        "               ************\n" +
+                        "               ####....#.\n" +
+                        "             #..###.....##....\n" +
+                        "             ###.......######              ###            ###\n" +
+                        "                ...........               #...#          #...#\n" +
+                        "               ##*#######                 #.#.#          #.#.#\n" +
+                        "            ####*******######             #.#.#          #.#.#\n" +
+                        "           ...#***.****.*###....          #...#          #...#\n" +
+                        "           ....**********##.....           ###            ###\n" +
+                        "           ....****    *****....\n" +
+                        "             ####        ####\n" +
+                        "           ######        ######\n" +
+                        "##############################################################\n" +
+                        "#...#......#.##...#......#.##...#......#.##------------------#\n" +
+                        "###########################################------------------#\n" +
+                        "#..#....#....##..#....#....##..#....#....#####################\n" +
+                        "##########################################    #----------#\n" +
+                        "#.....#......##.....#......##.....#......#    #----------#\n" +
+                        "##########################################    #----------#\n" +
+                        "#.#..#....#..##.#..#....#..##.#..#....#..#    #----------#\n" +
+                        "##########################################    ############\n");
+
 
         initView();
         initEvents();
@@ -205,32 +219,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    private void initDatas() {
-//        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//            @Override
-//            public void onPageScrolled(int position, float positionOffset, int
-//                    positionOffsetPixels) {
-//
-//            }
-//
-//            @Override
-//            public void onPageSelected(int position) {
-//                if (position == 0) {
-//                    mBottomNavigation.setCurrentItem(0);
-//                } else if (position == 1) {
-//                    mBottomNavigation.setCurrentItem(1);
-//                } else if (position == 2) {
-//                    mBottomNavigation.setCurrentItem(2);
-//                }
-//            }
-//
-//            @Override
-//            public void onPageScrollStateChanged(int state) {
-//
-//            }
-//        });
-//    }
-
 
     //底部的三个bar
     private void initBottomBar() {
@@ -240,8 +228,8 @@ public class MainActivity extends AppCompatActivity {
         AHBottomNavigationItem item3 = new AHBottomNavigationItem("指标", R.drawable.zhibiao);
 
         // Add items
-        mBottomNavigation.addItem(item1);
         mBottomNavigation.addItem(item2);
+        mBottomNavigation.addItem(item1);
         mBottomNavigation.addItem(item3);
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
@@ -333,8 +321,10 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.id_drawerLayout);
 //        此行代码表示锁定右侧的抽屉，只能通过点击右上角才能滑出抽屉，不能通过侧滑
 //        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
+
 //        此行代码使抽屉拉出后屏幕不变暗
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
+
 //        mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mFragmentList = new ArrayList<>();
         mFragmentList.add(mZhuangtaiFragment);
@@ -402,72 +392,6 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    //绑定服务
-    private void bindService() {
-        Intent bindIntent = new Intent(this, BluetoothService.class);
-        bindService(bindIntent, mFhrSCon, Context.BIND_AUTO_CREATE);
-    }
-
-    private ServiceConnection mFhrSCon = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mBluetoothService = ((BluetoothService.BluetoothBinder) service).getService();
-            mBluetoothService.setScanCallback(callback);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mBluetoothService = null;
-        }
-
-    };
-
-    /**
-     * 扫描的各种回调方法
-     */
-    private BluetoothService.Callback callback = new BluetoothService.Callback() {
-        @Override
-        public void onStartScan() {
-
-        }
-
-        @Override
-        public void onScanning(final ScanResult result) {
-
-        }
-
-        @Override
-        public void onScanComplete() {
-
-        }
-
-        @Override
-        public void onConnecting() {
-
-        }
-
-        @Override
-        public void onConnectFail() {
-
-        }
-
-        @Override
-        public void onDisConnected(BleException exp) {
-            Toast.makeText(mBluetoothService, "断开连接", Toast.LENGTH_SHORT).show();
-
-            Log.e("koma", "断开连接" + exp);
-        }
-
-        @Override
-        public void onServicesDiscovered() {
-
-        }
-
-        @Override
-        public void onConnectSuccess() {
-
-        }
-    };
 
     public boolean notifyMainActivity() {
         boolean notify = MyApplication.getBleManager().notify
@@ -597,9 +521,9 @@ public class MainActivity extends AppCompatActivity {
                                                                             });
 
                                                     if (isSuccess) {
-                                                        Log.d("koma1", "对时成功");
+                                                        Log.d("koma", "对时成功");
                                                     } else {
-                                                        Log.d("koma1", "对时失败");
+                                                        Log.d("koma", "对时失败");
                                                     }
                                                 } else if (MyApplication.toHexString1
                                                         (value[0]).equals("6f") &&
@@ -610,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
                                                                 (value[2]).equals
                                                                 ("7f")) {
                                                     //如果收到OK
-                                                    Log.d("koma1", "接收到OK消息");
+                                                    Log.d("koma", "接收到OK消息");
                                                 } else if (MyApplication.toHexString1(value[0])
                                                         .equals("70") &&
                                                         MyApplication.toHexString1(value[1])
@@ -766,7 +690,10 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(MessageEvent event) {
         if (event.getMsg() == 123) {
+            //注册notify的消息
             notifyMainActivity();
+        } else if (event.getMsg() == 111) {
+            //连接BLE的消息
         }
 
     }
@@ -886,8 +813,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(MainActivity.this, "已连接！", Toast.LENGTH_SHORT).show();
-            notifyMainActivity();
+            if (intent.getAction().equals("com.chenhang.reconnect")) {
+                Toast.makeText(MainActivity.this, "已连接！", Toast.LENGTH_SHORT).show();
+                notifyMainActivity();
+            } else if (intent.getAction().equals("com.chenhang.discoverservices")) {
+                Log.d("koma", "收到广播");
+                Bundle bundle = intent.getExtras();
+                ScanResult scanResult = (ScanResult) bundle.get("device");
+                connect(scanResult);
+            }
+
         }
 
     };
@@ -915,14 +850,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         isResume = true;
-<<<<<<< HEAD
+
         riqi = mMyInfoShared.getString("riqi", "2017-10-23");
 
-        Log.d("koma",MyApplication.getBleManager().isConnected()+"");
-=======
-        riqi = mMyInfoShared.getString("riqi","2017-10-23");
+        System.gc();
 
->>>>>>> 0ce1ed17b9c863cc06e2b2396eb75373c912243b
         super.onResume();
     }
 
@@ -943,170 +875,47 @@ public class MainActivity extends AppCompatActivity {
 
         //取消注册事件
         EventBus.getDefault().unregister(this);
-        unbindService(mFhrSCon);
         unregisterReceiver(myReceiver);
         BusProvider.getInstance().unregister(this);
         SocialSDK.revokeQQ(this);
+        mDuanlianjie.edit().putBoolean("isconnected", false).commit();
         super.onDestroy();
     }
 
 
+    private void connect(ScanResult scanResult) {
 
+        MyApplication.getBleManager().connectDevice(scanResult, true, new BleGattCallback() {
+            @Override
+            public void onConnectError(BleException exception) {
+                Log.d("koma", "连接失败");
+            }
 
+            @Override
+            public void onConnectSuccess(BluetoothGatt gatt, int status) {
+                Log.d("koma", "连接成功");
+            }
 
-    /**
-     * 下面这些代码是QQ登录的回调方法
-     * 本来是准备调用LoginQQActivity代码复用一下的
-     * 发现有点问题，我就单独写在闪屏页了
-     */
-    @Subscribe
-    public void onOauthResult(SSOBusEvent event) {
-        switch (event.getType()) {
-            case SSOBusEvent.TYPE_GET_TOKEN:
-                SocialToken token = event.getToken();
-                Log.i("koma---QQ", "onOauthResult#BusEvent.TYPE_GET_TOKEN " + token.toString());
-                break;
-            case SSOBusEvent.TYPE_GET_USER:
+            @Override
+            public void onDisConnected(BluetoothGatt gatt, int status, BleException exception) {
+                Log.d("koma", "断开连接");
+            }
 
-                SocialUser user = event.getUser();
-                mMyInfoShared.edit().putString("userName", user.getName()).commit();
-                if (user.getGender() == 1) {
-                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
+            @Override
+            public void onConnecting(BluetoothGatt gatt, int status) {
+                Log.d("koma", "连接中");
+            }
 
-                } else if (user.getGender() == 2) {
-                    mMyInfoShared.edit().putBoolean("isMale", false).commit();
-                } else {
-                    mMyInfoShared.edit().putBoolean("isMale", true).commit();
-                }
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                Log.d("koma", "发现服务");
 
-                new MyTask(user.getAvatar()).execute();
+                notifyMainActivity();
 
-
-                break;
-            case SSOBusEvent.TYPE_FAILURE:
-                Exception e = event.getException();
-                Log.i("koma---QQ", "授权失败 " + e.toString());
-                break;
-            case SSOBusEvent.TYPE_CANCEL:
-                Log.i("koma---QQ", "用户取消授权");
-                break;
-        }
-    }
-
-
-    //从连接中获取bitmap
-    public Bitmap returnBitMap(String url) {
-        URL myFileUrl = null;
-        Bitmap bitmap = null;
-        try {
-            myFileUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        try {
-            HttpURLConnection conn = (HttpURLConnection) myFileUrl
-                    .openConnection();
-            conn.setDoInput(true);
-            conn.connect();
-            InputStream is = conn.getInputStream();
-            bitmap = BitmapFactory.decodeStream(is);
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bitmap;
-    }
-
-    //把bitmap保存到文件夹
-    public void saveMyBitmap(String path, Bitmap mBitmap) {
-        File f = new File(path);
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            Log.e("koma---保存图片出错", e.toString());
-        }
-        FileOutputStream fOut = null;
-        try {
-            fOut = new FileOutputStream(f);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-        } catch (Exception e) {
-        }
-        try {
-            fOut.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            }
+        });
 
     }
-
-
-    private class MyTask extends AsyncTask<Void, Void, Void> {
-
-        Bitmap bitmap;
-        String murl;
-
-        public MyTask(String url) {
-            murl = url;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Log.d("koma", "开始下载图片");
-            bitmap = returnBitMap(murl);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Log.d("koma", "开始保存图片");
-            saveMyBitmap(getExternalStorageDirectory() +
-                    "/蓝牙手表图片/UserPhoto.jpg", bitmap);
-
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -1558,29 +1367,27 @@ public class MainActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
             String temp = "6f6666" + getInfo();
-            boolean isSuccess = mBluetoothService.write("0000ffe5-0000-1000-8000-00805f9b34fb",
-                    "0000ffe9-0000-1000-8000-00805f9b34fb",
-                    //6f6666是短连接
-                    //6f6e是长连接
-                    temp, new BleCharacterCallback() {
-                        @Override
-                        public void onSuccess(BluetoothGattCharacteristic characteristic) {
+            MyApplication.getBleManager().writeDevice
+                    ("0000ffe5-0000-1000-8000-00805f9b34fb",
+                            "0000ffe9-0000-1000-8000-00805f9b34fb",
+                            //6f6666是短连接
+                            //6f6e是长连接
+                            HexUtil.hexStringToBytes(temp), new BleCharacterCallback() {
+                                @Override
+                                public void onSuccess(BluetoothGattCharacteristic characteristic) {
 
-                        }
+                                }
 
-                        @Override
-                        public void onFailure(BleException exception) {
+                                @Override
+                                public void onFailure(BleException exception) {
 
-                        }
+                                }
 
-                        @Override
-                        public void onInitiatedResult(boolean result) {
+                                @Override
+                                public void onInitiatedResult(boolean result) {
 
-                        }
-                    });
-
-            if (isSuccess)
-                Toast.makeText(this, "切换为短连接成功", Toast.LENGTH_SHORT).show();
+                                }
+                            });
         }
         return super.onKeyDown(keyCode, event);
     }

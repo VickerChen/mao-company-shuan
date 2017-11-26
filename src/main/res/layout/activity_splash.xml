@@ -6,6 +6,10 @@
     android:background="@drawable/guide"
     >
 
+    <ImageView
+        android:src="@drawable/guide"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <Button
         android:id="@+id/loginQQ"

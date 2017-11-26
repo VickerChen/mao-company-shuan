@@ -34,6 +34,7 @@ import com.clj.fastble.data.ScanResult;
 import com.clj.fastble.exception.BleException;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.service.BluetoothService;
+import com.moscase.shouhuan.service.ConnectService;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
 
@@ -110,6 +111,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
         mReceiver = new MyReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.bluetooth.adapter.action.STATE_CHANGED");
+        filter.addAction("lianjieshibai");
+        filter.addAction("lianjiechenggong");
         registerReceiver(mReceiver, filter);
 
         initView();
@@ -148,18 +151,31 @@ public class BluetoothScanActivity extends AppCompatActivity {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (mBluetoothService != null) {
-                    mBluetoothService.connectDevice(mMyAdapter.getItem(i));
-                    String mac = mMyAdapter.getItem(i).getDevice().getAddress();
-                    String currentname = mMyAdapter.getItem(i).getDevice().getName();
-                    mSharedPreferences.edit().putString("mac", mac).commit();
-                    mSharedPreferences.edit().putString("currentname",currentname).commit();
-                    mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
-                    mConnectingDialog.setCanceledOnTouchOutside(false);
-                    mConnectingDialog.setCancelable(false);
-                    mConnectingDialog.setMessage("正在连接...");
-                    mConnectingDialog.show();
-                }
+//                if (mBluetoothService != null) {
+//                    mBluetoothService.connectDevice(mMyAdapter.getItem(i));
+//                    String mac = mMyAdapter.getItem(i).getDevice().getAddress();
+//                    String currentname = mMyAdapter.getItem(i).getDevice().getName();
+//                    mSharedPreferences.edit().putString("mac", mac).commit();
+//                    mSharedPreferences.edit().putString("currentname",currentname).commit();
+//                    mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
+//                    mConnectingDialog.setCanceledOnTouchOutside(false);
+//                    mConnectingDialog.setCancelable(false);
+//                    mConnectingDialog.setMessage("正在连接...");
+//                    mConnectingDialog.show();
+//                }
+
+                String mac = mMyAdapter.getItem(i).getDevice().getAddress();
+                String currentname = mMyAdapter.getItem(i).getDevice().getName();
+                mSharedPreferences.edit().putString("mac", mac).commit();
+                mSharedPreferences.edit().putString("currentname", currentname).commit();
+                mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
+                mConnectingDialog.setCanceledOnTouchOutside(false);
+                mConnectingDialog.setCancelable(false);
+                mConnectingDialog.setMessage("正在连接...");
+                mConnectingDialog.show();
+                Intent intent = new Intent(BluetoothScanActivity.this, ConnectService.class);
+                intent.putExtra("scanresult", mMyAdapter.getItem(i));
+                startService(intent);
             }
         });
     }
@@ -188,7 +204,16 @@ public class BluetoothScanActivity extends AppCompatActivity {
                     scanCompareListAddress.clear();
                     mMyAdapter.notifyDataSetChanged();
                 }
-
+            } else if (intent.getAction().equals("lianjieshibai")) {
+                Toast.makeText(BluetoothScanActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+                if (mConnectingDialog != null)
+                    mConnectingDialog.dismiss();
+            } else if (intent.getAction().equals("lianjiechenggong")) {
+                if (mConnectingDialog != null)
+                    mConnectingDialog.dismiss();
+                Toast.makeText(mBluetoothService, "连接成功", Toast.LENGTH_SHORT).show();
+                mRl_name.setVisibility(View.VISIBLE);
+                mCurrentConnectedName.setText(mSharedPreferences.getString("currentname", ""));
             }
 
         }
@@ -420,7 +445,7 @@ public class BluetoothScanActivity extends AppCompatActivity {
             Toast.makeText(mBluetoothService, "连接成功", Toast.LENGTH_SHORT).show();
             Log.d("koma", "连接成功");
             mRl_name.setVisibility(View.VISIBLE);
-            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname",""));
+            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname", ""));
 
 
             //发现服务0.5秒后订阅notify
@@ -482,9 +507,9 @@ public class BluetoothScanActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if (mSharedPreferences.getBoolean("isconnected",false)){
+        if (mSharedPreferences.getBoolean("isconnected", false)) {
             mRl_name.setVisibility(View.VISIBLE);
-            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname",""));
+            mCurrentConnectedName.setText(mSharedPreferences.getString("currentname", ""));
         }
         super.onResume();
     }
