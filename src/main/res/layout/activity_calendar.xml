@@ -1,33 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zhy.autolayout.AutoLinearLayout
+
+<com.zhy.autolayout.AutoRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <cn.aigestudio.datepicker.views.DatePicker
-        android:id="@+id/datepicker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-    </cn.aigestudio.datepicker.views.DatePicker>
 
     <com.zhy.autolayout.AutoLinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1.45">
+        android:orientation="vertical"
+        >
 
-        <com.moscase.shouhuan.view.BarChartView
-            android:id="@+id/barChartView"
+        <cn.aigestudio.datepicker.views.DatePicker
+            android:id="@+id/datepicker"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:max="20000"/>
+            android:layout_weight="1">
+
+        </cn.aigestudio.datepicker.views.DatePicker>
+
+        <com.zhy.autolayout.AutoLinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.45">
+
+            <com.moscase.shouhuan.view.BarChartView
+                android:id="@+id/barChartView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:max="20000"/>
+
+
+        </com.zhy.autolayout.AutoLinearLayout>
 
 
     </com.zhy.autolayout.AutoLinearLayout>
 
-
-</com.zhy.autolayout.AutoLinearLayout>
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_margin="10dp"
+        android:src="@drawable/back"/>
+</com.zhy.autolayout.AutoRelativeLayout>

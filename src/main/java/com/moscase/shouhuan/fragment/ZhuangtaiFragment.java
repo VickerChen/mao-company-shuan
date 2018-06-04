@@ -25,7 +25,6 @@ import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.CircleView;
 import com.moscase.shouhuan.view.RingView;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -48,9 +47,13 @@ public class ZhuangtaiFragment extends Fragment {
     private TextView mMoxige;
     private TextView mBuchangCM;
     private TextView mBuchang;
+    private TextView mTv_Time;
+    private TextView mTv_bupin;
     private int lastBushu;
     private int mubiao;
     private SharedPreferences mSharedPreferences;
+    //这是为了让步数显示动画的判断
+    private int length;
     private String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -68,9 +71,10 @@ public class ZhuangtaiFragment extends Fragment {
         View view = inflater.inflate(R.layout.zhuangtai1, container, false);
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.chenhang.inch");
+        filter.addAction("com.chenhang.time");
         filter.setPriority(Integer.MAX_VALUE);
         getActivity().registerReceiver(myReceiver, filter);
-        mSharedPreferences = getActivity().getSharedPreferences("myInfo",MODE_PRIVATE);
+        mSharedPreferences = getActivity().getSharedPreferences("myInfo", MODE_PRIVATE);
         initView(view);
         return view;
     }
@@ -81,11 +85,13 @@ public class ZhuangtaiFragment extends Fragment {
         mBuchangCM = (TextView) view.findViewById(R.id.buchangcm);
         if (MyApplication.isInch)
             mBuchangCM.setText("inch");
+        mTv_Time = view.findViewById(R.id.tv_time);
+        mTv_bupin = view.findViewById(R.id.tv_bupin);
         mZongjuli = (TextView) view.findViewById(R.id.zongjuli);
         mKaluli = (TextView) view.findViewById(R.id.kaluli);
         mMubiao = (TextView) view.findViewById(R.id.mubiaobushu);
         mMoxige = (TextView) view.findViewById(R.id.moxige);
-        mBushu = (TextView) view.findViewById(R.id.bushu);
+        mBushu = view.findViewById(R.id.bushu);
         mRingView = (RingView) view.findViewById(R.id.MiClockView);
         mCircleView = (CircleView) view.findViewById(R.id.circleview);
 //        mRingView.setOnClickListener(new View.OnClickListener() {
@@ -155,29 +161,31 @@ public class ZhuangtaiFragment extends Fragment {
         }
     }
 
-    public void setAngel(int result, float zongjuli, float kaluli) {
-        Log.d("resultis", result + "");
+    public void setAngel(final int result, float zongjuli, float kaluli) {
+        Log.d("result", "resultis" + result + "总记录is" + zongjuli + "卡路里is" + kaluli);
 
-        if (zongjuli == 0){
+        if (zongjuli == 0) {
             mZongjuli.setText("0.00");
-        }else {
+        } else {
             mZongjuli.setText(zongjuli + "");
         }
 
-        if (kaluli == 0){
-            mKaluli.setText("0.0000");
-        }else {
-            DecimalFormat   df   =   new DecimalFormat( "#,##0.0000");
-            mKaluli.setText(df.format(kaluli));
+        if (kaluli == 0) {
+            mKaluli.setText("0.0");
+        } else {
+//            DecimalFormat df = new DecimalFormat("#,##0.0");
+            mKaluli.setText(String.format("%.1f", kaluli*1000));
         }
 
-        int temp = (int) (kaluli / 307);
+        int temp = Math.round(kaluli * 1000 / 307);
         Log.d("moxige", temp + "");
         mMoxige.setText("≈" + temp + "个墨西哥鸡肉卷的热量");
 
         //当这次拿到的步数和上一次的步数不一样的时候才有动画
         if (lastBushu != result)
-            mBushu.setText(""+result);
+            mBushu.setText("" + result);
+
+
 //            NumAnim.startAnim(mBushu, result);
         lastBushu = result;
         // 创建一个数值格式化对象
@@ -194,30 +202,54 @@ public class ZhuangtaiFragment extends Fragment {
     }
 
     public void setInch() {
-        if (MyApplication.isInch){
+        if (MyApplication.isInch) {
             mBuchangCM.setText("inch");
-            mBuchang.setText(""+mSharedPreferences.getInt("buchangft",30));
-        } else{
-            mBuchang.setText(""+mSharedPreferences.getInt("buchang",75));
-            mBuchangCM.setText("cm");
+            mBuchang.setText("" + mSharedPreferences.getInt("buchangft", 30));
+        } else {
+            mBuchang.setText("" + mSharedPreferences.getInt("buchang", 75));
+            mBuchangCM.setText("CM");
         }
-
     }
 
     private BroadcastReceiver myReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("koma---修改公英制",MyApplication.isInch+"");
-            setInch();
-        }
+            if (intent.getAction().equals("com.chenhang.inch")) {
+                Log.d("koma---修改公英制", MyApplication.isInch + "");
+                mSharedPreferences.edit().clear().commit();
+                setInch();
+            } else if (intent.getAction().equals("com.chenhang.time")) {
+                String time = intent.getStringExtra("time");
+                String h = time.substring(0, 2);
+                String s = time.substring(4, 6);
+                String m = time.substring(2, 4);
+                mTv_Time.setText(h + "H " + m + "M " + s + "S");
+                int step = intent.getIntExtra("step", 0);
+                int ih = Integer.parseInt(h);
+                int im = Integer.parseInt(m);
+                int is = Integer.parseInt(s);
+                float second = 0;
+                if (ih != 0)
+                    second = ih * 60 * 60;
+                if (im != 0)
+                    second = second + im * 60;
+                if (is != 0) {
+                    second = second + is;
+                    if (second == 0)
+                        mTv_bupin.setText(0 + "");
+                    else
+                        mTv_bupin.setText(Math.round(step / (second / 60.0f)) + "");
+                }
 
+            }
+        }
     };
 
     @Override
     public void onResume() {
-        mubiao = mSharedPreferences.getInt("mubiao",10000);
-        mMubiao.setText(mubiao+"");
+        mubiao = mSharedPreferences.getInt("mubiao", 10000);
+        mMubiao.setText(mubiao + "");
         setInch();
         super.onResume();
     }

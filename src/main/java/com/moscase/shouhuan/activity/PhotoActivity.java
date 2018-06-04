@@ -1,8 +1,9 @@
 package com.moscase.shouhuan.activity;
 
 import android.Manifest;
-import android.bluetooth.BluetoothGattCharacteristic;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,9 +18,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.clj.fastble.conn.BleCharacterCallback;
-import com.clj.fastble.exception.BleException;
-import com.clj.fastble.utils.HexUtil;
 import com.github.florent37.camerafragment.CameraFragment;
 import com.github.florent37.camerafragment.CameraFragmentApi;
 import com.github.florent37.camerafragment.configuration.Configuration;
@@ -32,6 +30,8 @@ import com.github.florent37.camerafragment.widgets.CameraSwitchView;
 import com.github.florent37.camerafragment.widgets.FlashSwitchView;
 import com.github.florent37.camerafragment.widgets.MediaActionSwitchView;
 import com.github.florent37.camerafragment.widgets.RecordButton;
+import com.inuker.bluetooth.library.BluetoothClient;
+import com.inuker.bluetooth.library.connect.response.BleWriteResponse;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
@@ -43,17 +43,20 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static com.moscase.shouhuan.utils.MyApplication.hexStringToBytes;
 import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
+
 
 /**
  * Created by 陈航 on 2017/8/25.
- *
+ * <p>
  * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 public class PhotoActivity extends AppCompatActivity {
@@ -61,6 +64,7 @@ public class PhotoActivity extends AppCompatActivity {
     public static final String FRAGMENT_TAG = "camera";
     private static final int REQUEST_CAMERA_PERMISSIONS = 931;
     private static final int REQUEST_PREVIEW_CODE = 1001;
+    private BluetoothClient mBluetoothClient;
 
     @BindView(R.id.settings_view)
     CameraSettingsView settingsView;
@@ -87,13 +91,22 @@ public class PhotoActivity extends AppCompatActivity {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
+    private boolean isWhileCanRun = true;
 
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
+
+    private SharedPreferences mSharedPreferences;
+
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
+        mSharedPreferences = getSharedPreferences("ToggleButton", MODE_PRIVATE);
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
+        mBluetoothClient = MyApplication.getBleManager();
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         mDate = sDateFormat.format(new java.util.Date());
         if (Build.VERSION.SDK_INT >= 23) {
@@ -102,6 +115,31 @@ public class PhotoActivity extends AppCompatActivity {
         } else {
             addCamera();
         }
+
+
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                //要做的事情，这里再次调用此Runnable对象，以实现每两秒实现一次的定时器操作
+                mBluetoothClient.write(mSharedPreferences.getString
+                                ("mac", ""), UUID.fromString
+                                ("0000ffe5-0000-1000-8000-00805f9b34fb"),
+                        UUID.fromString
+                                ("0000ffe9-0000-1000-8000-00805f9b34fb"),
+                        hexStringToBytes("6f6b"), new BleWriteResponse() {
+
+                            @Override
+                            public void onResponse(int i) {
+
+                            }
+                        });
+                mHandler.postDelayed(this, 10000);
+            }
+        };
+        mHandler.postDelayed(mRunnable, 10);
+
+
     }
 
 
@@ -174,8 +212,9 @@ public class PhotoActivity extends AppCompatActivity {
 
     @RequiresPermission(Manifest.permission.CAMERA)
     public void addCamera() {
-        final CameraFragment cameraFragment = CameraFragment.newInstance(new Configuration.Builder()
-                .setCamera(Configuration.CAMERA_FACE_REAR).build());
+        @SuppressLint("MissingPermission") final CameraFragment cameraFragment = CameraFragment
+                .newInstance(new Configuration.Builder()
+                        .setCamera(Configuration.CAMERA_FACE_REAR).build());
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content, cameraFragment, FRAGMENT_TAG)
                 .commit();
@@ -356,6 +395,7 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -387,52 +427,41 @@ public class PhotoActivity extends AppCompatActivity {
     public void onEventMainThread(MessageEvent event) {
         //我懒得重新写全局的常量了
         if (event.getMsg() == 73) {
-            recordButton.performClick();
-            //拍照成功后发OK
-            MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
-                    "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
-                    ("6f6b"), new BleCharacterCallback() {
-                @Override
-                public void onSuccess(BluetoothGattCharacteristic characteristic) {
+            if (isEnterPhotoActivity) {
+                recordButton.performClick();
+                isEnterPhotoActivity = false;
+                //拍照成功后发OK
+                mBluetoothClient.write(mSharedPreferences.getString
+                                ("mac", ""), UUID.fromString
+                                ("0000ffe5-0000-1000-8000-00805f9b34fb"),
+                        UUID.fromString
+                                ("0000ffe9-0000-1000-8000-00805f9b34fb"),
+                        hexStringToBytes("6f6b"), new BleWriteResponse() {
 
-                }
+                            @Override
+                            public void onResponse(int i) {
 
-                @Override
-                public void onFailure(BleException exception) {
-
-                }
-
-                @Override
-                public void onInitiatedResult(boolean result) {
-
-                }
-            });
+                            }
+                        });
+            }
         }
     }
 
     @Override
     protected void onResume() {
         isEnterPhotoActivity = true;
-        boolean isSuccess = MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
-                "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
-                ("70686f746f7f"), new BleCharacterCallback() {
-            @Override
-            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        mBluetoothClient.write(mSharedPreferences.getString
+                        ("mac", ""), UUID.fromString
+                        ("0000ffe5-0000-1000-8000-00805f9b34fb"),
+                UUID.fromString
+                        ("0000ffe9-0000-1000-8000-00805f9b34fb"),
+                hexStringToBytes("70686f746f7f"), new BleWriteResponse() {
 
-            }
+                    @Override
+                    public void onResponse(int i) {
+                    }
+                });
 
-            @Override
-            public void onFailure(BleException exception) {
-
-            }
-
-            @Override
-            public void onInitiatedResult(boolean result) {
-
-            }
-        });
-        if (isSuccess)
-            Toast.makeText(this, "发送photo成功", Toast.LENGTH_SHORT).show();
         super.onResume();
     }
 
@@ -446,25 +475,22 @@ public class PhotoActivity extends AppCompatActivity {
     protected void onDestroy() {
         EventBus.getDefault().unregister(this);
         isEnterPhotoActivity = false;
+        isWhileCanRun = false;
+        mHandler.removeCallbacks(mRunnable);
         //退出界面发exit
-        MyApplication.getBleManager().writeDevice("0000ffe5-0000-1000-8000-00805f9b34fb",
-                "0000ffe9-0000-1000-8000-00805f9b34fb", HexUtil.hexStringToBytes
-                ("65786974"), new BleCharacterCallback() {
-            @Override
-            public void onSuccess(BluetoothGattCharacteristic characteristic) {
+        mBluetoothClient.write(mSharedPreferences.getString
+                        ("mac", ""), UUID.fromString
+                        ("0000ffe5-0000-1000-8000-00805f9b34fb"),
+                UUID.fromString
+                        ("0000ffe9-0000-1000-8000-00805f9b34fb"),
+                hexStringToBytes("65786974"), new BleWriteResponse() {
 
-            }
+                        @Override
+                        public void onResponse(int i) {
+                        }
+                    });
 
-            @Override
-            public void onFailure(BleException exception) {
-
-            }
-
-            @Override
-            public void onInitiatedResult(boolean result) {
-
-            }
-        });
         super.onDestroy();
+
     }
 }

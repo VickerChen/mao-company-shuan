@@ -1,11 +1,14 @@
 package com.moscase.shouhuan.activity;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
@@ -16,7 +19,7 @@ import com.moscase.shouhuan.R;
  * 这个Activity是小胡让我直接从WiFiWeather上搬过来的，
  * 我没有分析的太详细，直接把有用的抄过来
  */
-public class ClockActivity extends Activity {
+public class ClockActivity extends AppCompatActivity {
     private TimePicker mTimePicker;
     private String mTimeFormat;
     private ToggleButton Alarmbtn1, Alarmbtn2, Snoozebtn;
@@ -29,6 +32,19 @@ public class ClockActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clock);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("设置闹钟");
+        toolbar.setTitleTextColor(Color.GRAY);
+        toolbar.setBackgroundColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         preferences = getSharedPreferences("togglebuttonstatus",
                 Context.MODE_PRIVATE);

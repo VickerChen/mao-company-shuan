@@ -16,7 +16,10 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.idtk.smallchart.data.BarData;
 import com.idtk.smallchart.interfaces.iData.IBarData;
@@ -34,6 +37,7 @@ import cn.aigestudio.datepicker.bizs.calendars.DPCManager;
 import cn.aigestudio.datepicker.bizs.decors.DPDecor;
 import cn.aigestudio.datepicker.cons.DPMode;
 import cn.aigestudio.datepicker.views.DatePicker;
+import me.drakeet.materialdialog.MaterialDialog;
 
 
 public class CalendarActivity extends Activity {
@@ -45,9 +49,17 @@ public class CalendarActivity extends Activity {
     private BarData mBarData = new BarData();
     private ArrayList<PointF> mPointArrayList3 = new ArrayList<>();
     private List<Float> mFloats = new ArrayList<>();
+    private ImageView mBack;
 
     private int mCurrentMonth;
     private int mCurrentYear;
+
+    private TextView mDateToShow;
+    private TextView mSportTime;
+    private TextView mTotalbushu;
+    private TextView mTotalkaluli;
+    private TextView mTotalDistance;
+    private ImageView mCancel;
 
     private SharedPreferences mSharedPreferences;
 
@@ -77,24 +89,29 @@ public class CalendarActivity extends Activity {
         registerReceiver(myReceiver, filter);
 
 
-        mSharedPreferences = getSharedPreferences("myinfo", MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences("myInfo", MODE_PRIVATE);
 
         mDatePicker = (DatePicker) findViewById(R.id.datepicker);
         mBarChartView = (BarChartView) findViewById(R.id.barChartView);
         mBarChartView.setYmax(mSharedPreferences.getInt("mubiao", 10000));
         mBarChartView.setBarChartList(pointBar);
 
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 mCurrentMonth = mDatePicker.getMonth();
                 mCurrentYear = mDatePicker.getYear();
-                Toast.makeText(CalendarActivity.this, "" + mCurrentYear + mCurrentMonth, Toast
-                        .LENGTH_SHORT).show();
-
 
             }
         }, 500);
+        mBack = findViewById(R.id.back);
+        mBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
 
         /**
@@ -113,8 +130,6 @@ public class CalendarActivity extends Activity {
 
         //画右上角的红点
         DPCManager.getInstance().setDecorTR(mTmpTR);
-        DPCManager.getInstance().setDecorTR(mTmpTR);
-        DPCManager.getInstance().setDecorTR(mTmpTR);
         mDatePicker.setDPDecor(new DPDecor() {
             @Override
             public void drawDecorTR(Canvas canvas, Rect rect, Paint paint) {
@@ -122,6 +137,7 @@ public class CalendarActivity extends Activity {
                 canvas.drawCircle(rect.centerX() + 10, rect.centerY() - 10, rect.width() / 5,
                         paint);
             }
+
         });
 
 
@@ -130,15 +146,61 @@ public class CalendarActivity extends Activity {
         mDate = date.split("-");
         mDatePicker.setMode(DPMode.SINGLE);
         mDatePicker.setDate(Integer.parseInt(mDate[0]), Integer.parseInt(mDate[1]));
-
         mDatePicker.setOnDatePickedListener(new DatePicker.OnDatePickedListener() {
             @Override
             public void onDatePicked(String date) {
-//                Toast.makeText(CalendarActivity.this, date, Toast.LENGTH_SHORT).show();
+
+                List<BushuData> bushuData = DataSupport.where("riqi = ?", date).find(BushuData
+                        .class);
+                if (bushuData == null || bushuData.size() == 0) {
+
+                } else {
+                    View view = LayoutInflater.from(CalendarActivity.this).inflate(R.layout
+                            .detail_dialog, null, false);
+                    mDateToShow = view.findViewById(R.id.date);
+                    mSportTime = view.findViewById(R.id.sporttime);
+                    mTotalbushu = view.findViewById(R.id.totalbushu);
+
+                    mTotalDistance = view.findViewById(R.id.totaldistance);
+                    mTotalkaluli = view.findViewById(R.id.totalkaluli);
+                    mCancel = view.findViewById(R.id.cancel);
+                    mDateToShow.setText(date);
+                    mTotalbushu.setText(bushuData.get(0).getBushu() + "步");
+                    String time = bushuData.get(0).getSporttime();
+                    String h = time.substring(0, 2);
+                    String m = time.substring(2, 4);
+                    String s = time.substring(4, 6);
+                    if (Integer.valueOf(h) == 0) {
+                        if (Integer.valueOf(m) == 0) {
+                            mSportTime.setText(Integer.valueOf(s) + "秒");
+                        } else {
+                            mSportTime.setText(Integer.valueOf(m) + "分" + Integer.valueOf(s) + "秒");
+                        }
+                    } else {
+                        mSportTime.setText(Integer.valueOf(h) + "时" + Integer.valueOf(m) + "分" +
+                                Integer.valueOf(s) + "秒");
+                    }
+
+                    mTotalkaluli.setText(bushuData.get(0).getKaluli() + "千卡");
+                    mTotalDistance.setText(bushuData.get(0).getDistance() + "KM");
+
+
+                    final MaterialDialog materialDialog = new MaterialDialog(CalendarActivity.this);
+                    materialDialog.setCanceledOnTouchOutside(true);
+                    materialDialog.setContentView(view);
+                    materialDialog.show();
+                    mCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            materialDialog.dismiss();
+                        }
+                    });
+                    Log.d("koma===bushu", bushuData.get(0).getBushu() + "");
+
+                }
+
             }
         });
-
-
     }
 
     protected float pxTodp(float value) {
@@ -148,7 +210,7 @@ public class CalendarActivity extends Activity {
         return valueDP;
     }
 
-    String getDate() {
+    private String getDate() {
 //        Date date = new Date();
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMd");
 //        String date1 = dateFormat.format(date);
@@ -157,7 +219,7 @@ public class CalendarActivity extends Activity {
         return temp;
     }
 
-    void setData() {
+    private void setData() {
 
 
         pointBar = null;
@@ -184,10 +246,10 @@ public class CalendarActivity extends Activity {
                     (BushuData.class);
 
             if (bushuDatas.size() == 0) {
-                pointBar[i - 1] = 1;
+//                pointBar[i - 1] = 1;
             } else {
                 if (bushuDatas.get(0).getBushu() == 0) {
-                    pointBar[i - 1] = 1;
+//                    pointBar[i - 1] = 1;
                 } else {
                     pointBar[i - 1] = bushuDatas.get(0).getBushu();
                 }

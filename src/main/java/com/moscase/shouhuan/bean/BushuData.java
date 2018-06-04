@@ -16,6 +16,37 @@ public class BushuData extends DataSupport {
 
     private int bushu;
 
+    private String sporttime;
+
+    private float kaluli;
+    private float distance;
+
+    public String getSporttime() {
+        return sporttime;
+    }
+
+    public void setSporttime(String sporttime) {
+        this.sporttime = sporttime;
+    }
+
+    public float getKaluli() {
+        return kaluli;
+    }
+
+    public void setKaluli(float kaluli) {
+        this.kaluli = kaluli;
+    }
+
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
+
+
     public String getRiqi() {
         return riqi;
     }

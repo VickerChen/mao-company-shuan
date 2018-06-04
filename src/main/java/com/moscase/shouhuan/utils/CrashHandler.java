@@ -1,28 +1,22 @@
 package com.moscase.shouhuan.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.util.Log;
-
-import com.lzy.okgo.OkGo;
-import com.lzy.okgo.callback.StringCallback;
-import com.lzy.okgo.model.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import static java.lang.Thread.UncaughtExceptionHandler;
 
@@ -34,10 +28,11 @@ public class CrashHandler implements UncaughtExceptionHandler {
     private static final String TAG = "CrashHandler";
     private static final boolean DEBUG = true;
 
+
     private static final String PATH =
             Environment.getExternalStorageDirectory() + "/Crash/log/";
 
-    private static final String FILE_NAME = "_crash";
+    private static final String FILE_NAME = "crash";
 
     private static final String FILE_NAME_SUFFIX = ".log";
 
@@ -51,17 +46,45 @@ public class CrashHandler implements UncaughtExceptionHandler {
         return sInstance;
     }
 
+    private SharedPreferences mSharedPreferences;
+
+
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+
+            }
+            if (msg.what == 2) {
+
+            }
+            if (msg.what == 3) {
+                String path = (String) msg.obj;
+                Log.d("koma", "成功");
+                File file1 = new File(path);
+                file1.delete();
+            }
+            if (msg.what == 4) {
+
+            }
+        }
+    };
+
+
     public void init(Context context) {
         mDefaultCrashHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
         mContext = context.getApplicationContext();
+        mSharedPreferences = mContext.getSharedPreferences("ToggleButton", Context.MODE_PRIVATE);
     }
 
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
+        Log.d("koma", "抓到了异常");
+        boolean isCrash = mSharedPreferences.edit().putBoolean("isCrash", true).commit();
+        if (isCrash)
+            Log.d("koma", "已保存isCrash");
         // 导出异常信息到 SD 卡中
         dumpExceptionToSDCard(throwable);
-
         throwable.printStackTrace();
 
         // 如果系统提供了默认的异常处理器，则交给系统去结束程序，否则就由自己结束自己
@@ -69,6 +92,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
             mDefaultCrashHandler.uncaughtException(thread, throwable);
         } else {
             Process.killProcess(Process.myPid());
+//            System.exit(0);
         }
     }
 
@@ -86,16 +110,24 @@ public class CrashHandler implements UncaughtExceptionHandler {
             dir.mkdirs();
         }
         long current = System.currentTimeMillis();
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(current));
-        File file = new File(PATH + FILE_NAME + time + FILE_NAME_SUFFIX);
-
+        String time = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(new Date(current));
+        final File file = new File(PATH + FILE_NAME + FILE_NAME_SUFFIX);
         try {
             PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            String SerialNumber = Build.SERIAL;
+            pw.print("设备ID: ");
+            pw.println(SerialNumber);
             pw.println(time);
             dumpPhoneInfo(pw);
             pw.println();
             ex.printStackTrace(pw);
             pw.close();
+            Log.d("koma", file.getPath());
+//            UpLoad(file.getPath());
+//            uploadFile(file, "http://120.25.207.192:8080/apps/android/WiFiWeather/8001/servlet" +
+//                    "/UploadHandleServlet");
+
+
         } catch (Exception e) {
             Log.e(TAG, "dump crash info failed");
         }
@@ -106,67 +138,24 @@ public class CrashHandler implements UncaughtExceptionHandler {
         PackageInfo pi = pm.getPackageInfo(mContext.getPackageName(), PackageManager
                 .GET_ACTIVITIES);
         // App 版本号
-        pw.print("App Version: ");
+        pw.print("App版本号: ");
         pw.print(pi.versionName);
         pw.print("_");
         pw.println(pi.versionCode);
 
         // Android 系统版本号
-        pw.print("OS Version: ");
+        pw.print("Android 系统版本号: ");
         pw.print(Build.VERSION.RELEASE);
         pw.print("_");
         pw.println(Build.VERSION.SDK_INT);
 
         // 手机制造商
-        pw.print("Model: ");
+        pw.print("手机制造商: ");
         pw.println(Build.MODEL);
 
         // CPU 架构
-        pw.print("CPU ABI: ");
+        pw.print("CPU 架构: ");
         pw.println(Build.CPU_ABI);
     }
-
-    public void uploadFile() {
-        final File f = new File(PATH);
-        // 判断路径是否存在
-        if (!f.exists()) {
-            return;
-        }
-
-
-        final List<File> files = Arrays.asList(f.listFiles());
-        if (files.size() == 0) {
-            return;
-        }
-        OkGo.<String>post("https://app.moscase8.com/apps/8001D/LogForAndroid")
-                .tag(this)
-                .isSpliceUrl(true)
-                .addFileParams("file", files)
-                .execute(new StringCallback() {
-                    @Override
-                    public void onSuccess(Response<String> response) {
-                        Log.d("koma",response.body());
-                        JSONObject jsonObject;
-                        try {
-                            jsonObject = new JSONObject(response.body());
-                            int retCode = jsonObject.optInt("ret");
-                            if (retCode == 0) {
-                                Log.d("koma","上传成功");
-                                // 删除成功后，删除本地 crash 文件
-                                for (File file : files) {
-                                    boolean result = file.delete();
-                                    Log.d("koma","文件删除"+result);
-                                }
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Response<String> response) {
-                        Log.d("koma","上传失败"+response);
-                    }
-                });
-    }
 }
+

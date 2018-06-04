@@ -13,6 +13,8 @@ import java.util.Calendar;
  * Created by 陈航 on 2017/9/13.
  * <p>
  * 计算各种指标，详细信息参考项目根目录下的PDF
+ *
+ * 注：只用来计算公制
  * <p>
  * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
@@ -21,6 +23,7 @@ public class ComputeMyInfo {
 
 
     public static ComputeMyInfo mComputeMyInfo;
+
 
 
     public static synchronized ComputeMyInfo getInstance() {
@@ -32,15 +35,20 @@ public class ComputeMyInfo {
 
     private String sex = DataSupport.find(MyInfoBean.class, 1).getSex();
 
-    private int shengao = DataSupport.find(MyInfoBean.class, 1).getShengao();
+    private double shengao = DataSupport.find(MyInfoBean.class, 1).getShengao();
 
-    private int tizhong = DataSupport.find(MyInfoBean.class, 1).getTizhong();
+    private double tizhong = DataSupport.find(MyInfoBean.class, 1).getTizhong();
 
-    private int tunwei = DataSupport.find(MyInfoBean.class, 1).getTunwei();
+    private double tunwei = DataSupport.find(MyInfoBean.class, 1).getTunwei();
 
-    private int yaowei = DataSupport.find(MyInfoBean.class, 1).getYaowei();
+    private double yaowei = DataSupport.find(MyInfoBean.class, 1).getYaowei();
 
     private int birthday = DataSupport.find(MyInfoBean.class, 1).getBirthday();
+
+
+    private ComputeMyInfo(){
+
+    }
 
     public void setSex(String sex) {
         this.sex = sex;
@@ -50,7 +58,7 @@ public class ComputeMyInfo {
         Log.d("koma", "性别重新设置");
     }
 
-    public void setShengao(int shengao) {
+    public void setShengao(double shengao) {
         this.shengao = shengao;
         Log.d("koma", "身高重新设置" + shengao);
         ContentValues values = new ContentValues();
@@ -58,7 +66,7 @@ public class ComputeMyInfo {
         DataSupport.update(MyInfoBean.class, values, 1);
     }
 
-    public void setTizhong(int tizhong) {
+    public void setTizhong(double tizhong) {
         this.tizhong = tizhong;
         Log.d("koma", "体重重新设置" + tizhong);
         ContentValues values = new ContentValues();
@@ -66,7 +74,7 @@ public class ComputeMyInfo {
         DataSupport.update(MyInfoBean.class, values, 1);
     }
 
-    public void setTunwei(int tunwei) {
+    public void setTunwei(double tunwei) {
         this.tunwei = tunwei;
         Log.d("koma", "臀围重新设置" + tunwei);
         ContentValues values = new ContentValues();
@@ -74,7 +82,7 @@ public class ComputeMyInfo {
         DataSupport.update(MyInfoBean.class, values, 1);
     }
 
-    public void setYaowei(int yaowei) {
+    public void setYaowei(double yaowei) {
         this.yaowei = yaowei;
         Log.d("koma", "腰围重新设置" + this.yaowei);
         ContentValues values = new ContentValues();
@@ -90,7 +98,6 @@ public class ComputeMyInfo {
         DataSupport.update(MyInfoBean.class, values, 1);
     }
 
-    private int yearsOld = (Calendar.getInstance().get(Calendar.YEAR) - birthday);
 
 
     @Override
@@ -122,7 +129,12 @@ public class ComputeMyInfo {
             double c = a - b;
             //身体脂肪百分比 = （身体脂肪总重量/体重）* 100%
             double d = c / tizhong;
+            Log.d("koma", "体脂率---a" + a);
+            Log.d("koma", "体脂率---b" + b);
+            Log.d("koma", "体脂率---c" + b);
             Log.d("koma", "体脂率---男" + d);
+            if (d < 0)
+                d = 0;
             return (float) d;
         } else {
             //参数a = 腰围公分（腰部的周长）*0.74
@@ -133,39 +145,46 @@ public class ComputeMyInfo {
             double c = a - b;
             //身体脂肪百分比 = （身体脂肪总重量/体重）* 100%
             double d = c / tizhong;
+            Log.d("koma", "体脂率---女腰围" + yaowei);
             Log.d("koma", "体脂率---女" + d);
+            if (d < 0)
+                d = 0;
             return (float) d;
         }
     }
 
     public float computeJichudaixielv() {
         if (sex.equals("男")) {
-            double a = 66 + (13.7 * tizhong) + (5 * shengao) - (6.8 * yearsOld);
-            Log.d("koma", "基础代谢---" + a);
+            double a = 66 + (13.7 * tizhong) + (5 * shengao) - (6.8 * (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday()));
+            Log.d("koma", "基础代谢男男---" + a);
             return (float) a;
         } else {
-            double a = 655 + (9.6 * tizhong) + (1.7 * shengao) - (4.7 * yearsOld);
-            Log.d("koma", "基础代谢---" + a);
+            double a = 655 + (9.6 * tizhong) + (1.7 * shengao) - (4.7 * (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday()));
+            Log.d("koma", "基础代谢女女---" + a);
             return (float) a;
         }
     }
 
-    public float computeQuzhitizhong() {
-        float a = tizhong - (tizhong * computeTizhilv());
+    public double computeQuzhitizhong() {
+        double a = tizhong - (tizhong * computeTizhilv());
         Log.d("koma", "去脂体重---" + a);
         return a;
     }
 
-    public float computeYaotunbi() {
-        float a = (float) yaowei / tunwei * 100;
+    public double computeYaotunbi() {
+        double a = yaowei / tunwei * 100;
         Log.d("koma", "腰臀比---" + a);
         return a;
     }
 
     public float computeShuifen() {
-        double a = 1.369 + 0.597 * shengao * shengao / 290 + 0.099 * tizhong - 0.009 * yearsOld;
+        double a = 1.369 + 0.597 * shengao * shengao / 290 + 0.099 * tizhong - 0.009 * (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday());
         Log.d("koma", "水份---" + a);
         return (float) a;
+    }
+
+    public int getBirthday(){
+        return (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday());
     }
 
 }

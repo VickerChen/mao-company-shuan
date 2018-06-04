@@ -300,14 +300,14 @@ public class BMIView extends View {
         mPaint.setTextSize(sp2px(30));
         mPaint.setTextAlign(Paint.Align.CENTER);
         String value = String.valueOf(mSolidCreditValue);
-        canvas.drawText(value, mCenterX, mCenterY + dp2px(15), mPaint);
+//        canvas.drawText(value, mCenterX, mCenterY + dp2px(15), mPaint);
 
         /**
          * 画表头
          */
         mPaint.setAlpha(160);
-        mPaint.setTextSize(sp2px(12));
-        canvas.drawText(mHeaderText, mCenterX, mCenterY - dp2px(20), mPaint);
+        mPaint.setTextSize(sp2px(30));
+        canvas.drawText(mHeaderText, mCenterX, mCenterY, mPaint);
 
 
     }

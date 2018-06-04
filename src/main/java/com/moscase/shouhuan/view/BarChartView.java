@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * Created by 陈航 on 2017/8/28.
- *
- *我挥舞着键盘和本子，发誓要把世界写个明明白白
+ * <p>
+ * 我挥舞着键盘和本子，发誓要把世界写个明明白白
  */
 
 public class BarChartView extends View {
@@ -198,7 +198,7 @@ public class BarChartView extends View {
 
             }
 
-            canvas.drawText((i + 1) + "", startX + range * i + (range / 2)+3, getHeight() -
+            canvas.drawText((i + 1) + "", startX + range * i + (range / 2) + 3, getHeight() -
                     dp2px(15), txtXPaint);
 
 
@@ -297,7 +297,11 @@ public class BarChartView extends View {
         int value = mYMaxValue / 4;
         canvas.drawText(0 + "", dp2px(25), height, txtYPaint);
         for (int i = 1; i < 5; i++) {
-            canvas.drawText(value + "", dp2px(25), height - (offset * i), txtYPaint);
+            if (i == 4)
+                canvas.drawText(mYMaxValue + "", dp2px(25), height - (offset * i), txtYPaint);
+            else
+                canvas.drawText(value + "", dp2px(25), height - (offset * i), txtYPaint);
+
             if (!isHideGirdLine) {
                 canvas.drawLine(dp2px(30), height - (offset * i) - sp2px(4), width, height -
                         (offset * i) - sp2px(4), yPaint);
@@ -357,7 +361,7 @@ public class BarChartView extends View {
     }
 
 
-    public void setYmax(int value){
+    public void setYmax(int value) {
         mYMaxValue = value;
         postInvalidate();
     }

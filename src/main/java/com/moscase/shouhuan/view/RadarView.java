@@ -180,14 +180,14 @@ public class RadarView extends View {
 
 
     public void setDataList(List<RadarData> dataList) {
-        if (isDataListValid()) {
-            throw new RuntimeException("The number of data can not be less than 3");
-        } else {
+//        if (isDataListValid()) {
+//            throw new RuntimeException("The number of data can not be less than 3");
+//        } else {
             this.dataList = dataList;
             count = dataList.size();//圈数等于数据个数，默认为6
             angle = (float) (Math.PI * 2 / count);
             invalidate();
-        }
+//        }
     }
 
 

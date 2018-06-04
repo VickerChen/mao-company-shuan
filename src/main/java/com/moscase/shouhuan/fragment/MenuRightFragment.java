@@ -61,7 +61,6 @@ public class MenuRightFragment extends Fragment {
     private LinearLayout mClock;
     private LinearLayout mAbout;
     private CircleImageView mUserPhoto;
-    private Button mLoginButton;
     private Button mExitButton;
 
     private SharedPreferences mMyInfoShared;
@@ -126,13 +125,12 @@ public class MenuRightFragment extends Fragment {
             }
         });
 
-
+        mUserPhoto = (CircleImageView) view.findViewById(R.id.yonghu);
         mListener = new QQLoginListener();
         // 实例化Tencent
         if (mTencent == null) {
             mTencent = Tencent.createInstance("1106501598", getActivity());
         }
-        mUserPhoto = (CircleImageView) view.findViewById(R.id.yonghu);
         mUserPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,25 +140,10 @@ public class MenuRightFragment extends Fragment {
                 } else {
                     initLogin();
                 }
-//                Intent intent = new Intent(getActivity(), LoginQQActivity.class);
-//                startActivity(intent);
             }
         });
 
         mMyInfoShared = getSharedPreferences("myInfo", MODE_PRIVATE);
-
-        mLoginButton = (Button) view.findViewById(R.id.login);
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= 23) {
-//            6.0以上系统动态申请权限
-                    showPermission();
-                } else {
-                    initLogin();
-                }
-            }
-        });
 
         mExitButton = (Button) view.findViewById(R.id.exit);
         mExitButton.setOnClickListener(new View.OnClickListener() {
@@ -170,11 +153,19 @@ public class MenuRightFragment extends Fragment {
                     //注销登录
                     mTencent.logout(getActivity());
                 }
-                mLoginButton.setVisibility(View.VISIBLE);
+                File file = new File(getExternalStorageDirectory() + "/蓝牙手表图片/UserPhoto.jpg");
+                if (file.exists())
+                    file.delete();
+
+                mUserPhoto.setImageResource(R.drawable.human);
+
                 mExitButton.setVisibility(View.GONE);
 
             }
         });
+
+        if (mMyInfoShared.getBoolean("isLogin",false))
+            mExitButton.setVisibility(View.VISIBLE);
         return view;
     }
 
@@ -405,7 +396,6 @@ public class MenuRightFragment extends Fragment {
             if (bitmap != null)
                 mUserPhoto.setImageBitmap(bitmap);
 
-            mLoginButton.setVisibility(View.GONE);
             mExitButton.setVisibility(View.VISIBLE);
 
         }

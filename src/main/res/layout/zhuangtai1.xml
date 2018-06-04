@@ -86,9 +86,9 @@
             android:id="@+id/kaluli"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="380px"
+            android:layout_marginLeft="400px"
             android:layout_marginTop="280px"
-            android:text="0.0000"
+            android:text="0.0"
             android:textColor="#000"/>
 
         <TextView
@@ -116,7 +116,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:textSize="40px"
             android:gravity="center_horizontal"
+            android:layout_marginBottom="20px"
             android:text="≈0个墨西哥鸡肉卷的热量"
             android:textColor="#000"/>
 
@@ -156,6 +158,15 @@
                     android:layout_toRightOf="@id/time"
                     android:text="时间:"
                     android:textSize="30px"/>
+
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:text="00H 00M 00S"
+                    android:textSize="40px"/>
 
                 <View
                     android:layout_width="match_parent"
@@ -198,8 +209,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@id/buchangcm"
                     android:layout_marginRight="15px"
+                    android:layout_toLeftOf="@id/buchangcm"
                     android:text="75"
                     android:textSize="40px"/>
 
@@ -219,6 +230,7 @@
                     android:layout_height="1px"
                     android:layout_alignParentBottom="true"
                     android:background="#555"/>
+
 
             </com.zhy.autolayout.AutoRelativeLayout>
 
@@ -250,13 +262,25 @@
                     android:text="步频:"
                     android:textSize="30px"/>
 
+
                 <TextView
+                    android:id="@+id/step"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="15px"
                     android:text="Step/MIN"
+                    android:textSize="40px"/>
+
+                <TextView
+                    android:id="@+id/tv_bupin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15px"
+                    android:layout_toLeftOf="@id/step"
+                    android:text="0"
                     android:textSize="40px"/>
 
                 <View

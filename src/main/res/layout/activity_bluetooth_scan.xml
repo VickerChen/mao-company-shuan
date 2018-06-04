@@ -47,16 +47,10 @@
 
     </RelativeLayout>
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/list_device"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp"
-        android:layoutAnimation="@anim/anim_listview_item"
-        android:paddingEnd="10dp"
-        android:paddingStart="10dp"
-        android:scrollbars="none"/>
+        />
 
 </LinearLayout>

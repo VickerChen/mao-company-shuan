@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
 
-import com.clj.fastble.BleManager;
+import com.inuker.bluetooth.library.BluetoothClient;
 
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
@@ -17,13 +17,13 @@ import org.litepal.exceptions.GlobalException;
  */
 
 public class MyApplication extends LitePalApplication {
+    private static final char[] DIGITS_LOWER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    private static final char[] DIGITS_UPPER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     /**
      * Global application context.
      */
     static Context sContext;
-
-    public static BleManager sBleManager;
 
     /**
      * 当前MainActivity是否已经resume
@@ -34,6 +34,7 @@ public class MyApplication extends LitePalApplication {
      * 当前是否已经进入了拍照页面
      */
     public static boolean isEnterPhotoActivity;
+    public static boolean isFirstChanglianjie = true;
 
     public final static String XmlPath = "https://app.moscase8.com/apps/538/BluetoothWatch.xml";
     public final static int LOGIN = 10000;
@@ -43,7 +44,7 @@ public class MyApplication extends LitePalApplication {
      */
     public static boolean isInch = false;
 
-
+    public static BluetoothClient sBluetoothClient;
 
 
     /**
@@ -75,6 +76,14 @@ public class MyApplication extends LitePalApplication {
         }
         return sContext;
     }
+
+    public static BluetoothClient getBleManager() {
+        if (sBluetoothClient == null) {
+            sBluetoothClient = new BluetoothClient(getContext());
+        }
+        return sBluetoothClient;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -99,11 +108,6 @@ public class MyApplication extends LitePalApplication {
         CrashHandler.getInstance().init(this);
     }
 
-    public static synchronized BleManager getBleManager(){
-        if (sBleManager == null)
-            sBleManager = new BleManager(getContext());
-        return sBleManager;
-    }
 
     public static String toHexString1(byte b){
         String s = Integer.toHexString(b & 0xFF);
@@ -114,6 +118,55 @@ public class MyApplication extends LitePalApplication {
         }
     }
 
+    public static String encodeHexStr(byte[] data) {
+        return encodeHexStr(data, true);
+    }
 
+    public static String encodeHexStr(byte[] data, boolean toLowerCase) {
+        return encodeHexStr(data, toLowerCase?DIGITS_LOWER:DIGITS_UPPER);
+    }
+
+    protected static String encodeHexStr(byte[] data, char[] toDigits) {
+        return new String(encodeHex(data, toDigits));
+    }
+
+    protected static char[] encodeHex(byte[] data, char[] toDigits) {
+        if(data == null) {
+            return null;
+        } else {
+            int l = data.length;
+            char[] out = new char[l << 1];
+            int i = 0;
+
+            for(int var5 = 0; i < l; ++i) {
+                out[var5++] = toDigits[(240 & data[i]) >>> 4];
+                out[var5++] = toDigits[15 & data[i]];
+            }
+
+            return out;
+        }
+    }
+
+    public static byte[] hexStringToBytes(String hexString) {
+        if(hexString != null && !hexString.equals("")) {
+            hexString = hexString.toUpperCase();
+            int length = hexString.length() / 2;
+            char[] hexChars = hexString.toCharArray();
+            byte[] d = new byte[length];
+
+            for(int i = 0; i < length; ++i) {
+                int pos = i * 2;
+                d[i] = (byte)(charToByte(hexChars[pos]) << 4 | charToByte(hexChars[pos + 1]));
+            }
+
+            return d;
+        } else {
+            return null;
+        }
+    }
+
+    public static byte charToByte(char c) {
+        return (byte)"0123456789ABCDEF".indexOf(c);
+    }
 
 }

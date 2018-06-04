@@ -118,19 +118,13 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/login"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/login_button"
-            android:text="登录"/>
 
         <Button
             android:id="@+id/exit"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@drawable/exit_button"
-            android:text="退出"
+            android:text="退出账号"
             android:visibility="gone"/>
 
     </com.zhy.autolayout.AutoRelativeLayout>

@@ -11,13 +11,13 @@ import org.litepal.crud.DataSupport;
 public class MyInfoBean extends DataSupport{
     private String sex;
 
-    private int shengao;
+    private double shengao;
 
-    private int tizhong;
+    private double tizhong;
 
-    private int tunwei;
+    private double tunwei;
 
-    private int yaowei;
+    private double yaowei;
 
     private int birthday;
 
@@ -30,35 +30,35 @@ public class MyInfoBean extends DataSupport{
         this.sex = sex;
     }
 
-    public int getShengao() {
+    public double getShengao() {
         return shengao;
     }
 
-    public void setShengao(int shengao) {
+    public void setShengao(double shengao) {
         this.shengao = shengao;
     }
 
-    public int getTizhong() {
+    public double getTizhong() {
         return tizhong;
     }
 
-    public void setTizhong(int tizhong) {
+    public void setTizhong(double tizhong) {
         this.tizhong = tizhong;
     }
 
-    public int getTunwei() {
+    public double getTunwei() {
         return tunwei;
     }
 
-    public void setTunwei(int tunwei) {
+    public void setTunwei(double tunwei) {
         this.tunwei = tunwei;
     }
 
-    public int getYaowei() {
+    public double getYaowei() {
         return yaowei;
     }
 
-    public void setYaowei(int yaowei) {
+    public void setYaowei(double yaowei) {
         this.yaowei = yaowei;
     }
 
