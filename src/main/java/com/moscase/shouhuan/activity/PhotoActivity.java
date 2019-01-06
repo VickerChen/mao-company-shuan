@@ -2,12 +2,15 @@ package com.moscase.shouhuan.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
@@ -30,9 +33,8 @@ import com.github.florent37.camerafragment.widgets.CameraSwitchView;
 import com.github.florent37.camerafragment.widgets.FlashSwitchView;
 import com.github.florent37.camerafragment.widgets.MediaActionSwitchView;
 import com.github.florent37.camerafragment.widgets.RecordButton;
-import com.inuker.bluetooth.library.BluetoothClient;
-import com.inuker.bluetooth.library.connect.response.BleWriteResponse;
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.service.MyBleService;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
@@ -43,7 +45,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,7 +65,6 @@ public class PhotoActivity extends AppCompatActivity {
     public static final String FRAGMENT_TAG = "camera";
     private static final int REQUEST_CAMERA_PERMISSIONS = 931;
     private static final int REQUEST_PREVIEW_CODE = 1001;
-    private BluetoothClient mBluetoothClient;
 
     @BindView(R.id.settings_view)
     CameraSettingsView settingsView;
@@ -91,12 +91,14 @@ public class PhotoActivity extends AppCompatActivity {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE};
-    private boolean isWhileCanRun = true;
+    private boolean isConnect = true;
 
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
 
     private SharedPreferences mSharedPreferences;
+
+    private MyBleService mMyBleService;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -104,9 +106,11 @@ public class PhotoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
         mSharedPreferences = getSharedPreferences("ToggleButton", MODE_PRIVATE);
+        isConnect = mSharedPreferences.getBoolean("isconnected", false);
+        Intent intent1 = new Intent(this, MyBleService.class);
+        bindService(intent1, conn, BIND_AUTO_CREATE);
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
-        mBluetoothClient = MyApplication.getBleManager();
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         mDate = sDateFormat.format(new java.util.Date());
         if (Build.VERSION.SDK_INT >= 23) {
@@ -122,18 +126,8 @@ public class PhotoActivity extends AppCompatActivity {
             public void run() {
                 // TODO Auto-generated method stub
                 //要做的事情，这里再次调用此Runnable对象，以实现每两秒实现一次的定时器操作
-                mBluetoothClient.write(mSharedPreferences.getString
-                                ("mac", ""), UUID.fromString
-                                ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                        UUID.fromString
-                                ("0000ffe9-0000-1000-8000-00805f9b34fb"),
-                        hexStringToBytes("6f6b"), new BleWriteResponse() {
-
-                            @Override
-                            public void onResponse(int i) {
-
-                            }
-                        });
+                if (MyApplication.isBleConnect)
+                    mMyBleService.write(hexStringToBytes("6f6b"));
                 mHandler.postDelayed(this, 10000);
             }
         };
@@ -431,18 +425,8 @@ public class PhotoActivity extends AppCompatActivity {
                 recordButton.performClick();
                 isEnterPhotoActivity = false;
                 //拍照成功后发OK
-                mBluetoothClient.write(mSharedPreferences.getString
-                                ("mac", ""), UUID.fromString
-                                ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                        UUID.fromString
-                                ("0000ffe9-0000-1000-8000-00805f9b34fb"),
-                        hexStringToBytes("6f6b"), new BleWriteResponse() {
-
-                            @Override
-                            public void onResponse(int i) {
-
-                            }
-                        });
+                if (MyApplication.isBleConnect)
+                mMyBleService.write(hexStringToBytes("6f6b"));
             }
         }
     }
@@ -450,19 +434,9 @@ public class PhotoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         isEnterPhotoActivity = true;
-        mBluetoothClient.write(mSharedPreferences.getString
-                        ("mac", ""), UUID.fromString
-                        ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                UUID.fromString
-                        ("0000ffe9-0000-1000-8000-00805f9b34fb"),
-                hexStringToBytes("70686f746f7f"), new BleWriteResponse() {
-
-                    @Override
-                    public void onResponse(int i) {
-                    }
-                });
-
         super.onResume();
+        if (MyApplication.isBleConnect)
+            mMyBleService.write(hexStringToBytes("70686f746f7f"));
     }
 
     @Override
@@ -475,22 +449,25 @@ public class PhotoActivity extends AppCompatActivity {
     protected void onDestroy() {
         EventBus.getDefault().unregister(this);
         isEnterPhotoActivity = false;
-        isWhileCanRun = false;
         mHandler.removeCallbacks(mRunnable);
         //退出界面发exit
-        mBluetoothClient.write(mSharedPreferences.getString
-                        ("mac", ""), UUID.fromString
-                        ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                UUID.fromString
-                        ("0000ffe9-0000-1000-8000-00805f9b34fb"),
-                hexStringToBytes("65786974"), new BleWriteResponse() {
-
-                        @Override
-                        public void onResponse(int i) {
-                        }
-                    });
-
+        if (MyApplication.isBleConnect)
+        mMyBleService.write(hexStringToBytes("65786974"));
         super.onDestroy();
 
     }
+
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            mMyBleService = ((MyBleService.LocalBinder) iBinder).getService();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 }

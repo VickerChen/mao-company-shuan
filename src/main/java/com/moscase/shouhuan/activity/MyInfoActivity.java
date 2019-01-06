@@ -189,7 +189,7 @@ public class MyInfoActivity extends AppCompatActivity {
             mBuchangcm.setText("inch");
             mBuchang.setText(mSharePreferences.getInt("buchangft", 30) + "");
         } else {
-            mBodyHeight.setText(mSharePreferences.getInt("height", 180) + "");
+            mBodyHeight.setText(mSharePreferences.getInt("height", 178) + "");
             mBodyWeight.setText(mSharePreferences.getInt("weight", 68) + "");
             mYaowei.setText(mSharePreferences.getInt("yaowei", 70) + "");
             mTunwei.setText(mSharePreferences.getInt("tunwei", 100) + "");

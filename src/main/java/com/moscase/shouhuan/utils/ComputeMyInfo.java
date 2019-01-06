@@ -157,6 +157,7 @@ public class ComputeMyInfo {
         if (sex.equals("男")) {
             double a = 66 + (13.7 * tizhong) + (5 * shengao) - (6.8 * (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday()));
             Log.d("koma", "基础代谢男男---" + a);
+            Log.d("koma", "基础代谢男男---体重" + tizhong+"身高"+shengao+"年龄"+(Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday()));
             return (float) a;
         } else {
             double a = 655 + (9.6 * tizhong) + (1.7 * shengao) - (4.7 * (Calendar.getInstance().get(Calendar.YEAR) - DataSupport.find(MyInfoBean.class, 1).getBirthday()));

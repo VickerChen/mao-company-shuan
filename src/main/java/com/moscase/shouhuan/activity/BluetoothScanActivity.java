@@ -2,14 +2,19 @@ package com.moscase.shouhuan.activity;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -20,20 +25,16 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
-import com.inuker.bluetooth.library.BluetoothClient;
-import com.inuker.bluetooth.library.search.SearchRequest;
-import com.inuker.bluetooth.library.search.SearchResult;
-import com.inuker.bluetooth.library.search.response.SearchResponse;
 import com.moscase.shouhuan.R;
-import com.moscase.shouhuan.service.ConnectService;
+import com.moscase.shouhuan.service.MyBleService;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.view.DividerItemDecoration;
 
@@ -46,10 +47,10 @@ import java.util.List;
  * 这是蓝牙扫描结果的界面
  */
 public class BluetoothScanActivity extends AppCompatActivity {
-    private List<SearchResult> scanResultList;
+    private List<BluetoothDevice> scanResultList;
     private Adapter mMyAdapter;
     //    private BluetoothService mBluetoothService;
-    private List<SearchResult> scanCompareList = new ArrayList<>();
+    private List<BluetoothDevice> scanCompareList = new ArrayList<>();
     private List<String> scanCompareListAddress = new ArrayList<>();
     private List<String> scanListAddress = new ArrayList<>();
     //    private ListView mListView;
@@ -65,34 +66,150 @@ public class BluetoothScanActivity extends AppCompatActivity {
     private ImageButton mRefreshButton;
 
     private MyReceiver mReceiver;
-    private Handler mHandler;
 
     //这本来是存储长短连接的check值的，我拿来顺便存储一个mac地址
     private SharedPreferences mSharedPreferences;
 
-    private BluetoothClient mBluetoothClient;
+
+    private boolean isAutoCancleBle = true;
+
+
+    private BluetoothAdapter mBluetoothAdapter;
+    private boolean mScanning;
+
+    private static final int REQUEST_ENABLE_BT = 1;
+    // stop scan after 10 second
+    private static final long SCAN_PERIOD = 10000;
+
+
+    private MyBleService mMyBleService;
+
+    private void scanLeDevice(final boolean enable) {
+        if (enable) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                }
+            }, SCAN_PERIOD);
+
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mScanning = false;
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
+    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback
+            () {
+
+        @Override
+        public void onLeScan(final BluetoothDevice bleDevice, int rssi, final byte[] scanRecord) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    // 扫描到一个符合扫描规则的BLE设备（主线程）
+                    Log.d("koma", "扫描到设备" + bleDevice.getName());
+                    final String name = bleDevice.getName();
+                    if (!(name == null) && !name.equals("") && !name.equals("null") && !name.equals
+                            ("NULL")) {
+                        mScaningDialog.dismiss();
+                        if (!scanListAddress.contains(bleDevice.getAddress())) {
+
+                            mMyAdapter.addResult(bleDevice);
+                            scanListAddress.add(bleDevice.getAddress());
+                            Log.d("koma3", "添加了" + bleDevice.getName());
+                        }
+
+                        scanCompareListAddress.add(bleDevice.getAddress());
+                        scanCompareList.add(bleDevice);
+
+
+                        mMyAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
+    };
+
+
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+                Log.d("koma---", "扫描了");
+                mScanning = true;
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHandler.sendEmptyMessage(2);
+                    }
+                }, 3000);
+            } else {
+                mScanning = false;
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                mMyAdapter.compare();
+                if (mScaningDialog.isShowing())
+                    mScaningDialog.dismiss();
+
+                scanCompareList.clear();
+                scanCompareListAddress.clear();
+                mHandler.sendEmptyMessage(1);
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            mMyBleService = ((MyBleService.LocalBinder) iBinder).getService();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_scan);
+        // 初始化 Bluetooth adapter, 通过蓝牙管理器得到一个参考蓝牙适配器(API必须在以上android4.3或以上和版本)
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context
+                .BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        mHandler.sendEmptyMessage(1);
+
+        Intent intent = new Intent(this, MyBleService.class);
+        bindService(intent, conn, BIND_AUTO_CREATE);
+
 
         scanResultList = new ArrayList<>();
         mSharedPreferences = getSharedPreferences("ToggleButton", MODE_PRIVATE);
-        mHandler = new Handler();
         mRefreshButton = (ImageButton) findViewById(R.id.btn_refresh);
-        mBluetoothClient = MyApplication.getBleManager();
         mRefreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBluetoothClient.stopSearch();
                 mMyAdapter.clear();
                 scanCompareList.clear();
                 scanCompareListAddress.clear();
                 scanListAddress.clear();
                 scanResultList.clear();
                 mMyAdapter.notifyDataSetChanged();
-                initScan();
+                mHandler.removeMessages(1);
+                mHandler.removeMessages(2);
+                mHandler.removeCallbacksAndMessages(null);
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                mHandler.sendEmptyMessage(1);
             }
         });
 
@@ -117,79 +234,12 @@ public class BluetoothScanActivity extends AppCompatActivity {
 
         initView();
 
-        if (mBluetoothClient.isBluetoothOpened()) {
-            mScaningDialog.setMessage("搜索中...");
-            mScaningDialog.show();
-            initScan();
-        }
+        mScaningDialog.setMessage("搜索中...");
+        mScaningDialog.show();
+
+
     }
 
-
-    private void initScan() {
-
-        SearchRequest request = new SearchRequest.Builder()
-                .searchBluetoothLeDevice(3000, 1)   // 先扫BLE设备3次，每次3s
-                .build();
-
-        mBluetoothClient.search(request, new SearchResponse() {
-            @Override
-            public void onSearchStarted() {
-
-            }
-
-            @Override
-            public void onDeviceFounded(SearchResult device) {
-                final String name = device.getName();
-                if (!(name == null) && !name.equals("") && !name.equals("null") && !name.equals
-                        ("NULL")) {
-                    mScaningDialog.dismiss();
-                    if (!scanListAddress.contains(device.getAddress())) {
-
-                        mMyAdapter.addResult(device);
-                        scanListAddress.add(device.getAddress());
-                        Log.d("koma3", "添加了" + device.getName());
-
-                    }
-
-                    scanCompareListAddress.add(device.getAddress());
-                    scanCompareList.add(device);
-
-
-                    mMyAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onSearchStopped() {
-                if (mScaningDialog.isShowing())
-                    mScaningDialog.dismiss();
-//            if (mMyAdapter.getCount() == 0) {
-//                Toast.makeText(BluetoothScanActivity.this, "未发现可用设备,请重试", Toast.LENGTH_SHORT)
-//                        .show();
-//            } else {
-//                Toast.makeText(BluetoothScanActivity.this, "扫描完毕", Toast.LENGTH_SHORT).show();
-//            }
-
-                mMyAdapter.compare();
-
-
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        initScan();
-                        scanCompareList.clear();
-                        scanCompareListAddress.clear();
-                    }
-                }, 300);
-            }
-
-            @Override
-            public void onSearchCanceled() {
-
-            }
-        });
-
-    }
 
     private void initView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -200,6 +250,7 @@ public class BluetoothScanActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                isAutoCancleBle = false;
                 finish();
             }
         });
@@ -218,22 +269,28 @@ public class BluetoothScanActivity extends AppCompatActivity {
         mMyAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter baseQuickAdapter, View view, int i) {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                mHandler.removeMessages(1);
+                mHandler.removeMessages(2);
+                mHandler.removeCallbacksAndMessages(null);
                 Log.d("koma---", mMyAdapter.getItem(i).getName().contains("SWBLE") + "");
 //                if (mMyAdapter.getItem(i).getName().contains("SWBLE")) {
-                    mBluetoothClient.stopSearch();
-                    String mac = mMyAdapter.getItem(i).getAddress();
-                    String currentname = mMyAdapter.getItem(i).getName();
-                    mBluetoothClient.stopSearch();
-                    mHandler.removeMessages(0);
-                    mSharedPreferences.edit().putString("mac", mac).commit();
-                    mSharedPreferences.edit().putString("currentname", currentname).commit();
-                    mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
-                    mConnectingDialog.setCanceledOnTouchOutside(true);
-                    mConnectingDialog.setCancelable(true);
-                    mConnectingDialog.setMessage("正在连接...");
-                    mConnectingDialog.show();
-                    Intent intent = new Intent(BluetoothScanActivity.this, ConnectService.class);
-                    startService(intent);
+                String mac = mMyAdapter.getItem(i).getAddress();
+                MyApplication.sBluetoothDevice = mMyAdapter.getItem(i);
+                mMyBleService.connect(mac);
+
+                String currentname = mMyAdapter.getItem(i).getName();
+                mSharedPreferences.edit().putString("mac", mac).commit();
+                mSharedPreferences.edit().putString("currentname", currentname).commit();
+                mConnectingDialog = new ProgressDialog(BluetoothScanActivity.this);
+                mConnectingDialog.setCanceledOnTouchOutside(true);
+                mConnectingDialog.setCancelable(true);
+                mConnectingDialog.setMessage("正在连接...");
+                mConnectingDialog.show();
+
+//                Intent intent = new Intent(BluetoothScanActivity.this, ConnectService.class);
+//                startService(intent);
+
 //                } else {
 //                    // 创建构建器
 //                    AlertDialog.Builder builder = new AlertDialog.Builder(BluetoothScanActivity
@@ -266,7 +323,14 @@ public class BluetoothScanActivity extends AppCompatActivity {
                     mScaningDialog.setMessage("搜索中...");
                     mScaningDialog.show();
                     Log.e("koma", "打开了蓝牙");
-                    initScan();
+//                    initScan();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mScaningDialog.isShowing())
+                                mScaningDialog.cancel();
+                        }
+                    }, 5000);
                 } else if (state == BluetoothAdapter.STATE_OFF) {
                     mMyAdapter.clear();
                     scanCompareList.clear();
@@ -274,21 +338,20 @@ public class BluetoothScanActivity extends AppCompatActivity {
                     mMyAdapter.notifyDataSetChanged();
                 }
             } else if (intent.getAction().equals("lianjieshibai")) {
-                Toast.makeText(BluetoothScanActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-                if (mConnectingDialog != null)
-                    mConnectingDialog.dismiss();
+//                Toast.makeText(BluetoothScanActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+//                if (mConnectingDialog != null)
+//                    mConnectingDialog.dismiss();
             } else if (intent.getAction().equals("lianjiechenggong")) {
                 if (mConnectingDialog != null)
                     mConnectingDialog.dismiss();
-                Toast.makeText(BluetoothScanActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(BluetoothScanActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 mRl_name.setVisibility(View.VISIBLE);
                 mCurrentConnectedName.setText(mSharedPreferences.getString("currentname", ""));
                 mMyAdapter.removeItem("SWBLE");
                 mMyAdapter.notifyDataSetChanged();
-                mRefreshButton.performClick();
-            }else if (intent.getAction().equals("com.chenhang.disconnect")){
+            } else if (intent.getAction().equals("com.chenhang.disconnect")) {
+//                Toast.makeText(context, "断开连接", Toast.LENGTH_SHORT).show();
                 mRl_name.setVisibility(View.GONE);
-                mRefreshButton.performClick();
             }
 
         }
@@ -296,8 +359,8 @@ public class BluetoothScanActivity extends AppCompatActivity {
     }
 
 
-    public class Adapter extends BaseQuickAdapter<SearchResult, BaseViewHolder> {
-        void addResult(SearchResult result) {
+    public class Adapter extends BaseQuickAdapter<BluetoothDevice, BaseViewHolder> {
+        void addResult(BluetoothDevice result) {
             scanResultList.add(result);
             notifyDataSetChanged();
         }
@@ -308,8 +371,7 @@ public class BluetoothScanActivity extends AppCompatActivity {
 
         void compare() {
             for (int i = 0; i < scanResultList.size(); i++) {
-                if (!scanCompareListAddress.contains(mMyAdapter.getItem(i).getAddress
-                        ())) {
+                if (!scanCompareListAddress.contains(mMyAdapter.getItem(i).getAddress())) {
                     Log.d("koma", "删除了一个");
                     scanListAddress.remove(mMyAdapter.getItem(i).getAddress());
                     mMyAdapter.removeItem(mMyAdapter.getItem(i).getName());
@@ -318,12 +380,12 @@ public class BluetoothScanActivity extends AppCompatActivity {
             }
         }
 
-        List<SearchResult> getList() {
+        List<BluetoothDevice> getList() {
             return scanResultList;
         }
 
         void removeItem(String name) {
-            SearchResult result;
+            BluetoothDevice result;
             for (int i = 0; i < scanResultList.size(); i++) {
                 String name1 = mMyAdapter.getItem(i).getName();
                 if (name1.contains(name)) {
@@ -332,12 +394,12 @@ public class BluetoothScanActivity extends AppCompatActivity {
             }
         }
 
-        public Adapter(int layoutResId, @Nullable List<SearchResult> data) {
+        public Adapter(int layoutResId, @Nullable List<BluetoothDevice> data) {
             super(layoutResId, data);
         }
 
         @Override
-        protected void convert(BaseViewHolder baseViewHolder, SearchResult bleDevice) {
+        protected void convert(BaseViewHolder baseViewHolder, BluetoothDevice bleDevice) {
             baseViewHolder.setText(R.id.device_name, bleDevice.getName());
             baseViewHolder.setText(R.id.ble_states, bleDevice.getAddress());
         }
@@ -386,10 +448,23 @@ public class BluetoothScanActivity extends AppCompatActivity {
         mMyAdapter.clear();
         scanCompareList.clear();
         unregisterReceiver(mReceiver);
-        mHandler.removeMessages(0);
+        mHandler.removeMessages(1);
+        mHandler.removeMessages(2);
         mHandler.removeCallbacksAndMessages(null);
+        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        unbindService(conn);
         super.onDestroy();
-        System.gc();
+
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            isAutoCancleBle = false;
+            finish();
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
 }

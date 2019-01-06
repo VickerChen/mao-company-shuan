@@ -173,7 +173,7 @@ public class ZhibiaoFragment extends Fragment {
         }
 
 
-        mRulerView.setValue(quzhitizhong, 0, 200, 1);
+        mRulerView.setValue(Math.round(quzhitizhongfloat)<0?0:Math.round(quzhitizhongfloat), 0, 200, 1);
         mRulerView.setClickable(false);
 
         mShuifen.setText("水份: " + shuifen + "%");
@@ -306,7 +306,7 @@ public class ZhibiaoFragment extends Fragment {
                     tempyaotunbi * 100 > 100 ? 100 : tempyaotunbi * 100);
             mDataList.add(data1);
 
-            RadarData data2 = new RadarData("去脂体重 " + quzhitizhong, tempQuzhitizhong * 100);
+            RadarData data2 = new RadarData("去脂体重 " + (Math.round(quzhitizhongfloat)<0?0:Math.round(quzhitizhongfloat)), tempQuzhitizhong * 100);
             mDataList.add(data2);
 
             RadarData data3 = new RadarData("基础代谢率 " + Math.round(jichudaixiefloat),
@@ -329,7 +329,7 @@ public class ZhibiaoFragment extends Fragment {
                     tempyaotunbi * 100 > 100 ? 100 : tempyaotunbi * 100);
             mDataList.add(data1);
 
-            RadarData data2 = new RadarData("去脂体重 " + quzhitizhong, tempQuzhitizhong * 100);
+            RadarData data2 = new RadarData("去脂体重 " + (Math.round(quzhitizhongfloat)<0?0:Math.round(quzhitizhongfloat)), tempQuzhitizhong * 100);
             mDataList.add(data2);
 
             RadarData data3 = new RadarData("基础代谢率 " + Math.round(jichudaixiefloat),

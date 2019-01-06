@@ -1,10 +1,9 @@
 package com.moscase.shouhuan.utils;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
-
-import com.inuker.bluetooth.library.BluetoothClient;
 
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
@@ -17,6 +16,19 @@ import org.litepal.exceptions.GlobalException;
  */
 
 public class MyApplication extends LitePalApplication {
+    public static final int STATE_DISCONNECTED = 0;
+    public static final int STATE_CONNECTING = 1;
+    public static final int STATE_CONNECTED = 2;
+
+
+
+    public static BluetoothDevice sBluetoothDevice = null;
+
+    public static boolean isBleConnect;
+
+
+
+
     private static final char[] DIGITS_LOWER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     private static final char[] DIGITS_UPPER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
@@ -44,7 +56,8 @@ public class MyApplication extends LitePalApplication {
      */
     public static boolean isInch = false;
 
-    public static BluetoothClient sBluetoothClient;
+
+
 
 
     /**
@@ -77,12 +90,12 @@ public class MyApplication extends LitePalApplication {
         return sContext;
     }
 
-    public static BluetoothClient getBleManager() {
-        if (sBluetoothClient == null) {
-            sBluetoothClient = new BluetoothClient(getContext());
-        }
-        return sBluetoothClient;
-    }
+//    public static BluetoothClient getBleManager() {
+//        if (sBluetoothClient == null) {
+//            sBluetoothClient = new BluetoothClient(getContext());
+//        }
+//        return sBluetoothClient;
+//    }
 
     @Override
     public void onCreate() {
@@ -103,9 +116,12 @@ public class MyApplication extends LitePalApplication {
             StrictMode.setVmPolicy(builder.build());
         }
 
-
         //上传BUG日志的初始化
         CrashHandler.getInstance().init(this);
+
+
+
+
     }
 
 

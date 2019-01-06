@@ -5,10 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.moscase.shouhuan.R;
@@ -20,10 +18,6 @@ import com.moscase.shouhuan.R;
  */
 public class RingView extends View {
 
-    /**
-     * 心跳线的总宽度 -- 圆环的宽度
-     */
-    private int mHeartBeatWidth;
 
     /**
      * 圆环半径 根据view的宽度计算
@@ -65,10 +59,6 @@ public class RingView extends View {
     private int mAnimAngle = -1;
 
 
-    /**
-     * 期初的偏移量
-     */
-    private final int OFFSET_Y = 0;
 
     /**
      * canvas抗锯齿开启需要
@@ -77,7 +67,6 @@ public class RingView extends View {
 
     private Paint mLinePaint;
 
-    Path path = new Path();
 
     private boolean isAnimRunning;
 
@@ -111,7 +100,6 @@ public class RingView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mHeartBeatWidth = w - mHeartPaintWidth * 2 - 40; //内圆宽度
         mHeartPaintWidth = getMeasuredHeight() / 10;
         mRingPaint.setStrokeWidth(mHeartPaintWidth);
         mRingAnimPaint.setStrokeWidth(mHeartPaintWidth);
@@ -126,10 +114,6 @@ public class RingView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.setDrawFilter(mDrawFilter);//在canvas上抗锯齿
-
-        //由于drawArc默认从x轴开始画，因此需要将画布旋转或者绘制角度旋转，2种方案
-        //int level = canvas.save();
-        //canvas.rotate(-90, x, y);// 旋转的时候一定要指明中心
         for (int i = -90; i < 270; i += 3) {
             canvas.drawArc(mRectf, i, 1, false, mRingPaint);
         }
@@ -179,8 +163,6 @@ public class RingView extends View {
 
     public void setAngel(double baifenbi) {
         mNeedToShow = (int) (360 * baifenbi);
-        Log.d("koma---百分比是", mNeedToShow + "");
-
         mAnimAngle = -1;
         postInvalidate();
         startAnim();

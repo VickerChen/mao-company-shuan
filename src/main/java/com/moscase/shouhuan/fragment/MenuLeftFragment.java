@@ -3,18 +3,22 @@ package com.moscase.shouhuan.fragment;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,22 +27,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.inuker.bluetooth.library.BluetoothClient;
-import com.inuker.bluetooth.library.connect.response.BleReadResponse;
-import com.inuker.bluetooth.library.connect.response.BleReadRssiResponse;
 import com.moscase.shouhuan.R;
 import com.moscase.shouhuan.activity.BluetoothScanActivity;
 import com.moscase.shouhuan.activity.CalendarActivity;
 import com.moscase.shouhuan.activity.NotifyActivity;
 import com.moscase.shouhuan.activity.PhotoActivity;
-import com.moscase.shouhuan.utils.MyApplication;
+import com.moscase.shouhuan.service.MyBleService;
 import com.moscase.shouhuan.utils.PermissionUtil;
 
-import java.util.UUID;
-
+import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.MODE_PRIVATE;
-import static com.inuker.bluetooth.library.Constants.REQUEST_FAILED;
-import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
 import static com.moscase.shouhuan.utils.MyApplication.encodeHexStr;
 
 
@@ -58,13 +56,18 @@ public class MenuLeftFragment extends Fragment {
     private ImageView mSign;
 
     private Runnable mRunnable;
+    private MyBleService mMyBleService;
 
-    private BluetoothClient mBluetoothClient;
+    private boolean isBindService;
+
     private SharedPreferences mSharedPreferences;
     private String[] mBlueToothPermission = {Manifest.permission.ACCESS_COARSE_LOCATION,
-//            Manifest.permission.BLUETOOTH,
-//            Manifest.permission.BLUETOOTH_ADMIN,
-//            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.READ_SMS
+
     };
 
 
@@ -131,7 +134,7 @@ public class MenuLeftFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 mExitLayout.setVisibility(View.GONE);
-                mBluetoothClient.disconnect(mSharedPreferences.getString("mac", ""));
+                mMyBleService.getBluetoothGatt().disconnect();
             }
         });
 
@@ -139,13 +142,22 @@ public class MenuLeftFragment extends Fragment {
         return view;
     }
 
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            mMyBleService = ((MyBleService.LocalBinder) iBinder).getService();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
     private void initView(View view) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.chenhang.disconnect");
-        intentFilter.addAction("android.bluetooth.adapter.action.STATE_CHANGED");
-        getActivity().registerReceiver(mBroadcastReceiver, intentFilter);
         mSharedPreferences = getActivity().getSharedPreferences("ToggleButton", MODE_PRIVATE);
-        mBluetoothClient = MyApplication.getBleManager();
         mCalendarLinearLayout = (LinearLayout) view.findViewById(R.id.calendar);
         mPhotoLinearLayout = (LinearLayout) view.findViewById(R.id.takePhoto);
         mNotifyLayout = (LinearLayout) view.findViewById(R.id.notify);
@@ -154,75 +166,95 @@ public class MenuLeftFragment extends Fragment {
         mEle = view.findViewById(R.id.ele);
         mSign = view.findViewById(R.id.sign);
 
-//180f 2a19
 
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                mBluetoothClient.read(mSharedPreferences.getString("mac", ""), UUID.fromString
-                                ("0000180f-0000-1000-8000-00805f9b34fb")
-
-                        , UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb"), new
-                                BleReadResponse() {
-                                    @Override
-                                    public void onResponse(int code, byte[] bytes) {
-                                        if (code == REQUEST_SUCCESS) {
-                                            mExitLayout.setVisibility(View.VISIBLE);
-                                            byte[] value = bytes;
-                                            hexStr = encodeHexStr(value);
-                                            //转换成十六进制
-                                            int i = Integer.parseInt(hexStr, 16);
-                                            if (i >= 22 && i < 38) {
-                                                mEle.setImageResource(R.drawable.electric_three);
-                                            } else if (i >= 38 && i < 54) {
-                                                mEle.setImageResource(R.drawable.electric_four);
-                                            } else if (i >= 54 && i < 70) {
-                                                mEle.setImageResource(R.drawable.electric_five);
-                                            } else if (i >= 70 && i < 85) {
-                                                mEle.setImageResource(R.drawable.electric_six);
-                                            } else if (i >= 85) {
-                                                mEle.setImageResource(R.drawable.electric_seven);
-                                            } else {
-                                                mEle.setImageResource(R.drawable.electric_one);
-                                            }
-                                        }else if (code == REQUEST_FAILED)
-                                            mExitLayout.setVisibility(View.GONE);
-                                    }
-                                });
-
-                mBluetoothClient.readRssi(mSharedPreferences.getString("mac", ""), new
-                        BleReadRssiResponse() {
-
-                            @Override
-                            public void onResponse(int i, Integer integer) {
-                                if (i == REQUEST_SUCCESS) {
-                                    mExitLayout.setVisibility(View.VISIBLE);
-                                    if (i >= -55) {
-                                        mSign.setImageResource(R.drawable.sign);
-                                    } else if (i >= -65) {
-                                        mSign.setImageResource(R.drawable.sign_six);
-                                    } else if (i >= -75) {
-                                        mSign.setImageResource(R.drawable.sign_five);
-                                    } else if (i >= -80) {
-                                        mSign.setImageResource(R.drawable.sign_four);
-                                    } else if (i >= -90) {
-                                        mSign.setImageResource(R.drawable.sign_three);
-                                    } else {
-                                        mSign.setImageResource(R.drawable.sign_two);
-                                    }
-                                }else if (i == REQUEST_FAILED)
-                                    mExitLayout.setVisibility(View.GONE);
-                            }
-                        });
-
-                mHandler.postDelayed(this, 10000);
-            }
-        };
-
-        mHandler.postDelayed(mRunnable, 1000);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.chenhang.disconnect");
+        filter.addAction("lianjiechenggong");
+        filter.addAction("elc");
+        filter.addAction("rssi");
+        filter.addAction("discoverservices");
+        filter.addAction("android.bluetooth.adapter.action.STATE_CHANGED");
+        filter.setPriority(Integer.MAX_VALUE);
+        getActivity().registerReceiver(myReceiver, filter);
 
 
     }
+
+    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.chenhang.disconnect")) {
+                mEle.setImageResource(R.drawable.electric_one);
+                mSign.setImageResource(R.drawable.sign_two);
+                mExitLayout.setVisibility(View.GONE);
+                mHandler.removeCallbacksAndMessages(null);
+            } else if (intent.getAction().equals("discoverservices")) {
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+//                        mMyBleService.read();
+                        mMyBleService.getBluetoothGatt().readRemoteRssi();
+                        mHandler.postDelayed(this, 10000);
+                    }
+                };
+
+                mHandler.postDelayed(mRunnable, 1000);
+            } else if (intent.getAction().equals("elc")) {
+                mExitLayout.setVisibility(View.VISIBLE);
+                byte[] value = intent.getByteArrayExtra("elc");
+                hexStr = encodeHexStr(value);
+                //转换成十六进制
+                int i = Integer.parseInt(hexStr, 16);
+                if (i >= 22 && i < 38) {
+                    mEle.setImageResource(R.drawable.electric_three);
+                } else if (i >= 38 && i < 54) {
+                    mEle.setImageResource(R.drawable.electric_four);
+                } else if (i >= 54 && i < 70) {
+                    mEle.setImageResource(R.drawable.electric_five);
+                } else if (i >= 70 && i < 85) {
+                    mEle.setImageResource(R.drawable.electric_six);
+                } else if (i >= 85) {
+                    mEle.setImageResource(R.drawable.electric_seven);
+                } else {
+                    mEle.setImageResource(R.drawable.electric_one);
+                }
+            } else if (intent.getAction().equals("rssi")) {
+                Log.d("koma", "读取rssi之后");
+                mExitLayout.setVisibility(View.VISIBLE);
+                int i = intent.getIntExtra("rssi", 0);
+
+                if (i >= -50) {
+                    mSign.setImageResource(R.drawable.sign);
+                } else if (i >= -65) {
+                    mSign.setImageResource(R.drawable.sign_six);
+                } else if (i >= -75) {
+                    mSign.setImageResource(R.drawable.sign_five);
+                } else if (i >= -80) {
+                    mSign.setImageResource(R.drawable.sign_four);
+                } else if (i >= -90) {
+                    mSign.setImageResource(R.drawable.sign_three);
+                } else {
+                    mSign.setImageResource(R.drawable.sign_two);
+                }
+            } else if (intent.getAction().equals("android.bluetooth.adapter.action" +
+                    ".STATE_CHANGED")) {
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter
+                        .STATE_OFF);
+                if (state == BluetoothAdapter.STATE_ON) {
+
+                } else if (state == BluetoothAdapter.STATE_OFF) {
+                    mExitLayout.setVisibility(View.GONE);
+                }
+            } else if (intent.getAction().equals("lianjiechenggong")) {
+                if (!isBindService) {
+                    Intent intent1 = new Intent(getActivity(), MyBleService.class);
+                    getActivity().bindService(intent1, conn, BIND_AUTO_CREATE);
+                    isBindService = true;
+                }
+
+            }
+        }
+    };
 
     private void showBluetoothPer() {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
@@ -236,6 +268,12 @@ public class MenuLeftFragment extends Fragment {
                 != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
                 .BLUETOOTH_ADMIN)
+                != PackageManager.PERMISSION_GRANTED
+                ||ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED
+                |ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission
+                .READ_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             requestBluetoothPermissions();
         } else {
@@ -252,6 +290,10 @@ public class MenuLeftFragment extends Fragment {
                 Manifest.permission.BLUETOOTH_ADMIN)
                 || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.BLUETOOTH)
+                || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.READ_SMS)
+                || ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.RECEIVE_SMS)
                 ) {
             ActivityCompat
                     .requestPermissions(getActivity(), mBlueToothPermission,
@@ -276,34 +318,15 @@ public class MenuLeftFragment extends Fragment {
 
 
     public void gotoBluetoothActivity() {
-        mBluetoothClient.openBluetooth();
         Intent intent = new Intent(getActivity(), BluetoothScanActivity.class);
         startActivity(intent);
     }
 
-
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("com.chenhang.disconnect")) {
-                mEle.setImageResource(R.drawable.electric_one);
-                mSign.setImageResource(R.drawable.sign_two);
-            }else if (intent.getAction().equals("android.bluetooth.adapter.action.STATE_CHANGED")) {
-                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter
-                        .STATE_OFF);
-                if (state == BluetoothAdapter.STATE_ON) {
-
-                } else if (state == BluetoothAdapter.STATE_OFF) {
-                    mExitLayout.setVisibility(View.GONE);
-                }
-            }
-        }
-    };
-
-
     @Override
     public void onDestroyView() {
-        getActivity().unregisterReceiver(mBroadcastReceiver);
+        getActivity().unregisterReceiver(myReceiver);
+        if (isBindService)
+            getActivity().unbindService(conn);
         super.onDestroyView();
     }
 }

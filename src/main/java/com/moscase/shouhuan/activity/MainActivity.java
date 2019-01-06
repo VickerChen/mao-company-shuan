@@ -3,6 +3,10 @@ package com.moscase.shouhuan.activity;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -11,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -22,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -46,9 +52,6 @@ import com.elbbbird.android.socialsdk.model.SocialToken;
 import com.elbbbird.android.socialsdk.model.SocialUser;
 import com.elbbbird.android.socialsdk.otto.BusProvider;
 import com.elbbbird.android.socialsdk.otto.SSOBusEvent;
-import com.inuker.bluetooth.library.BluetoothClient;
-import com.inuker.bluetooth.library.connect.response.BleNotifyResponse;
-import com.inuker.bluetooth.library.connect.response.BleWriteResponse;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
@@ -59,6 +62,7 @@ import com.moscase.shouhuan.bean.UpdataInfo;
 import com.moscase.shouhuan.fragment.XinlvFragment;
 import com.moscase.shouhuan.fragment.ZhibiaoFragment;
 import com.moscase.shouhuan.fragment.ZhuangtaiFragment;
+import com.moscase.shouhuan.service.MyBleService;
 import com.moscase.shouhuan.utils.ComputeMyInfo;
 import com.moscase.shouhuan.utils.MessageEvent;
 import com.moscase.shouhuan.utils.MyApplication;
@@ -89,8 +93,6 @@ import java.util.UUID;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static com.aurelhubert.ahbottomnavigation.AHBottomNavigation.TitleState.ALWAYS_SHOW;
-import static com.inuker.bluetooth.library.Constants.REQUEST_FAILED;
-import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
 import static com.moscase.shouhuan.utils.MyApplication.encodeHexStr;
 import static com.moscase.shouhuan.utils.MyApplication.hexStringToBytes;
 import static com.moscase.shouhuan.utils.MyApplication.isEnterPhotoActivity;
@@ -130,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
     //从提醒界面拿到是否是短连接，用于发送给手表
     private boolean mIsDuanlianjie;
 
+    private boolean mIsBindService;
+
 
     private SharedPreferences mDuanlianjie;
     private SharedPreferences mMyInfoShared;
@@ -148,17 +152,16 @@ public class MainActivity extends AppCompatActivity {
     //这里要判断当前屏幕是否解锁，如果没解锁直接从538发过来跳转到Photo界面的话，直接崩溃
     private boolean isScreenOn = true;
 
-    private BluetoothClient mBluetoothClient;
     private MyInfoBean mMyInfoBean1;
     private String mTime;
 
+    private MyBleService mMyBleService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        mBluetoothClient = MyApplication.getBleManager();
 
 
         SharedPreferences sharedPreferences = getSharedPreferences("isFirstEnterAPP", MODE_PRIVATE);
@@ -200,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.chenhang.reconnect");
         filter.addAction("com.chenhang.disconnect");
+        filter.addAction("lianjiechenggong");
+        filter.addAction("discoverservices");
+        filter.addAction("callback");
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.setPriority(Integer.MAX_VALUE);
@@ -210,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().register(this);
 
 
-        //来一只超级玛丽当分割线       --Create by chenhang
+        //来一只超级玛丽助助兴      --Create by chenhang
         System.out.print("             来一只超级玛丽助助兴！  \n" +
                 "                ********\n" +
                 "               ************\n" +
@@ -256,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
     private void initBottomBar() {
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("状态", R.drawable.zhuangtai);
-//        AHBottomNavigationItem item2 = new AHBottomNavigationItem("心率", R.drawable.healthy);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem("心率", R.drawable.healthy);
         AHBottomNavigationItem item3 = new AHBottomNavigationItem("指标", R.drawable.zhibiao);
 
 
@@ -265,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Add items
         mBottomNavigation.addItem(item1);
-//        mBottomNavigation.addItem(item2);
+        mBottomNavigation.addItem(item2);
         mBottomNavigation.addItem(item3);
         mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
@@ -277,15 +283,15 @@ public class MainActivity extends AppCompatActivity {
                         setDefaultFragment();
 //                        mViewPager.setCurrentItem(0);
                     }
-                } else if (position == 2) {
-                    if (mBottomNavigation.getCurrentItem() == 2) {
+                } else if (position == 1) {
+                    if (mBottomNavigation.getCurrentItem() == 1) {
                         return true;
                     } else {
                         initXinlvFragment();
 //                        mViewPager.setCurrentItem(1);
                     }
-                } else if (position == 1) {
-                    if (mBottomNavigation.getCurrentItem() == 1) {
+                } else if (position == 2) {
+                    if (mBottomNavigation.getCurrentItem() == 2) {
                         return true;
                     } else {
                         initZhibiaoFragment();
@@ -426,263 +432,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private ServiceConnection conn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+            mMyBleService = ((MyBleService.LocalBinder) iBinder).getService();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
+
     public void notifyMainActivity() {
+        Log.d("koma===", "开始注册通知");
+        BluetoothGatt bluetoothGatt = mMyBleService.getBluetoothGatt();
+        BluetoothGattService service = bluetoothGatt.getService(UUID.fromString
+                ("0000ffe0-0000-1000-8000-00805f9b34fb"));
+        BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString
+                ("0000ffe4-0000-1000-8000-00805f9b34fb"));
 
-        mBluetoothClient.notify(mDuanlianjie.getString("mac", ""), UUID.fromString
-                        ("0000ffe0-0000-1000-8000-00805f9b34fb"),
-                UUID.fromString("0000ffe4-0000-1000-8000-00805f9b34fb"), new BleNotifyResponse() {
-                    @Override
-                    public void onNotify(UUID uuid, UUID uuid1, final byte[] bytes) {
-                        byte[] value = bytes;
-                        String value1 = encodeHexStr(value);
-                        Log.d("koma---收到的数据", value1);
-                        //接收到数据之后，具体看协议上面，我这里直接判断低位的数字是几
-                        final String value2 = String.valueOf(value1.charAt(1));
+        boolean isEnableNotification = bluetoothGatt.setCharacteristicNotification
+                (characteristic, true);
 
-                        if (value1.length() == 38) {
-                            if (value2.equals("1")) {
-                                Log.d("koma---截取的是", "1");
-                                bushu = value1.substring(16, 22);
-                                mGongli = (Float.parseFloat(value1.substring(22, 28)) / 1.0f
-                                        / 100);
-                                mKaluli = (Float.parseFloat(value1.substring(28, 34)) / 1.0f
-                                        / 10 / 1000);
-
-                                if (value1.substring(2, 4).equals("01") && !MyApplication
-                                        .isInch) {
-                                    sendBroadcast(new Intent("com.chenhang.inch"));
-
-                                    MyApplication.isInch = true;
-                                    //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
-                                    mDuanlianjie.edit().putBoolean("isinch", MyApplication
-                                            .isInch).commit();
-                                    mMyInfoShared.edit().clear().commit();
-                                } else if (value1.substring(2, 4).equals("00") && MyApplication
-                                        .isInch) {
-                                    sendBroadcast(new Intent("com.chenhang.inch"));
-
-                                    ComputeMyInfo.getInstance().setSex("男");
-                                    ComputeMyInfo.getInstance().setBirthday(1989);
-                                    ComputeMyInfo.getInstance().setYaowei(70);
-                                    ComputeMyInfo.getInstance().setTunwei(100);
-                                    ComputeMyInfo.getInstance().setShengao(178);
-                                    ComputeMyInfo.getInstance().setTizhong(68);
-                                    //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
-                                    MyApplication.isInch = false;
-                                    mDuanlianjie.edit().putBoolean("isinch", MyApplication
-                                            .isInch).commit();
-                                }
-
-                                if (riqi.equals(get())) {
-                                    ContentValues values = new ContentValues();
-                                    if (lastBushu < Integer.parseInt(bushu)) {
-                                        lastBushu = Integer.parseInt(bushu);
-                                        mMyInfoShared.edit().putInt("lastbushu", lastBushu)
-                                                .commit();
-                                        values.put("bushu", lastBushu);
-                                    }
-                                    values.put("sporttime",mTime);
-                                    values.put("kaluli",mKaluli*1000);
-                                    values.put("distance",mGongli);
-                                    DataSupport.updateAll(BushuData.class, values, "riqi = ?", get());
-
-                                } else {
-                                    BushuData bushuData = new BushuData();
-                                    bushuData.setRiqi(get());
-                                    bushuData.setBushu(Integer.parseInt(bushu));
-                                    bushuData.setDistance((int) mGongli);
-                                    bushuData.setKaluli(mKaluli*1000);
-                                    bushuData.setSporttime(mTime);
-                                    bushuData.save();
-
-                                    riqi = get();
-                                    lastBushu = Integer.parseInt(bushu);
-                                    mMyInfoShared.edit().putString("riqi", get()).commit();
-                                }
-
-                            } else {
-                                Log.d("koma 截取的是", "2");
-                                mTime = value1.substring(8, 14);
-                                int step = Integer.parseInt(bushu);
-                                Intent intent = new Intent();
-
-
-                                intent.setAction("com.chenhang.time");
-                                intent.putExtra("time", mTime);
-                                intent.putExtra("step", step);
-                                sendBroadcast(intent);
-                            }
-                        }
-
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        byte[] value = bytes;
-                                        if (MyApplication.toHexString1
-                                                (value[0]).equals
-                                                ("74") &&
-                                                MyApplication.toHexString1
-                                                        (value[1]).equals
-                                                        ("69") &&
-                                                MyApplication.toHexString1
-                                                        (value[2]).equals
-                                                        ("6d") &&
-                                                MyApplication.toHexString1
-                                                        (value[3]).equals
-                                                        ("65") &&
-                                                MyApplication.toHexString1
-                                                        (value[4]).equals
-                                                        ("3f") &&
-                                                MyApplication.toHexString1
-                                                        (value[5]).equals("7f")
-                                                ) {
-                                            //如果收到time？
-
-                                            mBluetoothClient.write(mDuanlianjie.getString("mac",
-                                                    ""), UUID.fromString
-                                                            ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                                                    UUID.fromString
-                                                            ("0000ffe9-0000-1000-8000-00805f9b34fb"), hexStringToBytes(getDate()), new BleWriteResponse() {
-                                                        @Override
-                                                        public void onResponse(int code) {
-                                                            if (code == REQUEST_SUCCESS) {
-
-
-                                                            } else if (code == REQUEST_FAILED) {
-                                                                Log.d("koma", "对时失败");
-                                                            }
-                                                        }
-                                                    });
-
-                                        } else if (MyApplication.toHexString1
-                                                (value[0]).equals("6f") &&
-                                                MyApplication.toHexString1
-                                                        (value[1]).
-                                                        equals("6b") &&
-                                                MyApplication.toHexString1
-                                                        (value[2]).equals
-                                                        ("7f")) {
-                                            //如果收到OK
-                                            Log.d("koma", "接收到OK消息");
-                                        } else if (MyApplication.toHexString1(value[0])
-                                                .equals("70") &&
-                                                MyApplication.toHexString1(value[1])
-                                                        .equals("68") && MyApplication
-                                                .toHexString1(value[2]).equals("6f") &&
-                                                MyApplication.toHexString1(value[3])
-                                                        .equals("74") && MyApplication
-                                                .toHexString1(value[4]).equals("6f")) {
-                                            if (isScreenOn) {
-                                                //收到photo，发OK然后跳转界面
-                                                mBluetoothClient.write(mDuanlianjie.getString
-                                                                ("mac", ""), UUID.fromString
-                                                                ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                                                        UUID.fromString
-                                                                ("0000ffe9-0000-1000-8000-00805f9b34fb"), hexStringToBytes("6f6b"), new BleWriteResponse() {
-
-                                                            @Override
-                                                            public void onResponse(int i) {
-
-                                                            }
-                                                        });
-                                                if (!isEnterPhotoActivity) {
-
-                                                    isEnterPhotoActivity = true;
-                                                    Intent intent = new Intent(MainActivity
-                                                            .this, PhotoActivity.class);
-                                                    startActivity(intent);
-                                                }
-                                            }
-                                        } else if (MyApplication.toHexString1(value[0])
-                                                .equals("73") &&
-                                                MyApplication.toHexString1(value[1])
-                                                        .equals("6e") && MyApplication
-                                                .toHexString1(value[2]).equals("61") &&
-                                                MyApplication.toHexString1(value[3])
-                                                        .equals("70")) {
-                                            //收到snap，
-
-                                            EventBus.getDefault().post(new MessageEvent
-                                                    (73));
-                                        } else if (MyApplication.toHexString1(value[0])
-                                                .equals("22")) {
-                                            Log.d("koma", "第二个包");
-                                            //前两位是22代表是第二个包，此时需要拿到步数更新界面
-                                            updateUI();
-                                            final String temp;
-                                            //这里，每次发数据前先检查是长连接还是短连接
-                                            mIsDuanlianjie = mDuanlianjie.getBoolean
-                                                    ("isChecked", true);
-                                            if (!mIsDuanlianjie) {
-                                                temp = "6f6e" + getInfo();
-                                                Log.d("koma----", temp);
-                                            } else {
-                                                temp = "6f6666" + getInfo();
-                                                Log.d("koma----", temp);
-                                            }
-                                            mBluetoothClient.write(mDuanlianjie.getString
-                                                            ("mac", ""), UUID.fromString
-                                                            ("0000ffe5-0000-1000-8000-00805f9b34fb"),
-                                                    UUID.fromString
-                                                            ("0000ffe9-0000-1000-8000-00805f9b34fb"),
-                                                    hexStringToBytes(temp), new BleWriteResponse() {
-
-                                                        @Override
-                                                        public void onResponse(int code) {
-                                                            if (code == REQUEST_SUCCESS) {
-                                                                Log.d("koma", "对时成功");
-
-                                                                if (mDuanlianjie.getBoolean
-                                                                        ("isChecked", true)) {
-                                                                    if (isFirstChanglianjie)
-                                                                        Toast.makeText
-                                                                                (MainActivity.this,
-                                                                                "对时成功", Toast.LENGTH_SHORT)
-                                                                                .show();
-                                                                    Toast.makeText(MainActivity
-                                                                            .this, "短连接", Toast
-                                                                            .LENGTH_SHORT).show();
-                                                                } else {
-                                                                    if (isFirstChanglianjie) {
-                                                                        Toast.makeText
-                                                                                (MainActivity.this,
-                                                                                "对时成功", Toast.LENGTH_SHORT)
-                                                                                .show();
-                                                                        Toast.makeText(MainActivity
-                                                                                .this, "长连接", Toast
-                                                                                .LENGTH_SHORT)
-                                                                                .show();
-                                                                        isFirstChanglianjie = false;
-                                                                    }
-
-                                                                }
-
-                                                            }
-                                                        }
-                                                    });
-
-                                        } else if (MyApplication.toHexString1(value[0])
-                                                .equals("21")) {
-                                            //前两位是21代表是第一个包，此时拿到身高等信息
-                                            Log.d("koma", "第一个包");
-                                        }
-                                    }
-                                }, 1000);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onResponse(int i) {
-                        if (i == REQUEST_SUCCESS) {
-                            Log.d("koma", "特征值改变成功");
-                        }
-                    }
-                });
+//        注：如果只写上面部分，那么是收不到通知的
+        if (isEnableNotification) {
+            Log.d("koma===", "注册通知成功");
+            List<BluetoothGattDescriptor> descriptorList = characteristic.getDescriptors();
+            if (descriptorList != null && descriptorList.size() > 0) {
+                for (BluetoothGattDescriptor descriptor : descriptorList) {
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    bluetoothGatt.writeDescriptor(descriptor);
+                }
+            }
+        } else {
+            Log.d("koma===", "注册通知失败");
+        }
 
 
     }
@@ -886,7 +674,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver myReceiver = new BroadcastReceiver() {
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, final Intent intent) {
             if (intent.getAction().equals("com.chenhang.reconnect")) {
                 Toast.makeText(MainActivity.this, "已连接！", Toast.LENGTH_SHORT).show();
                 notifyMainActivity();
@@ -898,6 +686,223 @@ public class MainActivity extends AppCompatActivity {
                 isScreenOn = true;
             } else if (intent.getAction().equals("com.chenhang.disconnect")) {
                 Toast.makeText(MainActivity.this, "断开连接", Toast.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals("lianjiechenggong")) {
+                Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                Intent intent1 = new Intent(MainActivity.this, MyBleService.class);
+                if (!mIsBindService){
+                    bindService(intent1, conn, BIND_AUTO_CREATE);
+                    mIsBindService = true;
+                }
+                Log.d("koma==", "主界面绑定服务");
+            } else if (intent.getAction().equals("discoverservices")) {
+                notifyMainActivity();
+            } else if (intent.getAction().equals("callback")) {
+                byte[] value = intent.getByteArrayExtra("byte");
+                String value1 = encodeHexStr(value);
+                Log.d("koma---收到的数据", value1);
+                //接收到数据之后，具体看协议上面，我这里直接判断低位的数字是几
+                final String value2 = String.valueOf(value1.charAt(1));
+
+                if (value1.length() == 38) {
+                    if (value2.equals("1")) {
+                        Log.d("koma---截取的是", "1");
+                        bushu = value1.substring(16, 22);
+                        mGongli = (Float.parseFloat(value1.substring(22, 28)) / 1.0f
+                                / 100);
+                        mKaluli = (Float.parseFloat(value1.substring(28, 34)) / 1.0f
+                                / 10 / 1000);
+
+                        if (value1.substring(2, 4).equals("01") && !MyApplication
+                                .isInch) {
+                            sendBroadcast(new Intent("com.chenhang.inch"));
+
+                            MyApplication.isInch = true;
+                            //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
+                            mDuanlianjie.edit().putBoolean("isinch", MyApplication
+                                    .isInch).commit();
+                            mMyInfoShared.edit().clear().commit();
+                        } else if (value1.substring(2, 4).equals("00") && MyApplication
+                                .isInch) {
+                            sendBroadcast(new Intent("com.chenhang.inch"));
+                            //切换中英制
+                            ComputeMyInfo.getInstance().setSex("男");
+                            ComputeMyInfo.getInstance().setBirthday(1989);
+                            ComputeMyInfo.getInstance().setYaowei(70);
+                            ComputeMyInfo.getInstance().setTunwei(100);
+                            ComputeMyInfo.getInstance().setShengao(178);
+                            ComputeMyInfo.getInstance().setTizhong(68);
+                            //本来是用来存储长短连接的数据库，我拿来顺便存一个是否是英制
+                            MyApplication.isInch = false;
+                            mDuanlianjie.edit().putBoolean("isinch", MyApplication
+                                    .isInch).commit();
+                        }
+
+                        if (riqi.equals(get())) {
+                            ContentValues values = new ContentValues();
+                            if (lastBushu < Integer.parseInt(bushu)) {
+                                lastBushu = Integer.parseInt(bushu);
+                                mMyInfoShared.edit().putInt("lastbushu", lastBushu)
+                                        .commit();
+                                values.put("bushu", lastBushu);
+                            }
+                            values.put("sporttime", mTime);
+                            values.put("kaluli", mKaluli * 1000);
+                            values.put("distance", mGongli);
+                            DataSupport.updateAll(BushuData.class, values, "riqi = ?", get());
+
+                        } else {
+                            BushuData bushuData = new BushuData();
+                            bushuData.setRiqi(get());
+                            bushuData.setBushu(Integer.parseInt(bushu));
+                            bushuData.setDistance((int) mGongli);
+                            bushuData.setKaluli(mKaluli * 1000);
+                            bushuData.setSporttime(mTime);
+                            bushuData.save();
+
+                            riqi = get();
+                            lastBushu = Integer.parseInt(bushu);
+                            mMyInfoShared.edit().putString("riqi", get()).commit();
+                        }
+
+                    } else {
+                        Log.d("koma 截取的是", "2");
+                        mTime = value1.substring(8, 14);
+                        int step = Integer.parseInt(bushu);
+                        Intent intent1 = new Intent();
+
+
+                        intent1.setAction("com.chenhang.time");
+                        intent1.putExtra("time", mTime);
+                        intent1.putExtra("step", step);
+                        sendBroadcast(intent1);
+                    }
+                }
+
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                byte[] value = intent.getByteArrayExtra("byte");
+
+                                if (MyApplication.toHexString1
+                                        (value[0]).equals
+                                        ("74") &&
+                                        MyApplication.toHexString1
+                                                (value[1]).equals
+                                                ("69") &&
+                                        MyApplication.toHexString1
+                                                (value[2]).equals
+                                                ("6d") &&
+                                        MyApplication.toHexString1
+                                                (value[3]).equals
+                                                ("65") &&
+                                        MyApplication.toHexString1
+                                                (value[4]).equals
+                                                ("3f") &&
+                                        MyApplication.toHexString1
+                                                (value[5]).equals("7f")
+                                        ) {
+                                    //如果收到time？
+
+                                    mMyBleService.write(hexStringToBytes(getDate()));
+
+                                } else if (MyApplication.toHexString1
+                                        (value[0]).equals("6f") &&
+                                        MyApplication.toHexString1
+                                                (value[1]).
+                                                equals("6b") &&
+                                        MyApplication.toHexString1
+                                                (value[2]).equals
+                                                ("7f")) {
+                                    //如果收到OK
+                                    Log.d("koma", "接收到OK消息");
+                                } else if (MyApplication.toHexString1(value[0])
+                                        .equals("70") &&
+                                        MyApplication.toHexString1(value[1])
+                                                .equals("68") && MyApplication
+                                        .toHexString1(value[2]).equals("6f") &&
+                                        MyApplication.toHexString1(value[3])
+                                                .equals("74") && MyApplication
+                                        .toHexString1(value[4]).equals("6f")) {
+                                    if (isScreenOn) {
+                                        //收到photo，发OK然后跳转界面
+                                        mMyBleService.write(hexStringToBytes("6f6b"));
+
+                                        if (!isEnterPhotoActivity) {
+
+                                            isEnterPhotoActivity = true;
+                                            Intent intent = new Intent(MainActivity
+                                                    .this, PhotoActivity.class);
+                                            startActivity(intent);
+                                        }
+                                    }
+                                } else if (MyApplication.toHexString1(value[0])
+                                        .equals("73") &&
+                                        MyApplication.toHexString1(value[1])
+                                                .equals("6e") && MyApplication
+                                        .toHexString1(value[2]).equals("61") &&
+                                        MyApplication.toHexString1(value[3])
+                                                .equals("70")) {
+                                    //收到snap，
+
+                                    EventBus.getDefault().post(new MessageEvent
+                                            (73));
+                                } else if (MyApplication.toHexString1(value[0])
+                                        .equals("22")) {
+                                    Log.d("koma", "第二个包");
+                                    //前两位是22代表是第二个包，此时需要拿到步数更新界面
+                                    updateUI();
+                                    final String temp;
+                                    //这里，每次发数据前先检查是长连接还是短连接
+                                    mIsDuanlianjie = mDuanlianjie.getBoolean
+                                            ("isChecked", true);
+                                    if (!mIsDuanlianjie) {
+                                        temp = "6f6e" + getInfo();
+                                        Log.d("koma----", temp);
+                                    } else {
+                                        temp = "6f6666" + getInfo();
+                                        Log.d("koma----", temp);
+                                    }
+
+                                    boolean write = mMyBleService.write(hexStringToBytes(temp));
+                                    if (write) {
+                                        if (mDuanlianjie.getBoolean
+                                                ("isChecked", true)) {
+                                            if (isFirstChanglianjie)
+                                                Toast.makeText
+                                                        (MainActivity.this,
+                                                                "对时成功", Toast.LENGTH_SHORT)
+                                                        .show();
+                                            Toast.makeText(MainActivity
+                                                    .this, "短连接", Toast
+                                                    .LENGTH_SHORT).show();
+                                        } else {
+                                            if (isFirstChanglianjie) {
+                                                Toast.makeText
+                                                        (MainActivity.this,
+                                                                "对时成功", Toast.LENGTH_SHORT)
+                                                        .show();
+                                                Toast.makeText(MainActivity
+                                                        .this, "长连接", Toast
+                                                        .LENGTH_SHORT)
+                                                        .show();
+                                                isFirstChanglianjie = false;
+                                            }
+
+                                        }
+                                    }
+                                } else if (MyApplication.toHexString1(value[0])
+                                        .equals("21")) {
+                                    //前两位是21代表是第一个包，此时拿到身高等信息
+                                    Log.d("koma", "第一个包");
+                                }
+                            }
+                        }, 1000);
+                    }
+                });
             }
 
         }
@@ -927,9 +932,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         isResume = true;
-
         riqi = mMyInfoShared.getString("riqi", "2017-10-23");
-
         System.gc();
 
         super.onResume();
@@ -959,6 +962,8 @@ public class MainActivity extends AppCompatActivity {
         //取消注册事件
         EventBus.getDefault().unregister(this);
         unregisterReceiver(myReceiver);
+        if (mIsBindService)
+            unbindService(conn);
         BusProvider.getInstance().unregister(this);
         SocialSDK.revokeQQ(this);
         mDuanlianjie.edit().putBoolean("isconnected", false).commit();
@@ -969,7 +974,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 下面这些代码是QQ登录的回调方法
      * 本来是准备调用LoginQQActivity代码复用一下的
-     * 发现有点问题，我就单独写在闪屏页了
+     * 发现有点问题，我就单独写了
      */
     @Subscribe
     public void onOauthResult(SSOBusEvent event) {
@@ -1414,23 +1419,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            mBluetoothClient.disconnect(mDuanlianjie.getString("mac", ""));
             mDuanlianjie.edit().putBoolean("isconnected", false);
-//            BleManager.getInstance().write(sBleDevice, "0000ffe5-0000-1000-8000-00805f9b34fb",
-//                    "0000ffe9-0000-1000-8000-00805f9b34fb",
-//                    //6f6666是短连接
-//                    //6f6e是长连接
-//                    HexUtil.hexStringToBytes(temp), new BleWriteCallback() {
-//                        @Override
-//                        public void onWriteSuccess() {
-//
-//                        }
-//
-//                        @Override
-//                        public void onWriteFailure(BleException e) {
-//
-//                        }
-//                    });
         }
         return super.onKeyDown(keyCode, event);
     }

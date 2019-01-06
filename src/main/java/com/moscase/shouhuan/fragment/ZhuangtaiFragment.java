@@ -20,12 +20,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.moscase.shouhuan.R;
+import com.moscase.shouhuan.bean.BushuData;
 import com.moscase.shouhuan.utils.MyApplication;
 import com.moscase.shouhuan.utils.PermissionUtil;
 import com.moscase.shouhuan.view.CircleView;
 import com.moscase.shouhuan.view.RingView;
 
+import org.litepal.crud.DataSupport;
+
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.moscase.shouhuan.utils.MyApplication.isResume;
@@ -52,8 +58,6 @@ public class ZhuangtaiFragment extends Fragment {
     private int lastBushu;
     private int mubiao;
     private SharedPreferences mSharedPreferences;
-    //这是为了让步数显示动画的判断
-    private int length;
     private String[] permissions = {Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -63,6 +67,7 @@ public class ZhuangtaiFragment extends Fragment {
     public ZhuangtaiFragment() {
 
     }
+
 
 
     @Override
@@ -76,6 +81,13 @@ public class ZhuangtaiFragment extends Fragment {
         getActivity().registerReceiver(myReceiver, filter);
         mSharedPreferences = getActivity().getSharedPreferences("myInfo", MODE_PRIVATE);
         initView(view);
+        List<BushuData> bushuData = DataSupport.where("riqi = ?", get()).find(BushuData
+                .class);
+        if (bushuData == null || bushuData.size() == 0) {
+
+        } else{
+            mBushu.setText(bushuData.get(0).getBushu()+"");
+        }
         return view;
     }
 
@@ -162,7 +174,7 @@ public class ZhuangtaiFragment extends Fragment {
     }
 
     public void setAngel(final int result, float zongjuli, float kaluli) {
-        Log.d("result", "resultis" + result + "总记录is" + zongjuli + "卡路里is" + kaluli);
+        Log.d("result", "resultis" + result + "总距离is" + zongjuli + "卡路里is" + kaluli);
 
         if (zongjuli == 0) {
             mZongjuli.setText("0.00");
@@ -184,8 +196,6 @@ public class ZhuangtaiFragment extends Fragment {
         //当这次拿到的步数和上一次的步数不一样的时候才有动画
         if (lastBushu != result)
             mBushu.setText("" + result);
-
-
 //            NumAnim.startAnim(mBushu, result);
         lastBushu = result;
         // 创建一个数值格式化对象
@@ -245,6 +255,13 @@ public class ZhuangtaiFragment extends Fragment {
             }
         }
     };
+
+    String get() {
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-M-d");
+        String date1 = dateFormat.format(date);
+        return date1;
+    }
 
     @Override
     public void onResume() {

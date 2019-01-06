@@ -48,6 +48,7 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -72,8 +73,8 @@ dependencies {
     compile 'com.github.florent37:camerafragment:1.0.7'
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'de.hdodenhof:circleimageview:2.1.0'
-//    compile 'com.clj.fastble:FastBleLib:2.1.7'
-    compile 'com.inuker.bluetooth:library:1.4.0'
+//    compile 'com.clj.fastble:FastBleLib:2.3.2'
+//    compile 'com.inuker.bluetooth:library:1.4.0'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'me.relex:circleindicator:1.2.2@aar'
     compile 'com.elbbbird.android:socialsdk:0.2.0@aar'

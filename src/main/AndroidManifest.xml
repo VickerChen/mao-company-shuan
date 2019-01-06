@@ -19,6 +19,8 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <!-- 用于读取手机当前的状态 -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
     <!-- 写入扩展存储，向扩展卡写入数据，用于写入对象存储BOS数据 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!-- 访问网络，网络定位需要上网 -->
@@ -56,7 +58,6 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.moscase.shouhuan.fileprovider"
@@ -128,19 +129,15 @@
         </activity>
         <activity android:name=".activity.MyInfoActivity">
         </activity>
-
         <activity
             android:name=".activity.TargetActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-
         <activity
             android:name=".activity.BluetoothScanActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-
         <activity android:name=".activity.ClockActivity">
-
         </activity>
 
         <!-- 监听通知栏消息发给手表 -->
@@ -178,7 +175,7 @@
         </activity>
 
         <service
-            android:name=".service.ConnectService"
+            android:name=".service.MyBleService"
             android:enabled="true"
             android:exported="true">
         </service>

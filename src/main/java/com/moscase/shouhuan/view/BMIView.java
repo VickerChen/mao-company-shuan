@@ -63,10 +63,7 @@ public class BMIView extends View {
     private String[] mTexts;
     private int mBackgroundColor;
     private int[] mBgColors;
-    /**
-     * 由于真实的界面不是线性排布，所以播放动画时若以信用值为参考，则会出现忽慢忽快
-     * 的情况（开始以为是卡顿）。因此，先计算出最终到达角度，以扫过的角度为线性参考，动画就流畅了
-     */
+
     private boolean isAnimFinish = true;
     private float mAngleWhenAnim;
     private AnimatorSet mAnimatorSet;
@@ -408,26 +405,8 @@ public class BMIView extends View {
         return mCreditValue;
     }
 
-    /**
-     * 设置信用值
-     *
-     * @param creditValue 信用值
-     */
-    public void setCreditValue(int creditValue) {
-        if (mSolidCreditValue == creditValue || creditValue < mMin || creditValue > mMax) {
-            return;
-        }
 
-        mSolidCreditValue = creditValue;
-        mCreditValue = creditValue;
-        postInvalidate();
-    }
 
-    /**
-     * 设置信用值并播放动画
-     *
-     * @param creditValue 信用值
-     */
     public void setCreditValueWithAnim(int creditValue) {
         if (creditValue < mMin || creditValue > mMax || !isAnimFinish) {
             mAnimatorSet.cancel();
